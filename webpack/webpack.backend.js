@@ -1,6 +1,7 @@
 const path = require('path');
 
 const NodeExternals = require('webpack-node-externals');
+const webpack = require('webpack');
 
 const OUTPUT_PATH = path.resolve(__dirname, '../bin');
 
@@ -12,7 +13,10 @@ module.exports = {
      ***********************************************/
 
 
-    entry: path.resolve(__dirname, '../server/server.js'),
+    entry: [
+        'webpack/hot/poll?1000',
+        path.resolve(__dirname, '../server/index.js'),
+    ],
     output: {
         path: OUTPUT_PATH,
         filename: 'server.js'
@@ -30,7 +34,9 @@ module.exports = {
      * Node.js Configuration Options
      ***********************************************/
 
-    externals: [NodeExternals()],
+    externals: [NodeExternals({
+        whitelist: ['webpack/hot/poll?1000']
+    })],
     target: "node",
     node: {
         __dirname: true
@@ -62,6 +68,11 @@ module.exports = {
 
     optimization: {
         minimize: false
-    }
+    },
+
+    plugins : [
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.NoEmitOnErrorsPlugin()
+    ]
 };
 

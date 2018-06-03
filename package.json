@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-front": "./node_modules/.bin/webpack --config webpack/webpack.frontend.js --progress",
+    "front:dev": "./node_modules/.bin/webpack-dev-server --config webpack/webpack.frontend.js",
     "build-back": "./node_modules/.bin/webpack --config webpack/webpack.backend.js --progress",
     "flow-front": "./node_modules/.bin/flow src",
     "flow-back": "./node_modules/.bin/flow server"
@@ -38,6 +38,7 @@
     "radium": "^0.21.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
+    "react-hot-loader": "^4.1.0",
     "react-jss": "^8.4.0",
     "react-redux": "^5.0.6",
     "react-router": "^4.2.0",
@@ -55,10 +56,15 @@
     "url-loader": "^0.6.2",
     "webpack": "^4.8.3",
     "webpack-cli": "^2.1.4",
+    "webpack-dev-server": "^3.1.4",
     "webpack-node-externals": "^1.7.2"
   },
   "dependencies": {
+    "apollo-boost": "^0.1.7",
     "body-parser": "^1.18.3",
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "graphql": "^0.13.2",
+    "graphql-tag": "^2.9.2",
+    "react-apollo": "^2.1.4"
   }
 }

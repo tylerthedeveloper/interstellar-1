@@ -1,11 +1,11 @@
 import React from 'react';
-import { render } from 'react-dom';
+import ReactDOM from 'react-dom';
 import {applyMiddleware, createStore, compose} from 'redux';
 import { Provider } from 'react-redux';
 import { ConnectedRouter, routerReducer, routerMiddleware } from 'react-router-redux'
 import createHistory from 'history/createBrowserHistory'
 
-import App from './app';
+import App from "./app";
 
 //router initialization
 const history  = createHistory();
@@ -17,11 +17,27 @@ const store = createStore(routerReducer, composeEnhancers(applyMiddleware(middle
 
 
 //app attachment
-render(
-    <Provider store={store}>
-        <ConnectedRouter history={history}>
-            <App/>
-        </ConnectedRouter>
-    </Provider>,
-    document.getElementById('root')
-);
+
+const render = Component => {
+    ReactDOM.render(
+        <Provider store={store}>
+            <ConnectedRouter history={history}>
+                <Component />
+            </ConnectedRouter>
+        </Provider>,
+        document.getElementById('root')
+    )
+
+};
+
+render(App);
+
+// // Webpack Hot Module Replacement API
+// if (module.hot) {
+//     module.hot.accept('./app', () => {
+//         // if you are using harmony modules ({modules:false})
+//         render(App);
+//         // in all other cases - re-require App manually
+//         render(require('./app'))
+//     })
+// }

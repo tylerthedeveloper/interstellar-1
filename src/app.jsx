@@ -1,6 +1,7 @@
 import React from 'react';
 import injectSheet from 'react-jss';
 import {Switch, Route} from 'react-router-dom';
+import { hot } from 'react-hot-loader';
 
 import Navbar from './structural/navbar/Component';
 import HomePage from './structural/pages/home/Component';
@@ -44,4 +45,4 @@ class App extends React.Component{
     }
 }
 
-export default injectSheet(styles)(App);
+export default hot(module)(injectSheet(styles)(App));

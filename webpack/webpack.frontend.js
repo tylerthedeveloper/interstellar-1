@@ -1,6 +1,7 @@
 const path = require('path');
 const glob = require('glob');
 
+const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const PurifyCSSPlugin = require('purifycss-webpack');
@@ -18,11 +19,15 @@ module.exports = {
      ***********************************************/
 
 
-    entry: path.resolve(__dirname, '../src/index.jsx'),
+    entry: [
+        'webpack-dev-server/client?http://localhost:3001',
+        'webpack/hot/only-dev-server',
+        path.resolve(__dirname, '../src/index.jsx')
+    ],
     output: {
         path: OUTPUT_PATH,
         filename: 'bundle.js',
-        publicPath: "/",
+        publicPath: 'http://localhost:3001/',
     },
 
     resolve: {
@@ -31,8 +36,19 @@ module.exports = {
     devtool: 'eval',
     mode: 'development',
     watch: true,
+    target: 'web',
 
 
+    /***********************************************
+     * Dev Server Config Options
+     ***********************************************/
+
+    devServer: {
+        host: 'localhost',
+        port: 3001,
+        historyApiFallback: true,
+        hot: true
+    },
 
 
     /***********************************************
@@ -130,11 +146,17 @@ module.exports = {
 
 
         //configuration plguins
-        new CleanWebpackPlugin([path.basename(OUTPUT_PATH)], {root: path.dirname(OUTPUT_PATH)}),
         new HtmlWebpackPlugin({
             template: HTML_ENTRY
         }),
-        //new HardSourceWebpackPlugin()
+        new webpack.NamedModulesPlugin(),
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.NoEmitOnErrorsPlugin(),
+        new webpack.DefinePlugin({
+            "process.env": {
+                "BUILD_TARGET": JSON.stringify("client")
+            }
+        })
 
     ]
 };

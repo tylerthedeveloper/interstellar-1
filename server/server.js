@@ -4,9 +4,6 @@ import fallback from 'express-history-api-fallback'
 import path from 'path';
 
 
-const hostname = 'localhost';
-const port = 3001;
-
 const publicDir = path.resolve(__dirname, '../dist');
 console.log(publicDir);
 
@@ -24,5 +21,4 @@ app.use(bodyParser.urlencoded({
 app.use(express.static(publicDir));
 app.use(fallback(path.resolve(publicDir, './index.html')));
 
-
-app.listen(port, hostname);
+export default app;
