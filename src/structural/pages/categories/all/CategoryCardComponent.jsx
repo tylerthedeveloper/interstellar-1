@@ -13,8 +13,18 @@ const styles = {
     },
     media: {
         height: 0,
-        paddingTop: '56.25%', // 16:9
+        paddingTop: '56.25%',
+        background: 'lightgrey',
+        position: 'relative'
     },
+
+    mediaText: {
+        position: 'absolute',
+        top: 20,
+        left: 20,
+        color: "white"
+    },
+
     navlink: {
         textDecoration: "none",
         margin:15,
@@ -30,11 +40,11 @@ const CategoryCard = (props) => {
     return (
         <NavLink to={to} className={classes.navlink}>
             <Card className={classes.card}>
-                <CardMedia
-                    className={classes.media}
-                    image="/static/images/cards/contemplative-reptile.jpg"
-                    title="Contemplative Reptile"
-                />
+                <div className={classes.media}>
+                    <div className={classes.mediaText}>
+                        Need category images!
+                    </div>
+                </div>
                 <CardContent>
                     <Typography gutterBottom variant="headline" component="h2">
                         {title}

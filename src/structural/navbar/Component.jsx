@@ -1,8 +1,9 @@
 import React from 'react';
-import {AppBar, Toolbar, Typography} from '@material-ui/core';
+import {AppBar, Toolbar, Typography, Button} from '@material-ui/core';
 import injectSheet from 'react-jss';
 
 import NavButton from './NavButtonComponent';
+import LoginModal from '../login/login_modal/Component'
 
 const styles = {
     logo: {
@@ -16,40 +17,70 @@ const styles = {
 };
 
 
+class NavBar extends React.Component {
 
-const NavBar = (props) => {
-    const {classes} = props;
-    return (
-        <AppBar position="static">
-            <Toolbar>
-                <Typography variant="display1" className={classes.logo}>
-                    Interstellar_Logo
-                </Typography>
-                <div className={classes.navSection}>
+    constructor(props){
+        super(props);
 
-                    <NavButton to="/">
-                        Home
-                    </NavButton>
-                    <NavButton to="/categories">
-                        Categories
-                    </NavButton>
-                    <NavButton to="/products">
-                        Products
-                    </NavButton>
-                    <NavButton to="/people">
-                        People
-                    </NavButton>
+        this.state = {
+            loginModelOpen: false
+        };
 
-                </div>
-                 <div className={classes.userSection}>
-                     <NavButton to="/login">
-                         Login
-                     </NavButton>
-                 </div>
-            </Toolbar>
-        </AppBar>
-    )
-};
+        this.openLoginModal = this.openLoginModal.bind(this);
+        this.closeLoginModal = this.closeLoginModal.bind(this);
+    }
+
+
+    openLoginModal(event) {
+        this.setState({
+            loginModelOpen: true
+        })
+    }
+
+    closeLoginModal(event) {
+        this.setState({
+            loginModelOpen: false
+        })
+    }
+
+
+
+    render(){
+        const {classes} = this.props;
+        return [
+            <AppBar position="static" key={"app-bar"}>
+                <Toolbar>
+                    <Typography variant="display1" className={classes.logo}>
+                        Interstellar_Logo
+                    </Typography>
+                    <div className={classes.navSection}>
+
+                        <NavButton to="/">
+                            Home
+                        </NavButton>
+                        <NavButton to="/categories">
+                            Categories
+                        </NavButton>
+                        <NavButton to="/products">
+                            Products
+                        </NavButton>
+                        <NavButton to="/people">
+                            People
+                        </NavButton>
+
+                    </div>
+                    <div className={classes.userSection}>
+                        <Button onClick={this.openLoginModal} variant={"raised"}>
+                            Login
+                        </Button>
+                    </div>
+                </Toolbar>
+            </AppBar>,
+            <LoginModal key={"login-modal"} open={this.state.loginModelOpen} onClose={this.closeLoginModal}/>
+        ]
+
+    }
+}
 
 
 export default injectSheet(styles)(NavBar);
