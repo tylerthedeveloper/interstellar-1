@@ -61,7 +61,7 @@ class ProductListItem extends React.PureComponent {
                             <form onMouseDown={this.onclickForm}>
                                 <TextField
                                     className={classes.cartCounter}
-                                    id="number"
+                                    id={"atc-" + name}
                                     label="Add to Cart"
                                     type="number"
                                     defaultValue={1}

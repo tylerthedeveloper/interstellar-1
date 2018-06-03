@@ -5,6 +5,7 @@ import {Switch, Route} from 'react-router-dom';
 import Navbar from './structural/navbar/Component';
 import HomePage from './structural/pages/home/Component';
 import Categories from './structural/pages/categories/Component';
+import Products from './structural/pages/products/Component';
 
 const styles = {
     container: {
@@ -34,6 +35,7 @@ class App extends React.Component{
                     <Switch >
                         <Route path="/" exact component={HomePage}/>
                         <Route path="/categories" component={Categories}/>
+                        <Route path="/products" component={Products}/>
                     </Switch>
                 </div>
             </div>
