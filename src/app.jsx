@@ -7,8 +7,6 @@ import Navbar from './structural/navbar/Component';
 import HomePage from './structural/pages/home/Component';
 import CategoryLanding from './structural/pages/category_landing/Component';
 
-const NAVBAR_HEIGHT = "100px";
-
 const styles = {
     container: {
         position: "absolute",

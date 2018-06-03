@@ -5,19 +5,21 @@
   "main": "index.js",
   "scripts": {
     "build-front": "./node_modules/.bin/webpack --config webpack/webpack.frontend.js --progress",
-    "build-back": "./node_modules/.bin/webpack --config webpack/webpack.backend.js --progress"
+    "build-back": "./node_modules/.bin/webpack --config webpack/webpack.backend.js --progress",
+    "flow-front": "./node_modules/.bin/flow src",
+    "flow-back": "./node_modules/.bin/flow server"
   },
   "author": "Jack Langston",
   "license": "ISC",
   "devDependencies": {
-    "@material-ui/core": "^1.0.0",
+    "@material-ui/core": "^1.2.0",
     "babel-cli": "^6.26.0",
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.7.0",
     "babel-preset-flow": "^6.23.0",
     "babel-preset-react": "^6.24.1",
     "clean-webpack-plugin": "^0.1.19",
-    "clone": "^2.1.1",
+    "clone": "^2.1.2",
     "compression-webpack-plugin": "^1.1.11",
     "css-loader": "^0.28.8",
     "express-history-api-fallback": "^2.2.1",
@@ -31,7 +33,7 @@
     "moment": "^2.20.1",
     "node-sass": "^4.7.2",
     "optimize-css-assets-webpack-plugin": "^4.0.1",
-    "purify-css": "^1.2.5",
+    "purify-css": "^1.2.6",
     "purifycss-webpack": "^0.7.0",
     "radium": "^0.21.0",
     "react": "^16.2.0",
