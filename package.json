@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "front:dev": "./node_modules/.bin/webpack-dev-server --config webpack/webpack.frontend.js",
-    "build-back": "./node_modules/.bin/webpack --config webpack/webpack.backend.js --progress",
-    "flow-front": "./node_modules/.bin/flow src",
-    "flow-back": "./node_modules/.bin/flow server"
+    "back:dev": "./node_modules/.bin/webpack --config webpack/webpack.backend.js --progress",
+    "front:flow": "./node_modules/.bin/flow src",
+    "back:flow": "./node_modules/.bin/flow server"
   },
   "author": "Jack Langston",
   "license": "ISC",

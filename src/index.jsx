@@ -17,7 +17,6 @@ const store = createStore(routerReducer, composeEnhancers(applyMiddleware(middle
 
 
 //app attachment
-
 const render = Component => {
     ReactDOM.render(
         <Provider store={store}>
@@ -29,15 +28,4 @@ const render = Component => {
     )
 
 };
-
 render(App);
-
-// // Webpack Hot Module Replacement API
-// if (module.hot) {
-//     module.hot.accept('./app', () => {
-//         // if you are using harmony modules ({modules:false})
-//         render(App);
-//         // in all other cases - re-require App manually
-//         render(require('./app'))
-//     })
-// }
