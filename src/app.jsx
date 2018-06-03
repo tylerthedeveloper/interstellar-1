@@ -2,10 +2,9 @@ import React from 'react';
 import injectSheet from 'react-jss';
 import {Switch, Route} from 'react-router-dom';
 
-
 import Navbar from './structural/navbar/Component';
 import HomePage from './structural/pages/home/Component';
-import CategoryLanding from './structural/pages/category_landing/Component';
+import Categories from './structural/pages/categories/Component';
 
 const styles = {
     container: {
@@ -34,7 +33,7 @@ class App extends React.Component{
                 <div className={classes.content}>
                     <Switch >
                         <Route path="/" exact component={HomePage}/>
-                        <Route path="/categories" component={CategoryLanding}/>
+                        <Route path="/categories" component={Categories}/>
                     </Switch>
                 </div>
             </div>
