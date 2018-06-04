@@ -1,4 +1,7 @@
 [ignore]
+<PROJECT_ROOT>/dist/.*
+<PROJECT_ROOT>/bin/.*
+<PROJECT_ROOT>/\.idea/.*
 
 [include]
 

@@ -1,19 +1,19 @@
-import React from 'react';
-import { Mutation } from 'react-apollo';
+// @flow
 
-import {toggleLoginModalStatus} from "../../models/login_modal";
-import NavBarComponent from './Component';
+import React from "react";
+import { Mutation } from "react-apollo";
 
+import { toggleLoginModalStatus } from "../../models/login_modal";
+import NavBarComponent from "./Component";
 
-const NavBar = () => {
-
-    return (
-        <Mutation mutation={toggleLoginModalStatus}>
-            {toggle => (
-                <NavBarComponent toggleLoginModal={toggle}/>
-            )}
-        </Mutation>
-    );
-};
+class NavBar extends React.PureComponent<{}> {
+    render() {
+        return (
+            <Mutation mutation={toggleLoginModalStatus}>
+                {(toggle) => <NavBarComponent toggleLoginModal={toggle} />}
+            </Mutation>
+        );
+    }
+}
 
 export default NavBar;

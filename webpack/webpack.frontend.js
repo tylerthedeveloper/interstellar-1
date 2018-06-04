@@ -30,7 +30,7 @@ module.exports = {
         extensions: ['.mjs', '.js', '.jsx']
     },
     devtool: 'eval',
-    mode: 'production',
+    mode: 'development',
     watch: true,
     target: 'web',
 

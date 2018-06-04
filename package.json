@@ -6,9 +6,15 @@
   "scripts": {
     "front:dev": "./node_modules/.bin/webpack-dev-server --config webpack/webpack.frontend.js",
     "back:dev": "./node_modules/.bin/webpack --config webpack/webpack.backend.js --progress",
-    "front:flow": "./node_modules/.bin/flow src",
-    "back:flow": "./node_modules/.bin/flow server"
+    "flow": "./node_modules/.bin/flow",
+    "pretty": "./node_modules/.bin/prettier --write src/**/*.jsx server/**/*.js"
   },
+  "husky" : {
+    "hooks": {
+      "pre-commit": "set -e; npm run flow; npm run pretty;"
+    }
+  },
+
   "author": "Jack Langston",
   "license": "ISC",
   "devDependencies": {
@@ -33,9 +39,12 @@
     "file-loader": "^1.1.6",
     "flow": "^0.2.3",
     "flow-bin": "^0.73.0",
+    "flow-typed": "^2.4.0",
     "graphql": "^0.13.2",
     "graphql-tag": "^2.9.2",
     "html-webpack-plugin": "^3.2.0",
+    "husky": "^1.0.0-rc.8",
+    "prettier": "1.13.4",
     "react": "^16.2.0",
     "react-apollo": "^2.1.4",
     "react-dom": "^16.2.0",
