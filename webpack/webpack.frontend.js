@@ -2,11 +2,7 @@ const path = require('path');
 const glob = require('glob');
 
 const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const PurifyCSSPlugin = require('purifycss-webpack');
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 const OUTPUT_PATH = path.resolve(__dirname, '../dist');
 const HTML_ENTRY = path.resolve(__dirname, '../static/index.html');
@@ -31,10 +27,10 @@ module.exports = {
     },
 
     resolve: {
-        extensions: ['.js', '.jsx']
+        extensions: ['.mjs', '.js', '.jsx']
     },
     devtool: 'eval',
-    mode: 'development',
+    mode: 'production',
     watch: true,
     target: 'web',
 
@@ -66,6 +62,11 @@ module.exports = {
                     loader: 'babel-loader',
                 }
             },
+            {
+                test: /\.mjs$/,
+                include: /node_modules/,
+                type: "javascript/auto",
+            },
 
             //images and fonts
             {
@@ -90,21 +91,6 @@ module.exports = {
     },
 
     plugins: [
-
-        //css plugins
-        new ExtractTextPlugin("styles.css"),
-        new PurifyCSSPlugin({
-                paths: glob.sync(path.resolve(__dirname, '../src/**/*.jsx')),
-            }
-        ),
-        new OptimizeCssAssetsPlugin({
-                assetNameRegExp: /\.css$/g,
-                cssProcessor: require('cssnano'),
-                cssProcessorOptions: { discardComments: { removeAll: true } },
-                canPrint: true
-            }
-        ),
-
 
         //configuration plguins
         new HtmlWebpackPlugin({

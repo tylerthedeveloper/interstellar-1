@@ -3,10 +3,11 @@ import injectSheet from 'react-jss';
 import {Switch, Route} from 'react-router-dom';
 import { hot } from 'react-hot-loader';
 
-import Navbar from './structural/navbar/Component';
+import Navbar from './structural/navbar/Container';
 import HomePage from './structural/pages/home/Component';
 import Categories from './structural/pages/categories/Component';
 import Products from './structural/pages/products/Component';
+import LoginModal from './structural/login/login_modal/Container';
 
 const styles = {
     container: {
@@ -39,6 +40,7 @@ class App extends React.Component{
                         <Route path="/products" component={Products}/>
                     </Switch>
                 </div>
+                <LoginModal/>
             </div>
 
         )

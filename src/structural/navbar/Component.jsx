@@ -3,7 +3,6 @@ import {AppBar, Toolbar, Typography, Button} from '@material-ui/core';
 import injectSheet from 'react-jss';
 
 import NavButton from './NavButtonComponent';
-import LoginModal from '../login/login_modal/Component'
 
 const styles = {
     logo: {
@@ -17,35 +16,11 @@ const styles = {
 };
 
 
-class NavBar extends React.Component {
+class NavBar extends React.PureComponent{
 
-    constructor(props){
-        super(props);
-
-        this.state = {
-            loginModelOpen: false
-        };
-
-        this.openLoginModal = this.openLoginModal.bind(this);
-        this.closeLoginModal = this.closeLoginModal.bind(this);
-    }
-
-
-    openLoginModal(event) {
-        this.setState({
-            loginModelOpen: true
-        })
-    }
-
-    closeLoginModal(event) {
-        this.setState({
-            loginModelOpen: false
-        })
-    }
-
-
-    render(){
-        const {classes} = this.props;
+    render() {
+        const {classes, toggleLoginModal} = this.props;
+        console.log('rendering navbar');
         return [
             <AppBar position="static" key={"app-bar"}>
                 <Toolbar>
@@ -69,16 +44,14 @@ class NavBar extends React.Component {
 
                     </div>
                     <div className={classes.userSection}>
-                        <Button onClick={this.openLoginModal} variant={"raised"}>
+                        <Button onClick={toggleLoginModal} variant={"raised"}>
                             Login
                         </Button>
                     </div>
                 </Toolbar>
             </AppBar>,
-            <LoginModal key={"login-modal"} open={this.state.loginModelOpen} onClose={this.closeLoginModal}/>
         ]
-
-    }
+    };
 }
 
 

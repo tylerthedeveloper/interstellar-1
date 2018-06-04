@@ -15,8 +15,9 @@ const styles = {
 
 const LoginModal = (props) => {
     const {classes, open, onClose} = props;
-
+    console.log("rendering login modal");
     return (
+
         <Dialog
             open={open}
             onClose={onclose}

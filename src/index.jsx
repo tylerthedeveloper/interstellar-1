@@ -10,6 +10,7 @@ import { ApolloLink } from 'apollo-link';
 import { withClientState } from 'apollo-link-state';
 
 import App from "./app";
+import {resolvers, defaults} from './models/login_modal';
 
 //graphql initialization
 const cache = new InMemoryCache();
@@ -26,21 +27,9 @@ const client = new ApolloClient({
         }),
 
         withClientState({
-            cache,
-            resolvers: {
-                Mutation: {
-                    updateNetworkStatus: (_, { isConnected }, { cache }) => {
-                        const data = {
-                            networkStatus: {
-                                __typename: 'NetworkStatus',
-                                isConnected
-                            },
-                        };
-                        cache.writeData({ data });
-                        return null;
-                    },
-                },
-            }
+            cache: cache,
+            resolvers: resolvers,
+            defaults: defaults
         }),
 
         new HttpLink({
