@@ -1,29 +1,44 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {applyMiddleware, createStore, compose} from 'redux';
-import { Provider } from 'react-redux';
-import { ConnectedRouter, routerReducer, routerMiddleware } from 'react-router-redux'
-import createHistory from 'history/createBrowserHistory'
+import { BrowserRouter as Router } from 'react-router-dom';
+import { ApolloClient }  from 'apollo-client';
+import {ApolloProvider} from 'react-apollo';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { HttpLink } from 'apollo-link-http';
+import { onError } from 'apollo-link-error';
+import { ApolloLink } from 'apollo-link';
 
 import App from "./app";
 
-//router initialization
-const history  = createHistory();
-const middleware = routerMiddleware(history);
-
-//redux initialization
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-const store = createStore(routerReducer, composeEnhancers(applyMiddleware(middleware)));
+//graphql initialization
+const client = new ApolloClient({
+    link: ApolloLink.from([
+        onError(({ graphQLErrors, networkError }) => {
+            if (graphQLErrors)
+                graphQLErrors.map(({ message, locations, path }) =>
+                    console.log(
+                        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+                    ),
+                );
+            if (networkError) console.log(`[Network error]: ${networkError}`);
+        }),
+        new HttpLink({
+            uri: 'http://localhost/graphql',
+            credentials: 'same-origin'
+        })
+    ]),
+    cache: new InMemoryCache()
+});
 
 
 //app attachment
 const render = Component => {
     ReactDOM.render(
-        <Provider store={store}>
-            <ConnectedRouter history={history}>
+        <ApolloProvider client={client}>
+            <Router>
                 <Component />
-            </ConnectedRouter>
-        </Provider>,
+            </Router>
+        </ApolloProvider>,
         document.getElementById('root')
     )
 

@@ -58,45 +58,6 @@ module.exports = {
     module: {
         rules: [
 
-            //sass
-            {
-                test: '/\.scss/',
-                use: ExtractTextPlugin.extract({
-                    fallback: "style-loader",
-                    use: [
-                        {
-                            loader: "css-loader",
-                            options: {
-                                sourceMap: true
-                            }
-                        },
-                        {
-                            loader: "sass-loader",
-                            options: {
-                                sourceMap: true
-                            }
-                        }
-                    ]
-                })
-
-},
-
-            //css
-            {
-                test: /\.css$/,
-                use: ExtractTextPlugin.extract({
-                    fallback: "style-loader",
-                    use: [
-                        {
-                            loader: "css-loader",
-                            options: {
-                                sourceMap: true
-                            }
-                        }
-                    ]
-                })
-            },
-
             //js
             {
                 test: /\.(jsx|js)?$/,

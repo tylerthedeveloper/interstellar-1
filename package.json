@@ -13,6 +13,12 @@
   "license": "ISC",
   "devDependencies": {
     "@material-ui/core": "^1.2.0",
+    "apollo-cache-inmemory": "^1.2.2",
+    "apollo-client": "^2.3.2",
+    "apollo-link": "^1.2.2",
+    "apollo-link-error": "^1.0.9",
+    "apollo-link-http": "^1.5.4",
+    "apollo-link-state": "^0.4.1",
     "babel-cli": "^6.26.0",
     "babel-loader": "^7.1.4",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
@@ -29,14 +35,14 @@
     "file-loader": "^1.1.6",
     "flow": "^0.2.3",
     "flow-bin": "^0.73.0",
+    "graphql": "^0.13.2",
+    "graphql-tag": "^2.9.2",
     "html-webpack-plugin": "^3.2.0",
-    "immutable": "^3.8.2",
-    "node-sass": "^4.7.2",
     "optimize-css-assets-webpack-plugin": "^4.0.1",
     "purify-css": "^1.2.6",
     "purifycss-webpack": "^0.7.0",
-    "radium": "^0.21.0",
     "react": "^16.2.0",
+    "react-apollo": "^2.1.4",
     "react-dom": "^16.2.0",
     "react-hot-loader": "^4.1.0",
     "react-jss": "^8.4.0",
@@ -50,7 +56,6 @@
     "redux-logger": "^3.0.6",
     "redux-saga": "^0.16.0",
     "reselect": "^3.0.1",
-    "sass-loader": "^6.0.6",
     "source-map-loader": "^0.2.3",
     "style-loader": "^0.19.1",
     "url-loader": "^0.6.2",
@@ -60,11 +65,7 @@
     "webpack-node-externals": "^1.7.2"
   },
   "dependencies": {
-    "apollo-boost": "^0.1.7",
     "body-parser": "^1.18.3",
-    "express": "^4.16.3",
-    "graphql": "^0.13.2",
-    "graphql-tag": "^2.9.2",
-    "react-apollo": "^2.1.4"
+    "express": "^4.16.3"
   }
 }
