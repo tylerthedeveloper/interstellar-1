@@ -7,10 +7,12 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { HttpLink } from 'apollo-link-http';
 import { onError } from 'apollo-link-error';
 import { ApolloLink } from 'apollo-link';
+import { withClientState } from 'apollo-link-state';
 
 import App from "./app";
 
 //graphql initialization
+const cache = new InMemoryCache();
 const client = new ApolloClient({
     link: ApolloLink.from([
         onError(({ graphQLErrors, networkError }) => {
@@ -22,12 +24,31 @@ const client = new ApolloClient({
                 );
             if (networkError) console.log(`[Network error]: ${networkError}`);
         }),
+
+        withClientState({
+            cache,
+            resolvers: {
+                Mutation: {
+                    updateNetworkStatus: (_, { isConnected }, { cache }) => {
+                        const data = {
+                            networkStatus: {
+                                __typename: 'NetworkStatus',
+                                isConnected
+                            },
+                        };
+                        cache.writeData({ data });
+                        return null;
+                    },
+                },
+            }
+        }),
+
         new HttpLink({
             uri: 'http://localhost/graphql',
             credentials: 'same-origin'
         })
     ]),
-    cache: new InMemoryCache()
+    cache: cache
 });
 
 
