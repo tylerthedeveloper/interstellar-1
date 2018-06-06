@@ -25,7 +25,6 @@ const schema = makeExecutableSchema({ typeDefs });
 // export default schema;
 module.exportsexport = schema;
 
-
 // // Require graphql
 // const { buildSchema } = require('graphql');
 
@@ -52,8 +51,6 @@ const SchemaDefinition = `
 `;
 
 export default makeExecutableSchema({
-  typeDefs: [
-    SchemaDefinition, RootQuery, Comment
-  ],
-  resolvers: {},
+    typeDefs: [SchemaDefinition, RootQuery, Comment],
+    resolvers: {}
 });
