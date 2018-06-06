@@ -11,11 +11,11 @@ const app = express();
 // app.use('/graphql', jsonGraphqlExpress(data));
 
 // Import graphQL for express
-const graphqlHTTP = require("express-graphql");
-const schema = require("./graphql/schema");
+const expressGraphQL = require('express-graphql');
+const schema = require('./graphql/schema');
 // The root provides a resolver function for each API endpoint
 const root = {
-    rollDice: function(args) {
+    rollDice: function (args) {
         var output = [];
         for (var i = 0; i < args.numDice; i++) {
             output.push(1 + Math.floor(Math.random() * (args.numSides || 6)));
@@ -24,62 +24,54 @@ const root = {
     }
 };
 
-app.use(
-    "/graphql",
-    graphqlHTTP({
-        schema: schema,
-        rootValue: root,
-        graphiql: true
-    })
-);
-
+app.use('/graphql', expressGraphQL({
+    graphiql: true,
+    schema: schema,
+    // rootValue: root
+}));
+  
 // The port the express app will listen on
 const port = process.env.PORT || 4000;
 /** Imports */
-const bodyParser = require("body-parser");
-const path = require("path");
-const http = require("http");
+const bodyParser = require('body-parser');
+const path = require('path');
+const http = require('http');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 /** Paths */
-const rootPath = "./"; // Root path
-const api = require("./routes/api.js"); // API file
-const docsPath = "app/documentation"; // Docs Path
-/** Firebase */
-const firebase = require("firebase");
-const admin = require("firebase-admin");
-const angularFireStore = require("angularfire2/firestore").AngularFirestore;
-
-// const serviceAccount = require('./galactic-storage-firebase-adminsdk-hvsjj-29f8ca05ab.json');
-const serviceAccount = require("./_firebase.js");
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://galactic-storage.firebaseio.com"
-});
-const firedb = admin.firestore();
-/** Headers */
-app.use(function(req, res, next) {
-    req.db = res.db = firedb;
-    req.afs = res.afs = angularFireStore;
-    // res.header("Access-Control-Allow-Origin", "http://localhost:4200");
-    res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept"
-    );
-    res.header(
-        "Access-Control-Allow-Methods",
-        "GET, POST, PUT, DELETE, OPTIONS"
-    );
-    res.append("Content-Type", "application/json");
-    next();
-});
-/** Setters */
-app.use(express.static(path.join(rootPath, "dist"))); // Angular DIST output folder
-// app.use('/api', api.router); // API location
-// app.use('/documentation', express.static(path.join(rootPath, 'documentation'))); // Docs location
-app.set("admin", api.admin);
-// app.set('firedb', api.firedb);
-// Serve the application at the given port
+const rootPath = './'; // Root path
+// todo
+// const api = require('./routes/api.js'); // API file
+const docsPath = 'app/documentation'; // Docs Path
+/*
+    /** Firebase /
+    const firebase = require('firebase');
+    const admin = require('firebase-admin');
+    const angularFireStore = require('angularfire2/firestore').AngularFirestore;
+    // const serviceAccount = require('./galactic-storage-firebase-adminsdk-hvsjj-29f8ca05ab.json');
+    const serviceAccount = require('./_firebase.js');
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: 'https://galactic-storage.firebaseio.com'
+    });
+    const firedb = admin.firestore();
+    // Headers
+    app.use(function (req, res, next) {
+        req.db = res.db = firedb;
+        req.afs = res.afs = angularFireStore;
+        // res.header("Access-Control-Allow-Origin", "http://localhost:4200");
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.append('Content-Type', 'application/json');
+        next();
+    });
+    /** Setters 
+    app.use(express.static(path.join(rootPath, 'dist'))); // Angular DIST output folder
+    app.use('/api', api.router); // API location
+    app.use('/documentation', express.static(path.join(rootPath, 'documentation'))); // Docs location
+    app.set('admin', api.admin);
+    // Serve the application at the given port
+*/
 app.listen(port, () => {
     // Success callbackw
     console.log(`Listening at http://localhost:${port}/`);

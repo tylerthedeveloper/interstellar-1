@@ -9,11 +9,12 @@
     "flow": "./node_modules/.bin/flow",
     "pretty": "./node_modules/.bin/prettier --write src/**/*.jsx server/**/*.js"
   },
-  "husky": {
+  "husky" : {
     "hooks": {
       "pre-commit": "set -e; npm run flow; npm run pretty;"
     }
   },
+
   "author": "Jack Langston",
   "license": "ISC",
   "devDependencies": {
@@ -60,8 +61,13 @@
     "webpack-node-externals": "^1.7.2"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
+    "express": "^4.16.3",
+    "express-graphql": "^0.6.12",
+    "graphql-tools": "^3.0.2",
+    "nodemon": "^1.17.5",
     "sitespeed.io": "^7.0.3"
   }
 }
