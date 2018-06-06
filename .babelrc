@@ -1,6 +1,6 @@
 {
-  "presets": ["flow","env", "stage-3", "react"],
+  "presets": ["flow",["env", {"modules": false}], "stage-3", "react"],
   "plugins": [
-    "react-hot-loader/babel",
+    "react-hot-loader/babel"
    ]
 }
