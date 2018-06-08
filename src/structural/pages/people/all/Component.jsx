@@ -6,7 +6,7 @@ import { Typography, TextField, Grid } from "@material-ui/core";
 import injectSheet from "react-jss";
 
 import { people } from "./data";
-import PersonCard from './PersonCardComponent';
+import PersonCard from "./PersonCardComponent";
 
 /****  TYPES ******/
 type ClassProp = {
@@ -35,11 +35,9 @@ class CategoryLanding extends React.PureComponent<ClassProp> {
                 </div>
 
                 <div className={classes.content}>
-                    <Grid container className={classes.items} component={"div"}>
+                    <Grid container className={classes.items} component={"div"} spacing={16}>
                         {people.map((props) => {
-                            return (
-                                <PersonCard {...props} key={props.name} />
-                            );
+                            return <PersonCard {...props} key={props.name} />;
                         })}
                     </Grid>
                     <div className={classes.filters}>Filters to go here</div>
@@ -64,7 +62,7 @@ const styles = {
     },
     content: {
         display: "flex",
-        marginTop: "20px",
+        marginTop: "20px"
     },
     title: {
         flex: 1
@@ -86,6 +84,7 @@ const styles = {
         display: "inline-block"
     },
     items: {
+        padding: "0 20px"
     }
 };
 
