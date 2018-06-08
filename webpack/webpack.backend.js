@@ -23,9 +23,8 @@ module.exports = {
     },
 
     resolve: {
-        extensions: ['.js']
+        extensions: ['.mjs', '.js', '.jsx']
     },
-
     devtool: 'eval',
     mode: 'development',
     watch: true,
@@ -59,6 +58,13 @@ module.exports = {
                 }
             },
 
+            {
+                test: /\.mjs$/,
+                include: /node_modules/,
+                type: "javascript/auto",
+            },
+
+
         ]
     },
 
@@ -72,7 +78,12 @@ module.exports = {
 
     plugins : [
         new webpack.HotModuleReplacementPlugin(),
-        new webpack.NoEmitOnErrorsPlugin()
+        new webpack.NoEmitOnErrorsPlugin(),
+        new webpack.DefinePlugin({
+            "process.env": {
+                "BUILD_TARGET": JSON.stringify('server')
+            }
+        }),
     ]
 };
 

@@ -11,11 +11,11 @@ const app = express();
 // app.use('/graphql', jsonGraphqlExpress(data));
 
 // Import graphQL for express
-const expressGraphQL = require('express-graphql');
-const schema = require('./graphql/schema');
+const expressGraphQL = require("express-graphql");
+const schema = require("./graphql/schema");
 // The root provides a resolver function for each API endpoint
 const root = {
-    rollDice: function (args) {
+    rollDice: function(args) {
         var output = [];
         for (var i = 0; i < args.numDice; i++) {
             output.push(1 + Math.floor(Math.random() * (args.numSides || 6)));
@@ -24,25 +24,28 @@ const root = {
     }
 };
 
-app.use('/graphql', expressGraphQL({
-    graphiql: true,
-    schema: schema,
-    // rootValue: root
-}));
-  
+app.use(
+    "/graphql",
+    expressGraphQL({
+        graphiql: true,
+        schema: schema
+        // rootValue: root
+    })
+);
+
 // The port the express app will listen on
 const port = process.env.PORT || 4000;
 /** Imports */
-const bodyParser = require('body-parser');
-const path = require('path');
-const http = require('http');
+const bodyParser = require("body-parser");
+const path = require("path");
+const http = require("http");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 /** Paths */
-const rootPath = './'; // Root path
+const rootPath = "./"; // Root path
 // todo
 // const api = require('./routes/api.js'); // API file
-const docsPath = 'app/documentation'; // Docs Path
+const docsPath = "app/documentation"; // Docs Path
 /*
     /** Firebase /
     const firebase = require('firebase');
