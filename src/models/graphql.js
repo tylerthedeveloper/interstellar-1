@@ -4,8 +4,6 @@ import graphql from "graphql";
 const queryType = new graphql.GraphQLObjectType({
     name: "Query",
     fields: {
-        login_modal_open: {
-            type: graphql.GraphQLBoolean
-        }
+        login_modal_open: { type: graphql.GraphQLBoolean }
     }
 });

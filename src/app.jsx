@@ -9,6 +9,7 @@ import Navbar from "./structural/navbar/Container";
 import HomePage from "./structural/pages/home/Component";
 import Categories from "./structural/pages/categories/Component";
 import Products from "./structural/pages/products/Component";
+import People from "./structural/pages/people/Component";
 import LoginModal from "./structural/login/login_modal/Container";
 
 /****  TYPES ******/
@@ -24,17 +25,18 @@ class App extends React.PureComponent<ComponentProps & ClassProp> {
         const { classes } = this.props;
 
         return (
-            <diwv className={classes.container}>
+            <div className={classes.container}>
                 <Navbar />
                 <div className={classes.content}>
                     <Switch>
                         <Route path="/" exact component={HomePage} />
                         <Route path="/categories" component={Categories} />
                         <Route path="/products" component={Products} />
+                        <Route path="/people" component={People} />
                     </Switch>
                 </div>
                 <LoginModal />
-            </diwv>
+            </div>
         );
     }
 }
