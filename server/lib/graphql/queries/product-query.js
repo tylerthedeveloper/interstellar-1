@@ -3,23 +3,17 @@ const graphql = require("graphql");
 const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString } = graphql;
 const ProductType = require("../types/product");
 const axios = require("axios");
+const ProductService = require("../../services/products.service")
+// const ProductService = new ProductService();
 
 module.exports = {
-    categoriedProducts: {
-        type: new GraphQLList(ProductType),
-        args: { category: { type: new GraphQLNonNull(GraphQLString) } },
-        resolve(parentValue, { category }) {
-            return axios
-                .get(`http://localhost:3000/categories/${category}/products`)
-                .then((res) => res.data);
-        }
-    },
     products: {
         type: new GraphQLList(ProductType),
         resolve(parentValue, args) {
-            return axios
-                .get(`http://localhost:3000/products/`)
-                .then((res) => res.data);
+            return ProductService.getAllProducts(); // .then((res) => res.data);
+            // return axios
+            //     .get(`http://localhost:3002/api/products`)
+            //     .then((res) => res.data);
         }
     },
     product: {
@@ -27,7 +21,7 @@ module.exports = {
         args: { id: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { id }) {
             return axios
-                .get(`http://localhost:3000/users/${args.id}`)
+                .get(`http://localhost:3002/api/products/${args.id}`)
                 .then((res) => res.data);
         }
     }

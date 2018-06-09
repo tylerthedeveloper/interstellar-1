@@ -1,4 +1,9 @@
 "use strict";
+/** Firebase */
+const firebase = require("firebase");
+const admin = require("firebase-admin");
+// const serviceAccount = require("./_firebase.js");
+
 const firebaseConfig = {
     // apiKey: 'AIzaSyBthCwhwO2SHLFMaY_V2aFIMJxRC23QFpI',
     // authDomain: 'galactic-storage.firebaseapp.com',
@@ -20,5 +25,13 @@ const firebaseConfig = {
     client_x509_cert_url:
         "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-hvsjj%40galactic-storage.iam.gserviceaccount.com"
 };
-module.exports = firebaseConfig;
+
+admin.initializeApp({
+    credential: admin.credential.cert(firebaseConfig),
+    databaseURL: "https://galactic-storage.firebaseio.com"
+});
+
+const firedb = admin.firestore();
+
+module.exports = firedb;
 //# sourceMappingURL=_firebase.js.map

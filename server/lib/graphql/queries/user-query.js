@@ -10,9 +10,8 @@ module.exports = {
             //   return axios.get(`https://firestore.googleapis.com/v1beta1/projects/galactic-storage/databases/(default)/documents/users/`)
             return (
                 axios
-                    // .get(`http://localhost:3000/users/`)
                     .get(`http://localhost:3002/api/users`)
-                    .then((res) => res.data)
+                        .then((res) => res.data)
             );
         }
     },
@@ -22,7 +21,7 @@ module.exports = {
         resolve(parentValue, { id }) {
             return axios
                 .get(`http://localhost:3002/api/users/${id}`)
-                .then((res) => res.data);
+                    .then((res) => res.data);
         }
     }
 };

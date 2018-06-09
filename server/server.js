@@ -5,20 +5,12 @@ import { graphqlExpress, graphiqlExpress } from "apollo-server-express";
 import path from "path";
 import schema from "./lib/graphql/schema";
 
-import firebase from "firebase";
-import admin from "firebase-admin";
 import api from "./lib/routes/api.js";
-import serviceAccount from "./_firebase.js";
+import firedb from "./_firebase.js";
 
 const publicDir = path.resolve(__dirname, "../dist");
 console.log(publicDir);
 const app = express();
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://galactic-storage.firebaseio.com"
-});
-const firedb = admin.firestore();
-
 app.use(bodyParser.json());
 app.use("/gql", bodyParser.json(), graphqlExpress({ schema: schema }));
 app.use("/iql", graphiqlExpress({ endpointURL: "/gql" }));

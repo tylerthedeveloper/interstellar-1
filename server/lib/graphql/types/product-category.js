@@ -1,35 +1,26 @@
-const schema = `
-    enum ProductCategoryEnum {
-        Apparel , #= 'Apparel',
-        Electronics , #= 'Electronics',
-        Food , #= 'Food',
-        Houseware , #= 'Houseware',
-        Software , #= 'Software',
-        Other , #= 'Other'
-    }
-    type ProductCategory {
-        productCategoryEnum: ProductCategoryEnum
-        category: String!
-        thumbnailLink: String!
-        description: String!
-    }
+const graphql = require("graphql");
+const {
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLID,
+    GraphQLInt,
+    GraphQLList,
+    GraphQLBoolean,
+    GraphQLNonNull
+} = graphql;
 
-    type Query {
-        categories(category: String!): [ProductCategory]
-    }
+const ProductCategoryType = new GraphQLObjectType({
+    name: "ProductCategoryType",
+    fields: () => ({
+        // id: { type: new GraphQLNonNull(GraphQLString) },
+        id: { type: GraphQLString },
+        category: { type: GraphQLString },
+        descripton: { type: GraphQLString },
+        imageURL: { type: GraphQLString },
+        numberOfProducts: { type: GraphQLInt },
+        // topProducts: { type: GraphQLString },
+        // topSellers: { type: GraphQLString },
+    })
+});
 
-    type Mutation {    
-        addProductToCategory (
-            input: ProductInput
-        ): Product
-    
-        deleteProductFromCategory(productID: String!): Product
-    }
-    
-    type Subscription {
-        productAdded: Product
-        productDeleted: Product
-    }
-`;
-
-module.exports = schema;
+module.exports = ProductCategoryType;

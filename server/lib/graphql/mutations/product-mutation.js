@@ -14,7 +14,7 @@ module.exports = {
         resolve(parentValue, { productName, userID }) {
             const product = Object.assign({ productName, userID });
             return axios
-                .post(`http://localhost:3000/products`, product)
+                .post(`http://localhost:3002/products`, product)
                 .then((res) => res.data);
         }
     },
@@ -23,7 +23,7 @@ module.exports = {
         args: { id: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { id }) {
             return axios
-                .delete(`http://localhost:3000/products/${id}`)
+                .delete(`http://localhost:3002/products/${id}`)
                 .then((res) => res.data);
         }
     },
@@ -36,7 +36,7 @@ module.exports = {
         },
         resolve(parentValue, args) {
             return axios
-                .patch(`http://localhost:3000/products/${args.id}`, args)
+                .patch(`http://localhost:3002/products/${args.id}`, args)
                 .then((res) => res.data);
         }
     }
