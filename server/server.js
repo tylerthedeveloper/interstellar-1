@@ -26,6 +26,7 @@ import session from 'express-session';
 const app = express();
 
 //attaching session data
+//TODO switch this out with an off-process TTL store like redis
 app.use(session({
     secret: "Jack Langston is the undisputed best",
     resave: true,
