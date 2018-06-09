@@ -14,7 +14,9 @@ const axios = require("axios");
 const UserType = new GraphQLObjectType({
     name: "UserType",
     fields: () => ({
-        id: { type: new GraphQLNonNull(GraphQLID) },
+        // id: { type: new GraphQLNonNull(GraphQLID) },
+        id: { type: GraphQLString },
+        publicKey: { type: GraphQLString },
         userName: { type: GraphQLString },
         fullName: { type: GraphQLString },
         email: { type: GraphQLString },
@@ -26,12 +28,13 @@ const UserType = new GraphQLObjectType({
         accountCreated: { type: GraphQLString },
         address: { type: GraphQLString },
         numberOfItemsSold: { type: GraphQLInt },
-        products: {
+        myProducts: {
             type: new GraphQLList(ProductType) ,
             resolve(parentValue, args) {
-                console.log(parentValue.id)
                 const parentID = parentValue.id;
-                return axios.get(`http://localhost:3000/products?userID=${parentID}`)
+                console.log(parentID)
+                // todo: Change to user-products
+                return axios.get(`http://localhost:4000/api/products/user-products/${parentID}`)
                     .then((res) => res.data);
             }
         }

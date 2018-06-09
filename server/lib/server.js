@@ -46,37 +46,39 @@ const rootPath = "./"; // Root path
 // todo
 const api = require("./routes/api.js"); // API file
 const docsPath = "app/documentation"; // Docs Path
+/** Firebase */
+const firebase = require('firebase');
+const admin = require('firebase-admin');
+// const angularFireStore = require('angularfire2/firestore').AngularFirestore;
+// const serviceAccount = require('./galactic-storage-firebase-adminsdk-hvsjj-29f8ca05ab.json');
+const serviceAccount = require('./_firebase.js');
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: 'https://galactic-storage.firebaseio.com'
+});
+
+const firedb = admin.firestore();
+
+app.use(function (req, res, next) {
+    req.db = res.db = firedb;
+    // req.afs = res.afs = angularFireStore;
+    // res.header("Access-Control-Allow-Origin", "http://localhost:4200");
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.append('Content-Type', 'application/json');
+    next();
+});
 /*
-    /** Firebase /
-    const firebase = require('firebase');
-    const admin = require('firebase-admin');
-    const angularFireStore = require('angularfire2/firestore').AngularFirestore;
-    // const serviceAccount = require('./galactic-storage-firebase-adminsdk-hvsjj-29f8ca05ab.json');
-    const serviceAccount = require('./_firebase.js');
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        databaseURL: 'https://galactic-storage.firebaseio.com'
-    });
-    const firedb = admin.firestore();
     // Headers
-    app.use(function (req, res, next) {
-        req.db = res.db = firedb;
-        req.afs = res.afs = angularFireStore;
-        // res.header("Access-Control-Allow-Origin", "http://localhost:4200");
-        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-        res.append('Content-Type', 'application/json');
-        next();
-    });
     /** Setters 
     app.use(express.static(path.join(rootPath, 'dist'))); // Angular DIST output folder
     app.use('/documentation', express.static(path.join(rootPath, 'documentation'))); // Docs location
     app.set('admin', api.admin);
-    // Serve the application at the given port
     */
-app.use("/api", api.router); // API location
+// API location
+app.use("/api", api.router); 
+// Serve the application at the given port
 app.listen(port, () => {
-    // Success callbackw
     console.log(`Listening at http://localhost:${port}/`);
 });
 module.exports = app;

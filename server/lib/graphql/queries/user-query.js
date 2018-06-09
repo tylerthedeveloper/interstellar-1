@@ -9,7 +9,8 @@ module.exports = {
         resolve() {
             //   return axios.get(`https://firestore.googleapis.com/v1beta1/projects/galactic-storage/databases/(default)/documents/users/`)
             return axios
-                .get(`http://localhost:3000/users/`)
+            // .get(`http://localhost:3000/users/`)
+            .get(`http://localhost:4000/api/users`)
                 .then((res) => res.data);
         }
     },
@@ -18,7 +19,7 @@ module.exports = {
         args: { id: { type: GraphQLID } },
         resolve(parentValue, { id }) {
             return axios
-                .get(`http://localhost:3000/users/${id}`)
+                .get(`http://localhost:4000/api/users/${id}`)
                 .then((res) => res.data);
         }
     }

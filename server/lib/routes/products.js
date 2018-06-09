@@ -107,9 +107,7 @@ productRouter.get("/user-products/:userID", (req, res) => {
         .get()
         .then((collectionSnapshot) => {
             console.log("user products on server");
-            const docs = collectionSnapshot.docs.map((documentSnapshot) =>
-                documentSnapshot.data()
-            );
+            const docs = collectionSnapshot.docs.map((documentSnapshot) => documentSnapshot.data());
             res.status(res.statusCode).send(docs);
         })
         .catch((err) => {

@@ -1,4 +1,5 @@
-const graphql = require("graphql");
+ // STRING OR ID ... pull from Database or GQL?
+ const graphql = require("graphql");
 const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString } = graphql;
 const ProductType = require("../types/product");
 const axios = require("axios");
@@ -23,7 +24,7 @@ module.exports = {
     },
     product: {
         type: ProductType,
-        args: { id: { type: new GraphQLNonNull(GraphQLID) } }, // STRING OR ID
+        args: { id: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { id }) {
             return axios
                 .get(`http://localhost:3000/users/${args.id}`)
