@@ -39,6 +39,7 @@
     "clone": "^2.1.2",
     "compression-webpack-plugin": "^1.1.11",
     "express-history-api-fallback": "^2.2.1",
+    "express-session": "^1.15.6",
     "file-loader": "^1.1.6",
     "flow": "^0.2.3",
     "flow-bin": "^0.73.0",

@@ -1,17 +1,8 @@
-import express from "express";
-import bodyParser from "body-parser";
-import fallback from "express-history-api-fallback";
-import { graphqlExpress, graphiqlExpress } from "apollo-server-express";
-import path from "path";
-import schema from "./lib/graphql/schema";
+
 
 import firebase from "firebase";
 import admin from "firebase-admin";
-import api from "./lib/routes/api.js";
 import serviceAccount from "./_firebase.js";
-
-//set up the public directory
-
 
 //establish the firebase connection TODO i'd probably move this to a separate folder
 admin.initializeApp({
@@ -24,10 +15,28 @@ const firedb = admin.firestore();
 /**************************************
  * Attach all of the Express Middleware
  **************************************/
+import express from "express";
+import path from "path";
+import { graphqlExpress, graphiqlExpress } from "apollo-server-express";
+import schema from "./lib/graphql/schema";
+import bodyParser from "body-parser";
+import fallback from "express-history-api-fallback";
+import session from 'express-session';
 
 const app = express();
 
+//attaching session data
+app.use(session({
+    secret: "Jack Langston is the undisputed best",
+    resave: true,
+    saveUninitialized: true,
+    cookie : {
+        maxAge: 1000 * 60
+    }
+}));
 
+
+//parsing the body of requests //TODO need to figure out if this is necesary
 app.use(
     bodyParser.urlencoded({
         extended: true
@@ -58,9 +67,19 @@ app.use("/iql", graphiqlExpress({ endpointURL: "/gql" }));
 // });
 
 
+//TODO Remove
+//TESTING
+app.use("/", (req, res, next) => {
+    console.log(req.sessionID);
+    next();
+});
+
+
 //set the static asset directory
 const publicDir = path.resolve(__dirname, "../dist");
 app.use(express.static(publicDir));
 app.use(fallback(path.resolve(publicDir, "./index.html")));
+
+
 
 export default app;
