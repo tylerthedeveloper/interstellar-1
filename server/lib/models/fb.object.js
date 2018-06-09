@@ -1,9 +1,9 @@
 "use strict";
 class FbObject {
-        createTime = '';
-        fields = [];
-        name = '';
-        updateTime = '';
+    createTime = "";
+    fields = [];
+    name = "";
+    updateTime = "";
     // constructor() {
     //     this.createTime = '';
     //     this.fields = [];
@@ -18,7 +18,7 @@ class FbObject {
     // }
 }
 const models = {
-    FbObject: FbObject,
+    FbObject: FbObject
 };
 module.exports = models;
 //# sourceMappingURL=fb.object.js.map
