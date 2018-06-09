@@ -23,7 +23,6 @@ type ComponentProps = product;
 
 /****  COMPONENT ******/
 class ProductListItem extends React.PureComponent<ComponentProps & ClassProp> {
-
     //stop the ripple effect when clicking on the add to cart form
     static onclickForm(event: SyntheticEvent<HTMLButtonElement>): void {
         event.stopPropagation();

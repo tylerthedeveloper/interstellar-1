@@ -1,6 +1,7 @@
 // @flow
 import React from "react";
 import { Grid, Typography, Avatar, Button } from "@material-ui/core";
+import { NavLink } from "react-router-dom";
 import type { ComponentType } from "react";
 import injectSheet from "react-jss";
 import StarRatingComponent from "react-star-rating-component";
@@ -13,17 +14,18 @@ type ClassProp = {
 type ComponentProps = {
     name: string,
     rating: number,
-    numberOfSales: number
+    numberOfSales: number,
+    id: string
 };
 
 /****  COMPONENT ******/
 class Component extends React.PureComponent<ComponentProps & ClassProp> {
     render() {
-        const { name, rating, classes, numberOfSales } = this.props;
+        const { name, rating, classes, numberOfSales, id } = this.props;
 
         return (
             <Grid item xl={2} lg={4} md={6} xs={12}>
-                <Button className={classes.button} fullWidth={true}>
+                <Button className={classes.button} fullWidth={true} component={NavLink} to={`/people/${id}`}>
                     <Typography
                         className={classes.title}
                         variant={"title"}

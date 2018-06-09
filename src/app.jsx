@@ -6,10 +6,10 @@ import { Switch, Route } from "react-router-dom";
 import { hot } from "react-hot-loader";
 
 import Navbar from "./structural/navbar/Container";
-import HomePage from "./structural/pages/home/Component";
-import Categories from "./structural/pages/categories/Component";
-import Products from "./structural/pages/products/Component";
-import People from "./structural/pages/people/Component";
+import HomePage from "./pages/home/Component";
+import Categories from "./pages/categories/Component";
+import Products from "./pages/products/Component";
+import People from "./pages/people/Component";
 import LoginModal from "./structural/login/login_modal/Container";
 
 /****  TYPES ******/

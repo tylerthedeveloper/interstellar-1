@@ -2,11 +2,10 @@
 
 import React from "react";
 import type { ComponentType } from "react";
-import { Typography, TextField, List } from "@material-ui/core";
+import { Typography, TextField } from "@material-ui/core";
 import injectSheet from "react-jss";
 
-import ProductListItem from "./ProductListItemComponent";
-import { products } from "./data";
+import ProductList from '../../../structural/products/product_list/Component';
 
 /****  TYPES ******/
 type ClassProp = {
@@ -35,13 +34,9 @@ class CategoryLanding extends React.PureComponent<ClassProp> {
                 </div>
 
                 <div className={classes.content}>
-                    <List className={classes.items} component={"div"}>
-                        {products.map((props) => {
-                            return (
-                                <ProductListItem key={props.name} {...props} />
-                            );
-                        })}
-                    </List>
+                    <div className={classes.items}>
+                        <ProductList/>
+                    </div>
                     <div className={classes.filters}>Filters to go here</div>
                 </div>
             </div>

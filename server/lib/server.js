@@ -44,7 +44,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 /** Paths */
 const rootPath = "./"; // Root path
 // todo
-const api = require('./routes/api.js'); // API file
+const api = require("./routes/api.js"); // API file
 const docsPath = "app/documentation"; // Docs Path
 /*
     /** Firebase /
@@ -74,7 +74,7 @@ const docsPath = "app/documentation"; // Docs Path
     app.set('admin', api.admin);
     // Serve the application at the given port
     */
-app.use('/api', api.router); // API location
+app.use("/api", api.router); // API location
 app.listen(port, () => {
     // Success callbackw
     console.log(`Listening at http://localhost:${port}/`);
