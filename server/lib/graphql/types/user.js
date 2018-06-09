@@ -1,21 +1,40 @@
-const graphql = require('graphql');
-const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLInt, GraphQLList, GraphQLBoolean } = graphql;
+const graphql = require("graphql");
+const {
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLID,
+    GraphQLInt,
+    GraphQLList,
+    GraphQLBoolean,
+    GraphQLNonNull
+} = graphql;
+const ProductType = require("./product");
+const axios = require("axios");
 
 const UserType = new GraphQLObjectType({
-  name:  'UserType',
-  fields: () => ({
-        id: { type: GraphQLID }, //GraphQLID
+    name: "UserType",
+    fields: () => ({
+        id: { type: new GraphQLNonNull(GraphQLID) },
         userName: { type: GraphQLString },
         fullName: { type: GraphQLString },
         email: { type: GraphQLString },
         birthdate: { type: GraphQLString },
-        age: { type: GraphQLInt }, 
+        age: { type: GraphQLInt },
         address: { type: GraphQLString }, // ... ???
-        isValidBuyer: { type: GraphQLBoolean }, 
-        isValidSeller: { type: GraphQLBoolean }, 
-        accountCreated: { type: GraphQLString }, 
+        isValidBuyer: { type: GraphQLBoolean },
+        isValidSeller: { type: GraphQLBoolean },
+        accountCreated: { type: GraphQLString },
         address: { type: GraphQLString },
-        numberOfItemsSold: { type: GraphQLInt }, 
+        numberOfItemsSold: { type: GraphQLInt },
+        products: {
+            type: new GraphQLList(ProductType) ,
+            resolve(parentValue, args) {
+                console.log(parentValue.id)
+                const parentID = parentValue.id;
+                return axios.get(`http://localhost:3000/products?userID=${parentID}`)
+                    .then((res) => res.data);
+            }
+        }
     })
 });
 // acceptedAssets: [AssetBalance]

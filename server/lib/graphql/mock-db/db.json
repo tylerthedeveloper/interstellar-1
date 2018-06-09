@@ -24,11 +24,22 @@
       "views": 65,
       "user_id": 456,
       "tag_id": "bar",
-      "category": "2"
+      "category": "2",
+      "productName": "a new prod name"
     },
     {
-      "productName": "tito",
+      "productName": "prod to seller 456",
       "id": 3
+    },
+    {
+      "productName": "last to seller 456",
+      "userID": "456",
+      "id": 4
+    },
+    {
+      "productName": "newestt",
+      "userID": "456",
+      "id": 5
     }
   ],
   "users": [
@@ -38,11 +49,7 @@
     },
     {
       "id": "456",
-      "userName": "Jane Doner"
-    },
-    {
-      "userName": "tito",
-      "id": "xIZDWYL"
+      "userName": "jane doner the 3rd"
     }
   ]
 }
