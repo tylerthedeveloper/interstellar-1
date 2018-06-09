@@ -36,7 +36,7 @@ const UserType = new GraphQLObjectType({
                 // todo: Change to user-products
                 return axios
                     .get(
-                        `http://localhost:4000/api/products/user-products/${parentID}`
+                        `http://localhost:3002/api/products/user-products/${parentID}`
                     )
                     .then((res) => res.data);
             }

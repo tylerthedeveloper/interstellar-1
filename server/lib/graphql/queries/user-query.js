@@ -11,7 +11,7 @@ module.exports = {
             return (
                 axios
                     // .get(`http://localhost:3000/users/`)
-                    .get(`http://localhost:4000/api/users`)
+                    .get(`http://localhost:3002/api/users`)
                     .then((res) => res.data)
             );
         }
@@ -21,7 +21,7 @@ module.exports = {
         args: { id: { type: GraphQLID } },
         resolve(parentValue, { id }) {
             return axios
-                .get(`http://localhost:4000/api/users/${id}`)
+                .get(`http://localhost:3002/api/users/${id}`)
                 .then((res) => res.data);
         }
     }
