@@ -10,7 +10,7 @@ import { ApolloLink } from "apollo-link";
 import { withClientState } from "apollo-link-state";
 
 import App from "./app";
-import { resolvers, defaults } from "./models/login_modal";
+import { resolvers, defaults } from "./models/local/login_modal";
 
 //graphql initialization
 const cache = new InMemoryCache();
@@ -45,7 +45,7 @@ const render = (Component) => {
     ReactDOM.render(
         <ApolloProvider client={client}>
             <Router>
-                <Route component={Component} />
+                <Component />
             </Router>
         </ApolloProvider>,
         document.getElementById("root")

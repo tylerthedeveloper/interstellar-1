@@ -6,7 +6,7 @@ import { Query, Mutation } from "react-apollo";
 import {
     getLoginModalOpenStatus,
     toggleLoginModalStatus
-} from "../../../models/login_modal";
+} from "../../../models/local/login_modal";
 import LoginModalComponent from "./Component";
 
 class LoginModal extends React.PureComponent<{}> {

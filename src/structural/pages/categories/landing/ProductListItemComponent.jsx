@@ -23,6 +23,7 @@ type ComponentProps = product;
 
 /****  COMPONENT ******/
 class ProductListItem extends React.PureComponent<ComponentProps & ClassProp> {
+
     //stop the ripple effect when clicking on the add to cart form
     static onclickForm(event: SyntheticEvent<HTMLButtonElement>): void {
         event.stopPropagation();
@@ -47,8 +48,9 @@ class ProductListItem extends React.PureComponent<ComponentProps & ClassProp> {
                                     starCount={5}
                                     value={rating}
                                 />
-                                <Typography variant={"caption"}>({rating})</Typography>
-
+                                <Typography variant={"caption"}>
+                                    ({rating})
+                                </Typography>
                             </div>
                         </div>
                         <Typography variant={"body1"}>{description}</Typography>
@@ -100,9 +102,9 @@ const styles = {
     headerBox: {
         display: "inline-flex"
     },
-    stars : {
+    stars: {
         fontSize: "20px",
-        marginRight:"7px"
+        marginRight: "7px"
     },
     ratingContainer: {
         display: "flex",

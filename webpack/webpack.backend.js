@@ -15,7 +15,7 @@ module.exports = {
 
     entry: [
         'webpack/hot/poll?1000',
-        path.resolve(__dirname, '../server/index.js'),
+        path.resolve(__dirname, '../server/login_modal.js'),
     ],
     output: {
         path: OUTPUT_PATH,

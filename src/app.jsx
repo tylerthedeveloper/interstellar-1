@@ -20,7 +20,7 @@ type ClassProp = {
 type ComponentProps = {};
 
 /****  COMPONENT ******/
-class App extends React.PureComponent<ComponentProps & ClassProp> {
+class App extends React.Component<ComponentProps & ClassProp> {
     render() {
         const { classes } = this.props;
 
