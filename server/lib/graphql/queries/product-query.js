@@ -1,5 +1,5 @@
- // STRING OR ID ... pull from Database or GQL?
- const graphql = require("graphql");
+// STRING OR ID ... pull from Database or GQL?
+const graphql = require("graphql");
 const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString } = graphql;
 const ProductType = require("../types/product");
 const axios = require("axios");

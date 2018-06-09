@@ -29,12 +29,15 @@ const UserType = new GraphQLObjectType({
         address: { type: GraphQLString },
         numberOfItemsSold: { type: GraphQLInt },
         myProducts: {
-            type: new GraphQLList(ProductType) ,
+            type: new GraphQLList(ProductType),
             resolve(parentValue, args) {
                 const parentID = parentValue.id;
-                console.log(parentID)
+                console.log(parentID);
                 // todo: Change to user-products
-                return axios.get(`http://localhost:4000/api/products/user-products/${parentID}`)
+                return axios
+                    .get(
+                        `http://localhost:4000/api/products/user-products/${parentID}`
+                    )
                     .then((res) => res.data);
             }
         }

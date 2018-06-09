@@ -8,10 +8,12 @@ module.exports = {
         type: new GraphQLList(UserType),
         resolve() {
             //   return axios.get(`https://firestore.googleapis.com/v1beta1/projects/galactic-storage/databases/(default)/documents/users/`)
-            return axios
-            // .get(`http://localhost:3000/users/`)
-            .get(`http://localhost:4000/api/users`)
-                .then((res) => res.data);
+            return (
+                axios
+                    // .get(`http://localhost:3000/users/`)
+                    .get(`http://localhost:4000/api/users`)
+                    .then((res) => res.data)
+            );
         }
     },
     user: {

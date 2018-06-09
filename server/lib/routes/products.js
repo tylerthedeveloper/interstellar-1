@@ -107,7 +107,9 @@ productRouter.get("/user-products/:userID", (req, res) => {
         .get()
         .then((collectionSnapshot) => {
             console.log("user products on server");
-            const docs = collectionSnapshot.docs.map((documentSnapshot) => documentSnapshot.data());
+            const docs = collectionSnapshot.docs.map((documentSnapshot) =>
+                documentSnapshot.data()
+            );
             res.status(res.statusCode).send(docs);
         })
         .catch((err) => {
@@ -137,19 +139,6 @@ productRouter.get("/categories/:category", (req, res) => {
         });
 });
 
-// // productRouter.get('/pkeys/:pubkey', (req: any, res: any) => {
-// //     const publicKey = req.params['pubkey'];
-// //     firedb.collection('products')
-// //         .where('publicKey', '==', publicKey)
-// //         .get()
-// //         .then((QuerySnapshot: any) => {
-// //             const userSnapShot = QuerySnapshot.docs[0].data();
-// //             res.status(res.statusCode).send(userSnapShot);
-// //         })
-// //         .catch((err: any) => {
-// //             res.status(res.statusCode).send(err);
-// //         });
-// // });
 // productRouter.delete('/:id', (req: any, res: any) => {
 //     const id = req.params['id'];
 //     firedb.collection('products').doc(id).delete()

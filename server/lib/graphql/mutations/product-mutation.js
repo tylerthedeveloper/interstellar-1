@@ -7,8 +7,8 @@ module.exports = {
     addProduct: {
         type: ProductType,
         // todo: add more props
-        args: { 
-            productName: { type: GraphQLID },  
+        args: {
+            productName: { type: GraphQLID },
             userID: { type: new GraphQLNonNull(GraphQLID) }
         },
         resolve(parentValue, { productName, userID }) {
@@ -20,21 +20,23 @@ module.exports = {
     },
     deleteProduct: {
         type: ProductType,
-        args: {  id: { type: new GraphQLNonNull(GraphQLID) } },
+        args: { id: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { id }) {
-            return axios.delete(`http://localhost:3000/products/${id}`)
+            return axios
+                .delete(`http://localhost:3000/products/${id}`)
                 .then((res) => res.data);
         }
     },
     updateProduct: {
         type: ProductType,
         // todo: add more props
-        args: {  
+        args: {
             id: { type: new GraphQLNonNull(GraphQLID) },
-            productName: { type: GraphQLID },  
+            productName: { type: GraphQLID }
         },
         resolve(parentValue, args) {
-            return axios.patch(`http://localhost:3000/products/${args.id}`, args)
+            return axios
+                .patch(`http://localhost:3000/products/${args.id}`, args)
                 .then((res) => res.data);
         }
     }

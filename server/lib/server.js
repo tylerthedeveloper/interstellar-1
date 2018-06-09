@@ -47,25 +47,31 @@ const rootPath = "./"; // Root path
 const api = require("./routes/api.js"); // API file
 const docsPath = "app/documentation"; // Docs Path
 /** Firebase */
-const firebase = require('firebase');
-const admin = require('firebase-admin');
+const firebase = require("firebase");
+const admin = require("firebase-admin");
 // const angularFireStore = require('angularfire2/firestore').AngularFirestore;
 // const serviceAccount = require('./galactic-storage-firebase-adminsdk-hvsjj-29f8ca05ab.json');
-const serviceAccount = require('./_firebase.js');
+const serviceAccount = require("./_firebase.js");
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: 'https://galactic-storage.firebaseio.com'
+    databaseURL: "https://galactic-storage.firebaseio.com"
 });
 
 const firedb = admin.firestore();
 
-app.use(function (req, res, next) {
+app.use(function(req, res, next) {
     req.db = res.db = firedb;
     // req.afs = res.afs = angularFireStore;
     // res.header("Access-Control-Allow-Origin", "http://localhost:4200");
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.append('Content-Type', 'application/json');
+    res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+    );
+    res.header(
+        "Access-Control-Allow-Methods",
+        "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    res.append("Content-Type", "application/json");
     next();
 });
 /*
@@ -76,7 +82,7 @@ app.use(function (req, res, next) {
     app.set('admin', api.admin);
     */
 // API location
-app.use("/api", api.router); 
+app.use("/api", api.router);
 // Serve the application at the given port
 app.listen(port, () => {
     console.log(`Listening at http://localhost:${port}/`);
