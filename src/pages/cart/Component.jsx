@@ -1,46 +1,48 @@
 // @flow
-import React from 'react';
-import {Stepper, Button, StepContent, Typography, Step, StepLabel} from '@material-ui/core';
-import type {ComponentType} from 'react';
-import injectSheet from 'react-jss';
+import React from "react";
+import {
+    Stepper,
+    Button,
+    StepContent,
+    Typography,
+    Step,
+    StepLabel
+} from "@material-ui/core";
+import type { ComponentType } from "react";
+import injectSheet from "react-jss";
 
 /****  TYPES ******/
 type ClassProp = {
-    classes: {[$Keys<typeof styles>]: string}
-}
+    classes: { [$Keys<typeof styles>]: string }
+};
 
-type ComponentProps = {
-}
-
-
-
+type ComponentProps = {};
 
 /****  COMPONENT ******/
 
-const steps =  [
-        {
-            label: 'Review Your Items',
-        },
-        {
-            label: 'Enter Shipping Information'
-        },
-        {
-            label:'Wait for Transaction Confirmation'
-        }];
+const steps = [
+    {
+        label: "Review Your Items"
+    },
+    {
+        label: "Enter Shipping Information"
+    },
+    {
+        label: "Wait for Transaction Confirmation"
+    }
+];
 
-class Component extends React.PureComponent<ComponentProps & ClassProp, any>{
-
-    constructor(props){
+class Component extends React.PureComponent<ComponentProps & ClassProp, any> {
+    constructor(props) {
         super(props);
         this.state = {
-            activeStep: 0,
+            activeStep: 0
         };
-
     }
 
     handleNext = () => {
         this.setState({
-            activeStep: this.state.activeStep + 1,
+            activeStep: this.state.activeStep + 1
         });
     };
 
@@ -52,35 +54,36 @@ class Component extends React.PureComponent<ComponentProps & ClassProp, any>{
 
     handleBack = () => {
         this.setState({
-            activeStep: this.state.activeStep - 1,
+            activeStep: this.state.activeStep - 1
         });
     };
 
     handleReset = () => {
         this.setState({
-            activeStep: 0,
+            activeStep: 0
         });
     };
 
     render() {
-
-        const {classes} = this.props;
-        const {activeStep} = this.state;
+        const { classes } = this.props;
+        const { activeStep } = this.state;
 
         return (
             <div className={classes.container}>
                 <Typography variant={"display2"}> Cart </Typography>
                 <Stepper activeStep={activeStep} orientation="vertical">
-                    {steps.map(({label}, index) => {
+                    {steps.map(({ label }, index) => {
                         return (
                             <Step key={index}>
                                 <StepLabel>
                                     <Button
-                                        onClick={()=>this.handleMove(index)}
-                                        disabled={this.state.activeStep + 1 < index}
+                                        onClick={() => this.handleMove(index)}
+                                        disabled={
+                                            this.state.activeStep + 1 < index
+                                        }
                                     >
                                         {label}
-                                        </Button>
+                                    </Button>
                                 </StepLabel>
                                 <StepContent>
                                     <div className={classes.actionsContainer}>
@@ -98,7 +101,9 @@ class Component extends React.PureComponent<ComponentProps & ClassProp, any>{
                                                 onClick={this.handleNext}
                                                 className={classes.button}
                                             >
-                                                {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                                                {activeStep === steps.length - 1
+                                                    ? "Finish"
+                                                    : "Next"}
                                             </Button>
                                         </div>
                                     </div>
@@ -109,27 +114,26 @@ class Component extends React.PureComponent<ComponentProps & ClassProp, any>{
                 </Stepper>
             </div>
         );
-    };
+    }
 }
 
 /****  STYLES ******/
 const styles = {
     container: {
-        width: '80%',
+        width: "80%",
         margin: "auto"
     },
     button: {
         marginTop: 10,
-        marginRight: 10,
+        marginRight: 10
     },
     actionsContainer: {
-        marginBottom: 20,
+        marginBottom: 20
     },
     resetContainer: {
-        padding: 30,
-    },
+        padding: 30
+    }
 };
 
-
 /****  EXPORT ******/
-export default (injectSheet(styles)(Component): ComponentType<ComponentProps>)
+export default (injectSheet(styles)(Component): ComponentType<ComponentProps>);

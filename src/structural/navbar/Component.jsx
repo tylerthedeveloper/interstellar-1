@@ -2,7 +2,7 @@
 
 import React from "react";
 import type { ComponentType } from "react";
-import { NavLink } from 'react-router-dom';
+import { NavLink } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Button, Icon } from "@material-ui/core";
 import injectSheet from "react-jss";
 
@@ -38,8 +38,15 @@ class NavBar extends React.PureComponent<ComponentProps & ClassProp> {
                         <Button onClick={toggleLoginModal} variant={"raised"}>
                             Login
                         </Button>
-                        <Button className={classes.cartButton} variant={"raised"} component={NavLink} to={"/cart"}>
-                            <Icon className={"material-icons"} >shopping_cart</Icon>
+                        <Button
+                            className={classes.cartButton}
+                            variant={"raised"}
+                            component={NavLink}
+                            to={"/cart"}
+                        >
+                            <Icon className={"material-icons"}>
+                                shopping_cart
+                            </Icon>
                         </Button>
                     </div>
                 </Toolbar>
@@ -60,9 +67,8 @@ const styles = {
     },
 
     cartButton: {
-        marginLeft:"20px"
+        marginLeft: "20px"
     }
-
 };
 
 /****  EXPORT ******/
