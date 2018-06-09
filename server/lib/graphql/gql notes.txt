@@ -42,3 +42,11 @@ mutation {
 put vs patch:
 put = completely replace, overriding 
 patch = update only specific fields
+
+
+client -> graphql -> server -> graphql -> client
+
+react-apollo is glue between client and server
+
+graphql-tag: helper to write queries in component file
+

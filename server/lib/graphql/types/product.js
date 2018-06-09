@@ -1,14 +1,36 @@
 const graphql = require('graphql');
 const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLInt, GraphQLList, GraphQLBoolean } = graphql;
 
+const ProductSellerDataType = new GraphQLObjectType({
+    name:  'ProductSellerDataType',
+    fields: () => ({
+        productSellerID: { type: GraphQLString },
+        productSellerName: { type: GraphQLString },
+        productSellerPublicKey: { type: GraphQLString }
+    })
+});
+
 const ProductType = new GraphQLObjectType({
   name:  'ProductType',
   fields: () => ({
-    id: { type: GraphQLString }, //GraphQLID
-    userName: { type: GraphQLString },
-    isValidSeller: { type: GraphQLBoolean }, 
-    numberOfItemsSold: { type: GraphQLInt }, 
-    acceptedAssets: [AssetBalance]
+    id: { type: GraphQLID },
+    productName: { type: GraphQLString },
+    productShortDescription: { type: GraphQLString },
+    productLongDescription: { type: GraphQLString },
+    fixedUSDAmount: { type: GraphQLInt },
+    quantity: { type: GraphQLInt },
+// productPrices: [AssetBalanceInput]
+    productAssetOptions: { type: new GraphQLList(GraphQLString) }, // valid???
+    productThumbnailLink: { type: GraphQLString },
+    productImages: { type: new GraphQLList(GraphQLString) },
+    productCategory: { type: GraphQLString },
+    productSellerData: { type: ProductSellerDataType },
+    productListedAt: { type: GraphQLString },
+    // # some day
+// # productRating: Int
+// # productReviews: [String]
+// # shippingInfo: ShippingInformation
+// acceptedAssets: [AssetBalance]
   })
 });
 
@@ -22,11 +44,7 @@ const schema = `
         productSellerPublicKey: String
     }
 
-    type ProductSellerData {
-        productSellerID: String
-        productSellerName: String
-        productSellerPublicKey: String
-    }
+    
     
     input ProductInput {
         # id: String

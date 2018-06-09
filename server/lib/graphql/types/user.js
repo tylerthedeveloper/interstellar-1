@@ -4,21 +4,21 @@ const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLInt, GraphQLList, Gr
 const UserType = new GraphQLObjectType({
   name:  'UserType',
   fields: () => ({
-    id: { type: GraphQLString }, //GraphQLID
-    userName: { type: GraphQLString },
-    fullName: { type: GraphQLString },
-    email: { type: GraphQLString },
-    birthdate: { type: GraphQLString },
-    age: { type: GraphQLInt }, 
-    address: { type: GraphQLString }, // ... ???
-    isValidBuyer: { type: GraphQLBoolean }, 
-    isValidSeller: { type: GraphQLBoolean }, 
-    accountCreated: { type: GraphQLString }, 
-    address: { type: GraphQLString },
-    numberOfItemsSold: { type: GraphQLInt }, 
-    acceptedAssets: [AssetBalance]
-  })
+        id: { type: GraphQLID }, //GraphQLID
+        userName: { type: GraphQLString },
+        fullName: { type: GraphQLString },
+        email: { type: GraphQLString },
+        birthdate: { type: GraphQLString },
+        age: { type: GraphQLInt }, 
+        address: { type: GraphQLString }, // ... ???
+        isValidBuyer: { type: GraphQLBoolean }, 
+        isValidSeller: { type: GraphQLBoolean }, 
+        accountCreated: { type: GraphQLString }, 
+        address: { type: GraphQLString },
+        numberOfItemsSold: { type: GraphQLInt }, 
+    })
 });
+// acceptedAssets: [AssetBalance]
 
 /*
 const schema = `

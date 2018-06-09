@@ -7,7 +7,9 @@
     "front:dev": "./node_modules/.bin/webpack-dev-server --config webpack/webpack.frontend.js",
     "back:dev": "./node_modules/.bin/webpack --config webpack/webpack.backend.js --progress",
     "flow": "./node_modules/.bin/flow",
-    "pretty": "./node_modules/.bin/prettier --write src/**/*.jsx server/**/*.js"
+    "pretty": "./node_modules/.bin/prettier --write src/**/*.jsx server/**/*.js",
+    "gql:dev": "nodemon ./server/lib/server.js",
+    "json-server": "json-server --watch ./server/lib/graphql/mock-db/db.json"
   },
   "husky": {
     "hooks": {
@@ -63,8 +65,10 @@
   "dependencies": {
     "axios": "^0.18.0",
     "body-parser": "^1.18.3",
+    "cors": "^2.8.4",
     "express": "^4.16.3",
     "express-graphql": "^0.6.12",
+    "firebase": "^5.0.4",
     "graphql-tools": "^3.0.2",
     "nodemon": "^1.17.5",
     "react-star-rating-component": "^1.4.1",
