@@ -1,6 +1,8 @@
 const path = require('path');
 
 const NodeExternals = require('webpack-node-externals');
+const StartServerPlugin = require("start-server-webpack-plugin");
+
 const webpack = require('webpack');
 
 const OUTPUT_PATH = path.resolve(__dirname, '../bin');
@@ -84,6 +86,9 @@ module.exports = {
                 "BUILD_TARGET": JSON.stringify('server')
             }
         }),
+        new StartServerPlugin({
+            name: "server.js"
+        })
     ]
 };
 
