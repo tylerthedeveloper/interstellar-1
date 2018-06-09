@@ -7,9 +7,9 @@ import {
     ListItem,
     Grid,
     TextField,
-    IconButton,
-    Icon
+    IconButton
 } from "@material-ui/core";
+import StarRatingComponent from "react-star-rating-component";
 import injectSheet from "react-jss";
 
 import type { product } from "./data";
@@ -29,7 +29,7 @@ class ProductListItem extends React.PureComponent<ComponentProps & ClassProp> {
     }
 
     render() {
-        const { classes, name, price, description } = this.props;
+        const { classes, name, price, description, rating } = this.props;
         return (
             <ListItem divider button>
                 <Grid container>
@@ -37,7 +37,20 @@ class ProductListItem extends React.PureComponent<ComponentProps & ClassProp> {
                         Image Here
                     </Grid>
                     <Grid item xs={7} className={classes.descriptionBox}>
-                        <Typography variant={"title"}>{name}</Typography>
+                        <div className={classes.headerBox}>
+                            <Typography variant={"title"}>{name}</Typography>
+                            <div className={classes.ratingContainer}>
+                                <StarRatingComponent
+                                    name={name}
+                                    editing={false}
+                                    className={classes.stars}
+                                    starCount={5}
+                                    value={rating}
+                                />
+                                <Typography variant={"caption"}>({rating})</Typography>
+
+                            </div>
+                        </div>
                         <Typography variant={"body1"}>{description}</Typography>
                     </Grid>
                     <Grid item xs={3}>
@@ -83,6 +96,18 @@ const styles = {
     cartCounter: {
         width: "100px",
         marginRight: "25px"
+    },
+    headerBox: {
+        display: "inline-flex"
+    },
+    stars : {
+        fontSize: "20px",
+        marginRight:"7px"
+    },
+    ratingContainer: {
+        display: "flex",
+        alignItems: "center",
+        marginLeft: "20px"
     }
 };
 

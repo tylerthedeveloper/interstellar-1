@@ -35,7 +35,12 @@ class CategoryLanding extends React.PureComponent<ClassProp> {
                 </div>
 
                 <div className={classes.content}>
-                    <Grid container className={classes.items} component={"div"} spacing={16}>
+                    <Grid
+                        container
+                        className={classes.items}
+                        component={"div"}
+                        spacing={16}
+                    >
                         {people.map((props) => {
                             return <PersonCard {...props} key={props.name} />;
                         })}
