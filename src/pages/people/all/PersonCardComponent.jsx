@@ -25,7 +25,12 @@ class Component extends React.PureComponent<ComponentProps & ClassProp> {
 
         return (
             <Grid item xl={2} lg={4} md={6} xs={12}>
-                <Button className={classes.button} fullWidth={true} component={NavLink} to={`/people/${id}`}>
+                <Button
+                    className={classes.button}
+                    fullWidth={true}
+                    component={NavLink}
+                    to={`/people/${id}`}
+                >
                     <Typography
                         className={classes.title}
                         variant={"title"}

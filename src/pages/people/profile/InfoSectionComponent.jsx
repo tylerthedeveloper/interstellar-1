@@ -1,45 +1,77 @@
 // @flow
-import React from 'react';
-import {TextField, Divider, Typography} from '@material-ui/core';
-import type {ComponentType} from 'react';
-import injectSheet from 'react-jss';
+import React from "react";
+import { TextField, Divider, Typography } from "@material-ui/core";
+import type { ComponentType } from "react";
+import injectSheet from "react-jss";
 
 /****  TYPES ******/
 type ClassProp = {
-    classes: {[$Keys<typeof styles>]: string}
-}
+    classes: { [$Keys<typeof styles>]: string }
+};
 
-type ComponentProps = {
-}
-
+type ComponentProps = {};
 
 /****  COMPONENT ******/
-class Component extends React.PureComponent<ComponentProps & ClassProp>{
-
+class Component extends React.PureComponent<ComponentProps & ClassProp> {
     render() {
-
-        const {classes} = this.props;
+        const { classes } = this.props;
         return (
             <form>
                 <Typography variant={"title"}> Basic Info</Typography>
-                <LocalTextField label={"Name"} value={"Jack Langston"} classes={classes}/>
-                <LocalTextField label={"Name"} value={"Jack Langston"} classes={classes}/>
-                <LocalTextField label={"Name"} value={"Jack Langston"} classes={classes}/>
-                <LocalTextField label={"Name"} value={"Jack Langston"} classes={classes}/>
-                <LocalTextField label={"Name"} value={"Jack Langston"} classes={classes}/>
-                <Divider className={classes.divider}/>
+                <LocalTextField
+                    label={"Name"}
+                    value={"Jack Langston"}
+                    classes={classes}
+                />
+                <LocalTextField
+                    label={"Name"}
+                    value={"Jack Langston"}
+                    classes={classes}
+                />
+                <LocalTextField
+                    label={"Name"}
+                    value={"Jack Langston"}
+                    classes={classes}
+                />
+                <LocalTextField
+                    label={"Name"}
+                    value={"Jack Langston"}
+                    classes={classes}
+                />
+                <LocalTextField
+                    label={"Name"}
+                    value={"Jack Langston"}
+                    classes={classes}
+                />
+                <Divider className={classes.divider} />
                 <Typography variant={"title"}> Contact Info</Typography>
-                <LocalTextField label={"Name"} value={"Jack Langston"} classes={classes}/>
-                <LocalTextField label={"Name"} value={"Jack Langston"} classes={classes}/>
-                <LocalTextField label={"Name"} value={"Jack Langston"} classes={classes}/>
-                <LocalTextField label={"Name"} value={"Jack Langston"} classes={classes}/>
+                <LocalTextField
+                    label={"Name"}
+                    value={"Jack Langston"}
+                    classes={classes}
+                />
+                <LocalTextField
+                    label={"Name"}
+                    value={"Jack Langston"}
+                    classes={classes}
+                />
+                <LocalTextField
+                    label={"Name"}
+                    value={"Jack Langston"}
+                    classes={classes}
+                />
+                <LocalTextField
+                    label={"Name"}
+                    value={"Jack Langston"}
+                    classes={classes}
+                />
             </form>
         );
-    };
+    }
 }
 
 const LocalTextField = (props) => {
-    const {classes, label, value} = props;
+    const { classes, label, value } = props;
 
     return (
         <TextField
@@ -55,13 +87,11 @@ const LocalTextField = (props) => {
                 }
             }}
             InputLabelProps={{
-                classes: {shrink: classes.label}
+                classes: { shrink: classes.label }
             }}
         />
-    )
+    );
 };
-
-
 
 /****  STYLES ******/
 const styles = {
@@ -88,6 +118,5 @@ const styles = {
     }
 };
 
-
 /****  EXPORT ******/
-export default (injectSheet(styles)(Component): ComponentType<ComponentProps>)
+export default (injectSheet(styles)(Component): ComponentType<ComponentProps>);

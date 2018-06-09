@@ -10,6 +10,7 @@ import HomePage from "./pages/home/Component";
 import Categories from "./pages/categories/Component";
 import Products from "./pages/products/Component";
 import People from "./pages/people/Component";
+import Cart from "./pages/cart/Component";
 import LoginModal from "./structural/login/login_modal/Container";
 
 /****  TYPES ******/
@@ -33,6 +34,7 @@ class App extends React.Component<ComponentProps & ClassProp> {
                         <Route path="/categories" component={Categories} />
                         <Route path="/products" component={Products} />
                         <Route path="/people" component={People} />
+                        <Route path="/cart" component={Cart} />
                     </Switch>
                 </div>
                 <LoginModal />

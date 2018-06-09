@@ -5,7 +5,7 @@ import type { ComponentType } from "react";
 import { Typography, TextField } from "@material-ui/core";
 import injectSheet from "react-jss";
 
-import ProductList from '../../../structural/products/product_list/Component';
+import ProductList from "../../../structural/products/product_list/Component";
 
 /****  TYPES ******/
 type ClassProp = {
@@ -35,7 +35,7 @@ class CategoryLanding extends React.PureComponent<ClassProp> {
 
                 <div className={classes.content}>
                     <div className={classes.items}>
-                        <ProductList/>
+                        <ProductList />
                     </div>
                     <div className={classes.filters}>Filters to go here</div>
                 </div>
