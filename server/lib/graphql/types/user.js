@@ -1,4 +1,26 @@
+const graphql = require('graphql');
+const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLInt, GraphQLList, GraphQLBoolean } = graphql;
 
+const UserType = new GraphQLObjectType({
+  name:  'UserType',
+  fields: () => ({
+    id: { type: GraphQLString }, //GraphQLID
+    userName: { type: GraphQLString },
+    fullName: { type: GraphQLString },
+    email: { type: GraphQLString },
+    birthdate: { type: GraphQLString },
+    age: { type: GraphQLInt }, 
+    address: { type: GraphQLString }, // ... ???
+    isValidBuyer: { type: GraphQLBoolean }, 
+    isValidSeller: { type: GraphQLBoolean }, 
+    accountCreated: { type: GraphQLString }, 
+    address: { type: GraphQLString },
+    numberOfItemsSold: { type: GraphQLInt }, 
+    acceptedAssets: [AssetBalance]
+  })
+});
+
+/*
 const schema = `
     type User {
         id: String
@@ -20,8 +42,8 @@ const schema = `
     }
 
     type Query {
-        allUsers: [User]
-        userByID(id: String!): User
+        users: [User]
+        users(id: String!): User
     }
 
     type Mutation {
@@ -47,3 +69,5 @@ const schema = `
 `;
 
 module.exports = schema;
+*/
+module.exports = UserType;

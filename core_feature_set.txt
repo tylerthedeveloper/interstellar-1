@@ -1,0 +1,50 @@
+Core Features
+
+
+Products (goal): crux of the whole app
+    - people can add their own products (CRUD)
+        - additional details to broaden scope of product description
+            - size, condition, amount, etc
+    - filter products by some of the above (where relevant)
+    - search for products through some set of query options
+
+Profile (goal): help to establish trust and put a name to a seller
+    - basic public information 
+    - store private information (address, birthdate, maybe contact info for business cases)
+
+
+Cart (goal): standard cart and persistence for return users
+    - add items to cart that will persist 
+    - be able to select certain items that will be carried to checkout
+
+Pricing (goal): allow users to trade in the currency they want accurately / know exactly what they're paying 
+    - ? business case = listing in US Price and calculate runtime price in sepcified asset type
+        - better way of caching above, making most precise
+            - making the requests every X period of time
+                - long term: list products with filter of specific asset and live update all products
+
+Categories (goal): (easy) first level of filtering and separation of products
+    - list of categories (static, simple)
+        - long term have sub-categories
+    - products by category
+        - maybe (additional) filtering in a single category
+
+Checkout (goal): be able to directly send payments on the site
+    - be able to verify buyer
+        - purchase products 
+            - make the payment
+                - generate shipping information
+
+Chat (goal): encourage users to stay on site for commnication
+    - create chats with users
+    - persist all chats
+        - long-term maybe send images, other
+    
+Shipping (goal): automation end to end
+    - be able to track shipping (like the Domino's tracker)
+        - notifications with updates
+    
+Ratings + reviews (goal): help establish trust and long term incentivization opportunity 
+    - list ratings + reviews as buyer 
+    - list ratings + reviews as seller
+

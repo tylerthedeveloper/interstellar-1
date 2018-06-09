@@ -27,17 +27,6 @@ const UserType = new GraphQLObjectType({
     }
 });
 
-// const users = [
-//     {
-//       "id": "123",
-//       "name": "John Doe"
-//     },
-//     {
-//       "id": "456",
-//       "name": "Jane Doe"
-//     }
-//   ];
-
 // return axios.get(`http://localhost:3000/users/${args.id}`)
 const RootQuery = new GraphQLObjectType({
     name: "RootQueryType",

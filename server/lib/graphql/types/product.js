@@ -1,4 +1,20 @@
+const graphql = require('graphql');
+const { GraphQLObjectType, GraphQLString, GraphQLID, GraphQLInt, GraphQLList, GraphQLBoolean } = graphql;
 
+const ProductType = new GraphQLObjectType({
+  name:  'ProductType',
+  fields: () => ({
+    id: { type: GraphQLString }, //GraphQLID
+    userName: { type: GraphQLString },
+    isValidSeller: { type: GraphQLBoolean }, 
+    numberOfItemsSold: { type: GraphQLInt }, 
+    acceptedAssets: [AssetBalance]
+  })
+});
+
+module.exports = ProductType;
+
+/*
 const schema = `
     input ProductSellerDataInput {
         productSellerID: String
@@ -78,3 +94,4 @@ const schema = `
 `;
 
 module.exports = schema;
+*/
