@@ -38,6 +38,7 @@
     "clean-webpack-plugin": "^0.1.19",
     "clone": "^2.1.2",
     "compression-webpack-plugin": "^1.1.11",
+    "cors": "^2.8.4",
     "express-history-api-fallback": "^2.2.1",
     "express-session": "^1.15.6",
     "file-loader": "^1.1.6",
@@ -69,7 +70,6 @@
   "dependencies": {
     "axios": "^0.18.0",
     "body-parser": "^1.18.3",
-    "cors": "^2.8.4",
     "express": "^4.16.3",
     "express-graphql": "^0.6.12",
     "firebase": "^5.0.4",

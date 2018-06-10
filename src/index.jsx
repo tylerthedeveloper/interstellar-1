@@ -34,7 +34,6 @@ const client = new ApolloClient({
                         errorPolicy: "none"
                     });
                     return null;
-                    console.log(`[Network error]: ${networkError}`);
                 }
             }
         ),
@@ -46,8 +45,8 @@ const client = new ApolloClient({
         }),
 
         new HttpLink({
-            uri: "http://localhost/graphql",
-            credentials: "same-origin"
+            uri: "http://localhost:3002/gql",
+            credentials: 'same-origin'
         })
     ]),
     cache: cache
