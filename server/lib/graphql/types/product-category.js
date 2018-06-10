@@ -9,6 +9,9 @@ const {
     GraphQLNonNull
 } = graphql;
 
+const CategoryService = require("../../services/category.service")
+const ProductType = require("../types/product");
+
 const ProductCategoryType = new GraphQLObjectType({
     name: "ProductCategoryType",
     fields: () => ({
@@ -18,6 +21,12 @@ const ProductCategoryType = new GraphQLObjectType({
         descripton: { type: GraphQLString },
         imageURL: { type: GraphQLString },
         numberOfProducts: { type: GraphQLInt },
+        productsInCategory: {
+            type: new GraphQLList(ProductType),
+            resolve(parentValue, args) {
+                return CategoryService.getProductsByCategory(parentValue.category);
+            }
+        }
         // topProducts: { type: GraphQLString },
         // topSellers: { type: GraphQLString },
     })

@@ -1,7 +1,7 @@
 import http from "http";
 import app from "./server";
 
-export const PORT = 3002;
+const PORT = 3002;
 const HOST = "localhost";
 
 const server = http.createServer(app);

@@ -1,7 +1,7 @@
 const graphql = require("graphql");
 const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString } = graphql;
 const ProductCategoryType = require("../types/product-category");
-const axios = require("axios");
+const CategoryService = require("../../services/category.service")
 
 module.exports = {
     addProductCategory: {
@@ -12,9 +12,7 @@ module.exports = {
             imageURL: { type: GraphQLString },
         },
         resolve(parentValue, args) {
-            return axios
-                .post(`http://localhost:3002/api/categories`, args)
-                .then((res) => res.data);
+            return CategoryService.createNewCategory(args).then(res => res);
         }
     }
 };

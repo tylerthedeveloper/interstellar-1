@@ -1,27 +1,20 @@
 const graphql = require("graphql");
 const { GraphQLList, GraphQLID, GraphQLNonNull } = graphql;
 const UserType = require("../types/user");
-const axios = require("axios");
+const UserService = require("../../services/user.service")
 
 module.exports = {
     users: {
         type: new GraphQLList(UserType),
         resolve() {
-            //   return axios.get(`https://firestore.googleapis.com/v1beta1/projects/galactic-storage/databases/(default)/documents/users/`)
-            return (
-                axios
-                    .get(`http://localhost:3002/api/users`)
-                        .then((res) => res.data)
-            );
+            return UserService.getAllUsers();
         }
     },
     user: {
         type: UserType,
         args: { id: { type: GraphQLID } },
         resolve(parentValue, { id }) {
-            return axios
-                .get(`http://localhost:3002/api/users/${id}`)
-                    .then((res) => res.data);
+            return UserService.getUserByUserId(id);
         }
     }
 };
