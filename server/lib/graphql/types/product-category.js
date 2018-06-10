@@ -15,7 +15,7 @@ const ProductType = require("../types/product");
 const ProductCategoryType = new GraphQLObjectType({
     name: "ProductCategoryType",
     fields: () => ({
-        // id: { type: new GraphQLNonNull(GraphQLString) },
+        // id: { type: new GraphQLNonNull(GraphQLString) }, // todo issuer with null resolve coming back from a write
         id: { type: GraphQLString },
         category: { type: GraphQLString },
         descripton: { type: GraphQLString },

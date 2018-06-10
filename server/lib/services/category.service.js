@@ -12,10 +12,13 @@ class CategoryService {
     // ────────────────────────────────────────────────────────────────────────────────────────
     //
     createNewCategory(category) {
+        const doc = this.categorysCollection.doc();
+        const docID = doc.id;
+        category.id = docID;
         console.log(category)
-        return this.categorysCollection
-            .add(category)
-            .then((docSnapshot) => docSnapshot.id);
+        return doc
+            .set(category)
+            .then((documentSnapshot) => docID);
     }
 
     getAllCategories() {
@@ -25,10 +28,10 @@ class CategoryService {
     /**
      * @param  {string} categoryID
      */
-    getProductsByCategory(category) {
-        console.log(category)
+    getProductsByCategory(categoryID) {
+        console.log(categoryID)
         return this.categorysCollection
-            .doc(category)
+            .doc(categoryID)
             .collection('products')
             .get()
             .then(snapshot => 

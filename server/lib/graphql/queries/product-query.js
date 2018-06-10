@@ -1,4 +1,3 @@
-// STRING OR ID ... pull from Database or GQL?
 const graphql = require("graphql");
 const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString } = graphql;
 const ProductType = require("../types/product");
@@ -11,17 +10,18 @@ module.exports = {
             return ProductService.getAllProducts();
         }
     },
-    userProducts: {
-        type: new GraphQLList(ProductType),
-        resolve (parentValue, { id }) {
-            return ProductService.getProductsByUserID(id);
-        }
-    },
     product: {
         type: ProductType,
         args: { id: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { id }) {
             return ProductService.getProductById(id);
         }
-    }
+    },
+    userProducts: {
+        type: new GraphQLList(ProductType),
+        resolve (parentValue, { id }) {
+            return ProductService.getProductsByUserID(id);
+        }
+    },
+
 };
