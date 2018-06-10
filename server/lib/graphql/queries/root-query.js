@@ -1,10 +1,12 @@
 const graphql = require("graphql");
 const { GraphQLObjectType, GraphQLList, GraphQLID, GraphQLNonNull } = graphql;
 // todo: https://github.com/KyleAMathews/deepmerge
+const cartItemQuery = require("./cart-items-query");
 const productCategoryQuery = require("./product-category-query");
 const productQuery = require("./product-query");
 import userQuery from "./user-query";
-const queryList = [productCategoryQuery, productQuery, userQuery];
+
+const queryList = [cartItemQuery,productCategoryQuery, productQuery, userQuery];
 
 /* 
     const sum = queryList.reduce((acc, cur) => {
@@ -22,6 +24,7 @@ const queryList = [productCategoryQuery, productQuery, userQuery];
     console.log(obj);
 */ 
 const fields = () => ({
+    ...cartItemQuery,
     ...productCategoryQuery,
     ...productQuery,
     ...userQuery

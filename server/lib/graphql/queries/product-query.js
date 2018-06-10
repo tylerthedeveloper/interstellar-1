@@ -1,5 +1,5 @@
 const graphql = require("graphql");
-const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString } = graphql;
+const { GraphQLList, GraphQLID, GraphQLNonNull } = graphql;
 const ProductType = require("../types/product");
 const ProductService = require("../../services/product.service")
 

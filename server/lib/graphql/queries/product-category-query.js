@@ -1,5 +1,5 @@
 const graphql = require("graphql");
-const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString } = graphql;
+const { GraphQLList, GraphQLID, GraphQLNonNull } = graphql;
 const ProductType = require("../types/product");
 const ProductCategoryType = require("../types/product-category");
 const CategoryService = require("../../services/category.service")
@@ -13,8 +13,8 @@ module.exports = {
     },
     productsInCategory: {
         type: new GraphQLList(ProductType),
-        args: { category: { type: new GraphQLNonNull(GraphQLString) } },
-        resolve(parentValue, { category }) {
+        args: { categoryID: { type: new GraphQLNonNull(GraphQLID) } },
+        resolve(parentValue, { categoryID }) {
             return CategoryService.getProductsByCategory(category);
         }
     }

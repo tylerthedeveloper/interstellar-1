@@ -1,70 +1,52 @@
-const schema = `
-    input CartItemInput {
-        cartItemID: String!
-        timestamp: String!
-        buyerUserID: String!
-        buyerPublicKey: String!
-        sellerUserID: String!
-        sellerPublicKey: String!
-        productID: String!
-        productName: String!
-        quantityPurchased: Int!
-        assetPricePerItem: String!
-        assetPurchaseDetails: AssetBalanceInput!
-        productShortDescription: String!
-        productThumbnailLink: String!
-        productCategory: String!
-        oldQuantity: Int!
-        fixedUSDAmount: Int!
-        selectedAsset: String
-        isInCheckout: Boolean
-        isPaidFor: Boolean
-    }
+const graphql = require("graphql");
+const {
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLID,
+    GraphQLInt,
+    GraphQLList,
+    GraphQLBoolean,
+    GraphQLNonNull
+} = graphql;
 
-    type CartItem {
-        cartItemID: String!
-        timestamp: String!
-        buyerUserID: String!
-        buyerPublicKey: String!
-        sellerUserID: String!
-        sellerPublicKey: String!
-        productID: String!
-        productName: String!
-        quantityPurchased: Int!
-        assetPricePerItem: String!
-        assetPurchaseDetails: AssetBalance!
-        productShortDescription: String!
-        productThumbnailLink: String!
-        productCategory: String!
-        oldQuantity: Int!
-        fixedUSDAmount: Int!
-        selectedAsset: String
-        isInCheckout: Boolean
-        isPaidFor: Boolean
-    }
+const ProductService = require("../../services/product.service")
+const ProductType = require("../types/product");
 
-    type Query {
-        cartItems(id: String!): [CartItem]
-    }
+const CartItemType = new GraphQLObjectType({
+    name: "CartItemType",
+    fields: () => ({
+        // cartItemID: { type: new GraphQLNonNull(GraphQLID) },
+        cartItemID: { type: GraphQLID },
+        timestamp: { type: GraphQLString },
+        buyerUserID: { type: GraphQLString },
+        buyerPublicKey: { type: GraphQLString },
+        sellerUserID: { type: GraphQLString },
+        sellerPublicKey: { type: GraphQLString },
 
-    type Mutation {
-        updateCartItem (
-            # need to dump all attributes
-            someAttrs: String
-        ): CartItem
-    
-        addToCart (
-            input: CartItemInput
-        ): CartItem
-    
-        deleteCartItem(fbid: String!): CartItem
-    }
-    
-    type Subscription {
-        cartItemUpdated: CartItem
-        cartItemAdded: CartItem
-        cartItemDeleted: CartItem
-    }
-`;
+        productID: { 
+            type: ProductType,
+            resolve(parentValue, args) {
+                return ProductService.getProductById(productID);
+            }
+        },
+        quantityPurchased: { type: GraphQLInt },
 
-module.exports = schema;
+        // group these 2 
+        selectedAsset: { type: GraphQLString }, 
+        assetPurchaseDetails: { type: GraphQLString }, // .. 
+        
+        /*
+        productName: { type: GraphQLString },
+        assetPricePerItem: { type: GraphQLString }, // ...
+        productShortDescription: { type: GraphQLString },
+        productThumbnailLink: { type: GraphQLString },
+        productCategory: { type: GraphQLString },
+        oldQuantity: { type: GraphQLInt },
+        fixedUSDAmount: { type: GraphQLInt },
+        */
+    //    isInCheckout: { type: GraphQLString },
+    //    isPaidFor: { type: GraphQLString }
+    })
+});
+
+module.exports = CartItemType;

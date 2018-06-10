@@ -16,7 +16,7 @@ const ProductCategoryType = new GraphQLObjectType({
     name: "ProductCategoryType",
     fields: () => ({
         // id: { type: new GraphQLNonNull(GraphQLString) }, // todo issuer with null resolve coming back from a write
-        id: { type: GraphQLString },
+        id: { type: GraphQLID },
         category: { type: GraphQLString },
         descripton: { type: GraphQLString },
         imageURL: { type: GraphQLString },
@@ -27,6 +27,7 @@ const ProductCategoryType = new GraphQLObjectType({
                 return CategoryService.getProductsByCategory(parentValue.category);
             }
         }
+        // todo: long term:
         // topProducts: { type: GraphQLString },
         // topSellers: { type: GraphQLString },
     })

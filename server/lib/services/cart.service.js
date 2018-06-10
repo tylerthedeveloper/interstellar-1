@@ -1,9 +1,9 @@
 const firedb = require("../../_firebase");
 
-class CategoryService {
+class CartService {
 
     constructor() {
-        this.categorysCollection = firedb.collection('categories');
+        this.cartItemsCollection = firedb.collection('user-cart');
     }
 
     //
@@ -11,27 +11,21 @@ class CategoryService {
     //   :::::: P U B L I C   C R U D   M E T H O D S : :  :   :    :     :        :          :
     // ────────────────────────────────────────────────────────────────────────────────────────
     //
-    createNewCategory(category) {
-        const doc = this.categorysCollection.doc();
+    // todo: pass context ID separately
+    addToCart(userID, cartItem) {
+        const doc = this.cartItemsCollection.doc(cartItem.userID).collection("cartItems").doc();
         const docID = doc.id;
-        category.id = docID;
+        cartItem.id = docID;
         return doc
-            .set(category)
+            .set(cartItem)
             .then((documentSnapshot) => docID);
     }
 
-    getAllCategories() {
-        return this.categorysCollection.get().then(snapshot => snapshot.docs.map((docSnapshot) => docSnapshot.data()));
-    }
-
-    /**
-     * @param  {string} categoryID
-     */
-    getProductsByCategory(categoryID) {
-        console.log(categoryID)
-        return this.categorysCollection
-            .doc(categoryID)
-            .collection('products')
+    getMyCart(userID) {
+        console.log(userID)
+        return this.cartItemsCollection
+            .doc(userID)
+            .collection("cartItems")
             .get()
             .then(snapshot => 
                 snapshot.docs.map((docSnapshot) => 
@@ -39,7 +33,35 @@ class CategoryService {
                 )
             );
     }
+
+    updateCartItem(cartItem) {
+        return this.cartItemsCollection
+                .doc(cartItem.id)
+                .update(cartItem, { merge: true})
+                .then((documentSnapshot) => documentSnapshot);
+    }
+
+    removeFromCart(userID, cartItemID) {
+        return this.cartItemsCollection
+            .doc(userID)
+            .collection("cartItems")
+            .doc(cartItemID)
+            .delete()
+            .then((documentSnapshot) => 
+                documentSnapshot
+            );
+
+    }
+    
+    // todo: batching 
+    emptyCart(userID) {
+            // return this,this.cartItemsCollection
+            //     .doc(cartItemID)
+            //     .delete()
+            //     .then((documentSnapshot) => userID);
+    }
+    
     // ────────────────────────────────────────────────────────────────────────────────
 }
 
-module.exports = new CategoryService();
+module.exports = new CartService();

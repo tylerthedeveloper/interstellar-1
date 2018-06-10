@@ -1,13 +1,10 @@
 const firedb = require("../../_firebase");
 import stellar from 'stellar-sdk';
 
-
 class UserService {
 
     constructor() {
         this.usersCollection = firedb.collection('users');
-        // this.userCategoriesCollection;
-        // userUsersCollection;
     }
 
     //
@@ -16,6 +13,8 @@ class UserService {
     // ────────────────────────────────────────────────────────────────────────────────────────
     //
     
+    /**
+     */
     getAllUsers() {
         return this.usersCollection
             .get()
@@ -25,7 +24,6 @@ class UserService {
             )
         );
     }
-
 
     /**
      * @param  {string} userID
@@ -60,7 +58,7 @@ class UserService {
      * @param  {string} userID
      */
     // todo: test for first or take
-    // todo: test for now found user
+    // todo: test for not found user
     getUserByUserPublicKey(publicKey) {
         return this.usersCollection
             .where("publicKey", "==", publicKey)
@@ -73,7 +71,6 @@ class UserService {
             });
     }
 
-
     verifySignature(publicKey, payload, signature){
         return stellar.Keypair.fromPublicKey(publicKey).verify(payload, Buffer.from(signature, 'base64'));
     }
@@ -84,39 +81,6 @@ class UserService {
                 .delete()
                 .then((documentSnapshot) => userID);
     }
-
-    // /**
-    //  * @returns string
-    //  */
-    // getNewUserID() {
-    //     const _newUserID = this.afs.createId();
-    //     return _newUserID;
-    // }
-
-    // /**
-    //  * @param  {string} userData
-    //  * @returns Promise
-    //  */
-    // addUser(userData) {
-    //     const _userData = JSON.parse(userData);
-    //     const _docID = _userData.id;
-    //     const _cat = _userData.userCategory;
-    //     const batch = this.afs.firestore.batch();
-    //     batch.set(this.usersCollection.doc(_docID).ref, _userData);
-    //     batch.set(this.userUsersCollection.doc(this._userID).collection('users').doc(_docID).ref, _userData);
-    //     batch.set(this.userCategoriesCollection.doc(_cat).collection('users').doc(_docID).ref, _userData);
-    //     return batch.commit().then(() => _docID);
-    // }
-
-    // /**
-    //  * @param  {string} key
-    //  * @param  {{}} newUserData
-    //  * @returns Promise
-    //  */
-    // updateUser(key, newUserData) {
-    //     return this.usersCollection.doc(key).update(newUserData);
-    // }
-
     // ────────────────────────────────────────────────────────────────────────────────
 }
 
