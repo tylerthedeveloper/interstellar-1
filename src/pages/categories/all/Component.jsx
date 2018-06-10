@@ -12,22 +12,32 @@ type ClassProp = {
     classes: { [$Keys<typeof styles>]: string }
 };
 
-type ComponentProps = {};
+type Category = {
+    id: string,
+    category: string,
+    description: string,
+    imageURL: string,
+    numberOfProducts: number,
+}
+
+type ComponentProps = {
+    categories: [Category]
+};
 
 /****  COMPONENT ******/
 class CategoryLanding extends React.PureComponent<ComponentProps & ClassProp> {
     render() {
-        const { classes } = this.props;
+        const { classes, categories } = this.props;
         return (
             <div>
                 <Grid container alignContent={"center"} alignItems={"center"}>
-                    {[...Array(5).keys()].map((i) => {
+                    {categories.map((category) => {
                         return (
-                            <Grid item xs={6} lg={3} key={i}>
+                            <Grid item xs={6} lg={3} key={category.id}>
                                 <CategoryCard
-                                    title={"test"}
-                                    description={"This is my really cool test."}
-                                    to={"/categories/" + i}
+                                    title={category.category}
+                                    description={category.description}
+                                    to={"/categories/" + category.id}
                                 />
                             </Grid>
                         );

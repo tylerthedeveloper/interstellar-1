@@ -11,6 +11,7 @@ import schema from "./lib/graphql/schema";
 import bodyParser from "body-parser";
 import fallback from "express-history-api-fallback";
 import session from 'express-session';
+import cors from 'cors';
 
 const app = express();
 
@@ -34,7 +35,7 @@ app.use(
 );
 
 //graphql attachments
-app.use("/gql", bodyParser.json(), graphqlExpress(req => ({
+app.use("/gql", cors(), bodyParser.json(), graphqlExpress(req => ({
     schema: schema,
     context: {
         session: req.session

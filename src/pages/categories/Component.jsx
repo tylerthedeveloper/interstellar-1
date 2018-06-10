@@ -3,7 +3,7 @@
 import React from "react";
 import { Switch, Route } from "react-router-dom";
 
-import CategoryAll from "./all/Component";
+import CategoryAll from "./all/Container";
 import CategoryLanding from "./landing/Component";
 
 /**** Component ******/
