@@ -13,19 +13,49 @@ class UserService {
     //   :::::: P U B L I C   C R U D   M E T H O D S : :  :   :    :     :        :          :
     // ────────────────────────────────────────────────────────────────────────────────────────
     //
+    createNewUser(user) {
+        const doc = this.usersCollection.doc();
+        const docID = doc.id;
+        user.id = docID;
+        // todo: check if better return from post
+        return doc
+                .set(user)
+                .then((documentSnapshot) => docID);
+    }
+
     getAllUsers() {
-        return this.usersCollection.get().then(snapshot => snapshot.docs.map((docSnapshot) => docSnapshot.data()));
+        return this.usersCollection
+            .get()
+            .then(snapshot => 
+                snapshot.docs.map((docSnapshot) => 
+                    docSnapshot.data()
+                )
+            );
     }
 
     /**
      * @param  {string} userID
      */
     getUserByUserId(userID) {
-        console.log(userID)
         return this.usersCollection
             .doc(userID)
             .get()
-            .then((documentSnapshot) => documentSnapshot.data());
+            .then((documentSnapshot) => 
+                documentSnapshot.data()
+            );
+    }
+
+    /**
+     * @param  {string} userID
+     */
+    // todo: test for first or take
+    getUserByUserPublicKey(publicKey) {
+        return this.usersCollection
+            .where("publicKey", "==", publicKey)
+            .get()
+            .then((QuerySnapshot) => 
+                QuerySnapshot.docs[0].data()
+            );
     }
 
     // /**
