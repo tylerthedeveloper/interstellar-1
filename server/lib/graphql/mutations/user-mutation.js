@@ -77,10 +77,14 @@ export default {
                     if(user) session.currentUserID = user.id;
                     return user;
                 })
+        }
+    },
 
-            //works
-            //return UserService.getUserByUserPublicKey(publicKey);
-
+    logout: {
+        type: UserType,
+        resolve(parent, args, {session}){
+            delete session.currentUserID;
+            return null;
         }
     }
 };
