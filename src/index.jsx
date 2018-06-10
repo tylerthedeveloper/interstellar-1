@@ -14,7 +14,8 @@ import { resolvers, defaults } from "./models/local/login_modal";
 
 //graphql initialization
 const cache = new InMemoryCache();
-export const client = new ApolloClient({ //TODO need to move this to separate file
+export const client = new ApolloClient({
+    //TODO need to move this to separate file
     link: ApolloLink.from([
         onError(
             ({ operation, response, graphQLErrors, networkError, forward }) => {

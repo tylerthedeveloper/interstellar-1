@@ -32,9 +32,8 @@ class NavBar extends React.PureComponent<ComponentProps & ClassProp> {
                     </Typography>
                     <div className={classes.navSection}>
                         <NavButton to="/">Home</NavButton>
-                        <NavButton to="/categories">Categories</NavButton>
-                        <NavButton to="/products">Products</NavButton>
-                        <NavButton to="/people">People</NavButton>
+                        <NavButton to="/categories">Products</NavButton>
+                        <NavButton to="/people">Sellers</NavButton>
                     </div>
                     <div>
                         {loggedIn ? (

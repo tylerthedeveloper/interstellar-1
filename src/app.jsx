@@ -32,7 +32,6 @@ class App extends React.Component<ComponentProps & ClassProp> {
                     <Switch>
                         <Route path="/" exact component={HomePage} />
                         <Route path="/categories" component={Categories} />
-                        <Route path="/products" component={Products} />
                         <Route path="/people" component={People} />
                         <Route path="/cart" component={Cart} />
                     </Switch>

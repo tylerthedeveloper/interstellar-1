@@ -17,9 +17,8 @@ class NavBar extends React.PureComponent<{}> {
             <Mutation mutation={toggleLoginModalStatus}>
                 {(toggle) => (
                     <Query query={getCurrentUserID}>
-                        {({ data, loading}) => {
-
-                            if(loading) return <div/>;
+                        {({ data, loading }) => {
+                            if (loading) return <div />;
 
                             return (
                                 <Mutation
@@ -29,7 +28,7 @@ class NavBar extends React.PureComponent<{}> {
                                             data: {
                                                 currentUser: null
                                             }
-                                        })
+                                        });
                                     }}
                                 >
                                     {(logout) => (
@@ -40,7 +39,7 @@ class NavBar extends React.PureComponent<{}> {
                                         />
                                     )}
                                 </Mutation>
-                            )
+                            );
                         }}
                     </Query>
                 )}
