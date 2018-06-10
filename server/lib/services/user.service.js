@@ -1,4 +1,6 @@
 const firedb = require("../../_firebase");
+import stellar from 'stellar-sdk';
+
 
 class UserService {
 
@@ -63,9 +65,17 @@ class UserService {
         return this.usersCollection
             .where("publicKey", "==", publicKey)
             .get()
-            .then((QuerySnapshot) => 
-                QuerySnapshot.docs[0].data()
-            );
+            .then((QuerySnapshot) => {
+                if(QuerySnapshot.docs[0])
+                    return QuerySnapshot.docs[0].data();
+                else
+                    throw 'no user';
+            });
+    }
+
+
+    verifySignature(publicKey, payload, signature){
+        return stellar.Keypair.fromPublicKey(publicKey).verify(payload, Buffer.from(signature, 'base64'));
     }
 
     deleteUser(userID) {
@@ -110,5 +120,4 @@ class UserService {
     // ────────────────────────────────────────────────────────────────────────────────
 }
 
-UserService = new UserService();
-module.exports = UserService;
+export default new UserService();

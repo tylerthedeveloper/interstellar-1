@@ -16,6 +16,7 @@ type ClassProp = {
 class CategoryLanding extends React.PureComponent<ClassProp> {
     render() {
         const { classes } = this.props;
+        console.log(this.props);
 
         return (
             <div className={classes.container}>

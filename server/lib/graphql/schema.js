@@ -19,10 +19,10 @@ const axios = require("axios");
 const { makeExecutableSchema, mergeSchemas } = require("graphql-tools");
 const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLSchema } = graphql;
 
-const RootQuery = require("./queries/root-query.js");
-const RootMutation = require("./mutations/root-mutation.js");
-console.log(RootMutation);
-module.exports = new GraphQLSchema({
-    query: RootQuery,
-    mutation: RootMutation
+import query from "./queries/root-query.js";
+import mutation from "./mutations/root-mutation.js";
+
+export default new GraphQLSchema({
+    query,
+    mutation
 });
