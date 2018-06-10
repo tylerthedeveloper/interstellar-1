@@ -52,7 +52,7 @@ export const resolvers  = {
                     .then((account) => {
 
                         console.log('closing modal');
-                        console.log(StellarService.generatePackageToSign());
+                        StellarService.test();
 
                         //close the modal and signal logged in
                         cache.writeData({

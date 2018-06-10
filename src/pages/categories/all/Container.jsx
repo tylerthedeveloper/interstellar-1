@@ -10,23 +10,12 @@ import { Query } from "react-apollo";
 class Category extends React.PureComponent<{}> {
     render() {
         return (
-            <Query
-                query={query}
-            >
-                {({data, loading, error}) => {
+            <Query query={query}>
+                {({ data, loading, error }) => {
+                    if (loading || error) return <div />;
 
-                    if(loading || error) return <div/>;
-
-                    console.log(data);
-
-
-                    return (
-                        <CategoryComponent
-                            categories={data.categories}
-                        />
-                    );
+                    return <CategoryComponent categories={data.categories} />;
                 }}
-
             </Query>
         );
     }

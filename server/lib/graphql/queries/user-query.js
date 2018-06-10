@@ -1,9 +1,9 @@
 const graphql = require("graphql");
 const { GraphQLList, GraphQLID, GraphQLString, GraphQLNonNull } = graphql;
 const UserType = require("../types/user");
-const UserService = require("../../services/user.service")
+import UserService from "../../services/user.service";
 
-module.exports = {
+export default {
     users: {
         type: new GraphQLList(UserType),
         resolve() {
@@ -28,8 +28,8 @@ module.exports = {
     currentUser : {
         type: UserType,
         resolve(user, args, context) {
-            if(!context.session.userID) return null;
-            else return getUserByUserId(context.session.userID);
+            if(!context.session.currentUserID) return null;
+            else return UserService.getUserByUserId(context.session.currentUserID);
         }
     }
 };

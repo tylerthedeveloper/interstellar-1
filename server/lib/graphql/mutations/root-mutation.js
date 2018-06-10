@@ -8,7 +8,7 @@ const {
 } = graphql;
 const productCategoryMutation = require("./product-category-mutation");
 const productMutation = require("./product-mutation");
-const userMutation = require("./user-mutation");
+import userMutation from "./user-mutation";
 
 const fields = () => ({
     ...productCategoryMutation,
@@ -16,9 +16,7 @@ const fields = () => ({
     ...userMutation
 });
 
-const RootMutation = new GraphQLObjectType({
+export default new GraphQLObjectType({
     name: "RootMutationType",
     fields: fields
 });
-
-module.exports = RootMutation;

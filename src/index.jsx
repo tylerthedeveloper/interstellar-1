@@ -46,7 +46,7 @@ const client = new ApolloClient({
 
         new HttpLink({
             uri: "http://localhost:3002/gql",
-            credentials: 'same-origin'
+            credentials: "same-origin"
         })
     ]),
     cache: cache

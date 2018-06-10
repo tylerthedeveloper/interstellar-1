@@ -17,8 +17,8 @@ type Category = {
     category: string,
     description: string,
     imageURL: string,
-    numberOfProducts: number,
-}
+    numberOfProducts: number
+};
 
 type ComponentProps = {
     categories: [Category]

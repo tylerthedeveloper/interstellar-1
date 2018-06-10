@@ -3,7 +3,7 @@ const { GraphQLObjectType, GraphQLList, GraphQLID, GraphQLNonNull } = graphql;
 // todo: https://github.com/KyleAMathews/deepmerge
 const productCategoryQuery = require("./product-category-query");
 const productQuery = require("./product-query");
-const userQuery = require("./user-query");
+import userQuery from "./user-query";
 const queryList = [productCategoryQuery, productQuery, userQuery];
 
 /* 
@@ -28,11 +28,7 @@ const fields = () => ({
     // ...sum
 });
 
-const RootQuery = new GraphQLObjectType({
+export default new GraphQLObjectType({
     name: "RootQueryType",
     fields: fields
 });
-
-// RootQuery.fields = Object.assign(fields)
-
-module.exports = RootQuery;

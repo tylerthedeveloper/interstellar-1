@@ -72,6 +72,17 @@ class StellarService {
 
     generatePackageToSign = () => {
         return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    };
+
+    test = () => {
+      const pkg = this.generatePackageToSign();
+      const publicKey = this.keyPair.publicKey();
+      const signature = this.keyPair.sign(pkg).toString('base64');
+
+      console.log("pkg", pkg);
+      console.log("key", publicKey);
+      console.log("sig", signature);
+
     }
 
 }

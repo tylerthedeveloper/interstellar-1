@@ -1,10 +1,12 @@
 const graphql = require("graphql");
 const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString } = graphql;
 const UserType = require("../types/user");
-const UserService = require("../../services/user.service")
+import UserService from  "../../services/user.service";
+
+
 // const axios = require("axios");
 
-module.exports = {
+export default {
     addUser: {
         type: UserType,
         // todo: add more props
@@ -36,6 +38,49 @@ module.exports = {
             return axios
                 .patch(`http://localhost:3002/users/${args.id}`, args)
                 .then((res) => res.data);
+        }
+    },
+    login: {
+        type: UserType,
+        args: {
+          payload: {type: GraphQLNonNull(GraphQLString)},
+          publicKey: {type: GraphQLNonNull(GraphQLString)},
+          signature: {type: GraphQLNonNull(GraphQLString)}
+        },
+        resolve(parent, {payload, publicKey, signature}, {session}){
+
+
+            //only let the user through if they have the correct signature
+            if(!UserService.verifySignature(publicKey, payload, signature))
+                return null;
+
+
+            return UserService.getUserByUserPublicKey(publicKey)
+
+                //catch if the user does not exist and automatically create their account
+                .catch((err) => {
+
+                    //account creation step
+                    if(err === 'no user'){
+                        return UserService.createNewUser({publicKey: publicKey})
+                            .then((id) => {
+                                return UserService.getUserByUserId(data)
+                            })
+                    }
+
+                    //log but pass through all the other errors
+                    console.log(err);
+                    return null;
+
+                //log the current user's ID on the session
+                }).then((user) => {
+                    if(user) session.currentUserID = user.id;
+                    return user;
+                })
+
+            //works
+            //return UserService.getUserByUserPublicKey(publicKey);
+
         }
     }
 };
