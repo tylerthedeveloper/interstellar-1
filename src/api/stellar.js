@@ -70,20 +70,24 @@ class StellarService {
      * Creates a package to sign and send to the server for authentication
      */
 
-    generatePackageToSign = () => {
+    __generatePackageToSign = () => {
         return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     };
 
-    test = () => {
-      const pkg = this.generatePackageToSign();
-      const publicKey = this.keyPair.publicKey();
-      const signature = this.keyPair.sign(pkg).toString('base64');
+    __generateSignature = (pkg) => {
+        return this.keyPair.sign(pkg).toString('base64');
+    };
 
-      console.log("pkg", pkg);
-      console.log("key", publicKey);
-      console.log("sig", signature);
+    generatePackageAndSignature = () => {
+        if(!this.isInitialized()){
+            return null;
+        }
 
-    }
+        const pkg = this.__generatePackageToSign();
+        const sig = this.__generateSignature(pkg);
+        return [pkg, sig];
+
+    };
 
 }
 

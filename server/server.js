@@ -26,6 +26,13 @@ app.use(session({
     }
 }));
 
+//TODO Remove
+//TESTING
+app.use("/", (req, res, next) => {
+    console.log("Current session: ", req.sessionID);
+    next();
+});
+
 
 //parsing the body of requests //TODO need to figure out if this is necesary
 app.use(
@@ -35,7 +42,7 @@ app.use(
 );
 
 //graphql attachments
-app.use("/gql", cors(), bodyParser.json(), graphqlExpress(req => ({
+app.use("/gql", cors({origin: true, credentials: true, maxAge: 60 * 60}), bodyParser.json(), graphqlExpress(req => ({
     schema: schema,
     context: {
         session: req.session
@@ -63,12 +70,7 @@ app.use("/iql", graphiqlExpress({ endpointURL: "/gql" }));
 // });
 
 
-//TODO Remove
-//TESTING
-app.use("/", (req, res, next) => {
-    console.log(req.sessionID);
-    next();
-});
+
 
 
 //set the static asset directory

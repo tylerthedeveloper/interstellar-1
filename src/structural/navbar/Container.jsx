@@ -6,8 +6,7 @@ import {
     getLoginStatus,
     toggleLoginModalStatus,
     logout,
-    getLoginModalOpenStatus,
-    login
+    getCurrentUserID
 } from "../../models/local/login_modal";
 import NavBarComponent from "./Component";
 import { Mutation, Query } from "react-apollo";
@@ -17,18 +16,32 @@ class NavBar extends React.PureComponent<{}> {
         return (
             <Mutation mutation={toggleLoginModalStatus}>
                 {(toggle) => (
-                    <Query query={getLoginStatus}>
-                        {({ data: { loggedIn } }) => (
-                            <Mutation mutation={logout}>
-                                {(logout) => (
-                                    <NavBarComponent
-                                        loggedIn={loggedIn}
-                                        toggleLoginModal={toggle}
-                                        logout={logout}
-                                    />
-                                )}
-                            </Mutation>
-                        )}
+                    <Query query={getCurrentUserID}>
+                        {({ data, loading}) => {
+
+                            if(loading) return <div/>;
+
+                            return (
+                                <Mutation
+                                    mutation={logout}
+                                    update={(cache) => {
+                                        cache.writeData({
+                                            data: {
+                                                currentUser: null
+                                            }
+                                        })
+                                    }}
+                                >
+                                    {(logout) => (
+                                        <NavBarComponent
+                                            loggedIn={Boolean(data.currentUser)}
+                                            toggleLoginModal={toggle}
+                                            logout={logout}
+                                        />
+                                    )}
+                                </Mutation>
+                            )
+                        }}
                     </Query>
                 )}
             </Mutation>

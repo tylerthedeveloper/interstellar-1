@@ -1,6 +1,7 @@
 import gql from 'graphql-tag';
 
 import StellarService from '../../api/stellar';
+import {client} from '../../index';
 
 /*************************************************
  * Defaults
@@ -25,6 +26,7 @@ export const defaults = {
 
 export const resolvers  = {
     Mutation: {
+
         toggleLoginModal: (_, args, { cache }) => {
             const {loginModalOpen} = cache.readQuery({query: getLoginModalOpenStatus});
             cache.writeData({ data: {loginModalOpen: !loginModalOpen} });
@@ -35,56 +37,61 @@ export const resolvers  = {
         login: (_, args, { cache }) : Promise<{error?: string}> => {
             const { key } = args;
 
-            return new Promise((resolve) => {
 
+            //check to make sure we have a valid key
+            if(!StellarService.setKey(key)){
+                return Promise.resolve({
+                    error: "Does not appear to be a valid format for a secret key!"
+                });
+            }
 
-                //check to make sure we have a valid key
-                if(!StellarService.setKey(key)){
-                    resolve({
-                        error: "Does not appear to be a valid format for a secret key!"
-                    });
-                    return;
-                }
+            //try to retrieve the account details -- store them in the StellarService
+            //but mark logged in in the apollo cache
+            return StellarService.getAccount()
+                .then((account) => {
 
-                //try to retrieve the account details -- store them in the StellarService
-                //but mark logged in in the apollo cache
-                return StellarService.getAccount()
-                    .then((account) => {
+                    const [payload, signature] = StellarService.generatePackageAndSignature();
+                    const publicKey = StellarService.keyPair.publicKey();
 
-                        console.log('closing modal');
-                        StellarService.test();
-
-                        //close the modal and signal logged in
-                        cache.writeData({
-                            data: {
-                                loginModalOpen:false,
-                                loggedIn: true
-                            }
-                        });
-
-                        resolve({});
-
-                    }, (err) => {
-                        resolve({
-                            error: "No public account belonging to that key found!"
-                        })
+                    return client.mutate({
+                        mutation: loginServer,
+                        variables: {
+                            publicKey,
+                            payload,
+                            signature
+                        },
+                        update: (cache, {data: {login: {id}}}) => {
+                            console.log(id);
+                            cache.writeData({
+                                data: {
+                                    currentUser: {
+                                        __typename: "UserType",
+                                        id
+                                    }
+                                }
+                            })
+                        }
                     })
-            });
-        },
 
-        logout: (_, args, { cache }) => {
+                }, (err) => {
+                    return Promise.reject({
+                        error: "No public account belonging to that key found!"
+                    })
+                }).then((user) => {
 
-            //clear out the data from the service
-            StellarService.clearData();
+                    //close the modal and signal logged in
+                    cache.writeData({
+                        data: {
+                            loginModalOpen:false,
+                        }
+                    });
 
-            //signal that user is no longer logged in
-            cache.writeData({
-                data: {
-                    loggedIn: false
-                }
-            });
 
-            return null;
+                    return {};
+                }).catch(err => {
+                    return err;
+                })
+
         }
     },
 };
@@ -99,9 +106,11 @@ export const getLoginModalOpenStatus = gql`
   }
 `;
 
-export const getLoginStatus = gql`
+export const getCurrentUserID = gql`
     query {
-        loggedIn @client
+        currentUser {
+            id
+        }
     }
 `;
 
@@ -123,7 +132,27 @@ export const login = gql`
 
 export const logout = gql`
     mutation Logout{
-        logout @client
+        logout {
+            id
+        }
+    }
+`;
+
+const loginServer = gql`
+    mutation Login($publicKey: String!, $payload: String!, $signature: String!){
+        login(publicKey: $publicKey, payload: $payload, signature: $signature){
+            id,
+            publicKey,
+            userName,
+            fullName,
+            email,
+            birthdate,
+            age,
+            address,
+            isValidBuyer,
+            isValidSeller,
+            accountCreated
+        }
     }
 `;
 
