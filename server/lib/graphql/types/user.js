@@ -9,7 +9,7 @@ const {
     GraphQLNonNull
 } = graphql;
 const ProductType = require("./product");
-const axios = require("axios");
+const ProductService = require("../../services/product.service")
 
 const UserType = new GraphQLObjectType({
     name: "UserType",
@@ -33,12 +33,7 @@ const UserType = new GraphQLObjectType({
             resolve(parentValue, args) {
                 const parentID = parentValue.id;
                 console.log(parentID);
-                // todo: Change to user-products
-                return axios
-                    .get(
-                        `http://localhost:3002/api/products/user-products/${parentID}`
-                    )
-                    .then((res) => res.data);
+                return ProductService.getProductsByUserID(parentID);
             }
         }
     })

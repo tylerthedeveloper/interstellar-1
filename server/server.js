@@ -1,14 +1,5 @@
-import firebase from "firebase";
-import admin from "firebase-admin";
-import serviceAccount from "./_firebase.js";
-
 //establish the firebase connection TODO i'd probably move this to a separate folder
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://galactic-storage.firebaseio.com"
-});
-const firedb = admin.firestore();
-
+import firedb from "./_firebase.js";
 
 /**************************************
  * Attach all of the Express Middleware

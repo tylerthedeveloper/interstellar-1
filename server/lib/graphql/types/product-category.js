@@ -1,35 +1,35 @@
-const schema = `
-    enum ProductCategoryEnum {
-        Apparel , #= 'Apparel',
-        Electronics , #= 'Electronics',
-        Food , #= 'Food',
-        Houseware , #= 'Houseware',
-        Software , #= 'Software',
-        Other , #= 'Other'
-    }
-    type ProductCategory {
-        productCategoryEnum: ProductCategoryEnum
-        category: String!
-        thumbnailLink: String!
-        description: String!
-    }
+const graphql = require("graphql");
+const {
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLID,
+    GraphQLInt,
+    GraphQLList,
+    GraphQLBoolean,
+    GraphQLNonNull
+} = graphql;
 
-    type Query {
-        categories(category: String!): [ProductCategory]
-    }
+const CategoryService = require("../../services/category.service")
+const ProductType = require("../types/product");
 
-    type Mutation {    
-        addProductToCategory (
-            input: ProductInput
-        ): Product
-    
-        deleteProductFromCategory(productID: String!): Product
-    }
-    
-    type Subscription {
-        productAdded: Product
-        productDeleted: Product
-    }
-`;
+const ProductCategoryType = new GraphQLObjectType({
+    name: "ProductCategoryType",
+    fields: () => ({
+        // id: { type: new GraphQLNonNull(GraphQLString) },
+        id: { type: GraphQLString },
+        category: { type: GraphQLString },
+        descripton: { type: GraphQLString },
+        imageURL: { type: GraphQLString },
+        numberOfProducts: { type: GraphQLInt },
+        productsInCategory: {
+            type: new GraphQLList(ProductType),
+            resolve(parentValue, args) {
+                return CategoryService.getProductsByCategory(parentValue.category);
+            }
+        }
+        // topProducts: { type: GraphQLString },
+        // topSellers: { type: GraphQLString },
+    })
+});
 
-module.exports = schema;
+module.exports = ProductCategoryType;

@@ -21,9 +21,7 @@ userRouter.get("/", (req, res) => {
 userRouter.post("/", (req, res) => {
     console.log("post user");
     const user = req.body;
-    const id = req.body["id"];
-    // console.log(req.body);
-    // console.log(req.body.id);
+    const id = req.body["id"]; // id???
     req.db
         .collection("users")
         .doc(id)
