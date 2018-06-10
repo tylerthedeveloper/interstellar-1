@@ -1,5 +1,3 @@
-
-
 import firebase from "firebase";
 import admin from "firebase-admin";
 import serviceAccount from "./_firebase.js";

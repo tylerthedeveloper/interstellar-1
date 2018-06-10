@@ -13,6 +13,8 @@ import {
 } from "@material-ui/core";
 import injectSheet from "react-jss";
 
+import {StatusSymbols} from '../../../models/local/login_modal';
+
 /****  TYPES ******/
 type classProp = {
     classes: { [$Keys<typeof styles>]: string }
@@ -20,38 +22,76 @@ type classProp = {
 
 type LoginModalProps = {
     open: boolean,
-    onClose: (event: SyntheticEvent<HTMLButtonElement>) => void
+    onClose: (event: SyntheticEvent<HTMLButtonElement>) => void,
+    onLogin: ({variables: {key: string}}) => void,
+    statusCode: any
 };
 
 /****  COMPONENT ******/
-class LoginModal extends React.PureComponent<LoginModalProps & classProp> {
+
+//TODO remove
+//Secret Key (Public Network): SB6ZKPBDEWFQ7CGV7IPV3QUBU6MSR232LWHOIURIHPHICOSWCAPEQDSC
+//Secret Key (Test Network): SAKRB7EE6H23EF733WFU76RPIYOPEWVOMBBUXDQYQ3OF4NF6ZY6B6VLW
+
+class LoginModal extends React.Component<LoginModalProps & classProp, {key: string}> {
+
+    state = {
+        key: ""
+    };
+
+
+    onInput = (event: SyntheticEvent<HTMLInputElement>) => {
+        this.setState({
+            key: (event.target: any).value
+        });
+    };
+
+    shouldComponentUpdate = (nextProps, nextState) => {
+
+        //hack to clear the secret key if the modal closes without logging in
+        if (this.props.open === true && nextProps.open === false) {
+            this.setState({ key: "" });
+        }
+
+        return true;
+    };
+
+
     render() {
-        const { classes, open, onClose } = this.props;
-        console.log("rendering login modal");
+        const { classes, open, onClose, onLogin, statusCode } = this.props;
+        const invalid = statusCode !== StatusSymbols.LOGGED_IN && statusCode !== StatusSymbols.LOGGED_OUT;
+
         return (
             <Dialog
                 open={open}
-                onClose={onClose}
                 onBackdropClick={onClose}
                 aria-labelledby="form-dialog-title"
                 fullWidth={true}
                 maxWidth={"sm"}
                 classes={{ paperWidthSm: classes.modalPaper }}
             >
-                <DialogTitle id="form-dialog-title">Log In</DialogTitle>
+                <DialogTitle id="form-dialog-title"> Login or Sign Up with your Stellar Secret Key</DialogTitle>
                 <DialogContent>
-                    <DialogContentText variant={"title"}>
-                        Returning Users
-                    </DialogContentText>
                     <TextField
                         autoFocus
                         margin="dense"
                         id="private-key-log-in"
-                        label="Stellar Wallet Private Key"
+                        label="Secret Key"
                         type="password"
+                        onChange={this.onInput}
+                        value={this.state.key}
                         fullWidth
+                        error = {invalid}
                     />
+                    {invalid &&
+                    <DialogContentText className={classes.errorText}>
+                        {statusCode === StatusSymbols.NO_ACCOUNT && "This secret key does not belong to a public account!"}
+                        {statusCode === StatusSymbols.INVALID_KEY_FORMAT && "This does not appear to a valid format for a secret key!"}
+                        {statusCode === StatusSymbols.NOT_ABLE_TO_VERIFY && "We weren't able to verify your ownership of this secret key!"}
+                    </DialogContentText>
+                    }
                 </DialogContent>
+
                 <DialogActions>
                     <Button
                         onClick={onClose}
@@ -61,43 +101,13 @@ class LoginModal extends React.PureComponent<LoginModalProps & classProp> {
                         Cancel
                     </Button>
                     <Button
-                        onClick={onClose}
+                        onClick={() => onLogin({
+                            variables: {key: this.state.key}
+                        })}
                         color="primary"
                         variant={"raised"}
                     >
                         Login
-                    </Button>
-                </DialogActions>
-
-                <Divider className={classes.divider} />
-
-                <DialogContent>
-                    <DialogContentText variant={"title"}>
-                        New Users
-                    </DialogContentText>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="private-key-sign-up"
-                        label="Stellar Wallet Private Key"
-                        type="password"
-                        fullWidth
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button
-                        onClick={onClose}
-                        color="primary"
-                        variant={"outlined"}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={onClose}
-                        color="primary"
-                        variant={"raised"}
-                    >
-                        Sign Up
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -113,6 +123,10 @@ const styles = {
     },
     divider: {
         margin: "50px 20px"
+    },
+    errorText: {
+        color: "red",
+        marginTop: "10px"
     }
 };
 

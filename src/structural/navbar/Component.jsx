@@ -7,6 +7,7 @@ import { AppBar, Toolbar, Typography, Button, Icon } from "@material-ui/core";
 import injectSheet from "react-jss";
 
 import NavButton from "./NavButtonComponent";
+import {StatusSymbols} from '../../models/local/login_modal';
 
 /****  TYPES ******/
 type ClassProp = {
@@ -14,14 +15,15 @@ type ClassProp = {
 };
 
 type ComponentProps = {
-    toggleLoginModal: () => void
+    toggleLoginModal: () => void,
+    logout: () => void,
+    statusCode: number
 };
 
 /****  COMPONENT ******/
 class NavBar extends React.PureComponent<ComponentProps & ClassProp> {
     render() {
-        const { classes, toggleLoginModal } = this.props;
-        console.log("rendering navbar");
+        const { classes, toggleLoginModal, statusCode, logout } = this.props;
         return [
             <AppBar position="static" key={"app-bar"}>
                 <Toolbar>
@@ -35,9 +37,18 @@ class NavBar extends React.PureComponent<ComponentProps & ClassProp> {
                         <NavButton to="/people">People</NavButton>
                     </div>
                     <div>
-                        <Button onClick={toggleLoginModal} variant={"raised"}>
-                            Login
-                        </Button>
+                        {statusCode === StatusSymbols.LOGGED_IN ?
+                            <Button onClick={logout} variant={"raised"}>
+                                Logout
+                            </Button>
+                            :
+                            <Button onClick={toggleLoginModal} variant={"raised"}>
+                                Login / Sign Up
+                            </Button>
+
+                        }
+
+
                         <Button
                             className={classes.cartButton}
                             variant={"raised"}

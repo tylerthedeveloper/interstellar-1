@@ -1,19 +1,23 @@
 // @flow
 
 import React from "react";
-import { Mutation } from "react-apollo";
 
-import { toggleLoginModalStatus } from "../../models/local/login_modal";
+import { getLoginStatus, toggleLoginModalStatus, logout } from "../../models/local/login_modal";
 import NavBarComponent from "./Component";
+import { graphql, compose } from "react-apollo";
 
-class NavBar extends React.PureComponent<{}> {
-    render() {
-        return (
-            <Mutation mutation={toggleLoginModalStatus}>
-                {(toggle) => <NavBarComponent toggleLoginModal={toggle} />}
-            </Mutation>
-        );
-    }
-}
+export default compose(
+    graphql(toggleLoginModalStatus, {
+        name: "toggleLoginModal"
+    }),
 
-export default NavBar;
+    graphql(getLoginStatus, {
+        props: ({data: { loginStatus: {statusCode} }}) => ({
+            statusCode
+        })
+    }),
+
+    graphql(logout, {
+        name: "logout"
+    })
+)(NavBarComponent);
