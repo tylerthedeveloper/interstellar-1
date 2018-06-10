@@ -1,48 +1,66 @@
 // @flow
 
 import React from "react";
-import { graphql, compose} from "react-apollo";
+import { Mutation, Query } from "react-apollo";
 
 import {
     getLoginModalOpenStatus,
     toggleLoginModalStatus,
-    login,
-    getLoginStatus,
-    StatusSymbols
+    login
 } from "../../../models/local/login_modal";
+
 import LoginModalComponent from "./Component";
+import type {LoginModalProps} from "./Component";
 
-export default compose(
-    graphql(getLoginModalOpenStatus, {
-        props: ({data: {loginModalOpen}}) => ({
-            open: loginModalOpen
-        })
-    }),
 
-    graphql(toggleLoginModalStatus, {
-        name: "onClose"
-    }),
+class LoginModal extends React.PureComponent<{}> {
+    render() {
+        return (
+            <Mutation mutation={toggleLoginModalStatus}>
+                {(toggle) => (
 
-    graphql(login, {
-        name: "onLogin",
-        options: {
-            update : (cache, { data: {login: data}}) => {
+                    <Query query={getLoginModalOpenStatus}>
+                        {({ data: {loginModalOpen} }) => (
 
-                //update the login status
-                cache.writeQuery({query: getLoginStatus, data });
+                            <Mutation
+                                mutation={login}
+                            >
+                                {(login, {data, loading}) => {
 
-                //close the login modal if necessary
-                if(data.loginStatus.statusCode === StatusSymbols.LOGGED_IN){
-                    cache.writeQuery({query: getLoginModalOpenStatus, data: {loginModalOpen: false}})
-                }
-            }
-        }
-    }),
 
-    graphql(getLoginStatus, {
-        props: ({data: { loginStatus: {statusCode} }}) => ({
-            statusCode
-        })
-    })
+                                    let props: LoginModalProps = {
+                                        open: loginModalOpen,
+                                        onClose: toggle,
+                                        onLogin: login,
+                                        loading: loading
+                                    };
 
-)(LoginModalComponent);
+                                    //check if the login mutation caused an error
+                                    if(data && data.login.error){
+
+                                        //when the modal closes, clear any error messages
+                                        if(!loginModalOpen){
+                                            delete data.login.error
+
+                                        //otherwise, pass along to the login modal
+                                        }else{
+                                            props.errorMessage = data.login.error;
+                                        }
+                                    }
+
+                                    return(
+                                        <LoginModalComponent
+                                            {...props}
+                                        />
+                                    );
+                                }}
+                            </Mutation>
+                        )}
+                    </Query>
+                )}
+            </Mutation>
+        );
+    }
+}
+
+export default LoginModal;

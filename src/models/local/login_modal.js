@@ -16,10 +16,7 @@ export const StatusSymbols = Object.freeze({
 
 export const defaults = {
     loginModalOpen: false,
-    loginStatus: {
-        __typename: "LoginStatus",
-        statusCode: StatusSymbols.LOGGED_OUT
-    }
+    loggedIn: false
 };
 
 /*************************************************
@@ -35,40 +32,57 @@ export const resolvers  = {
         },
 
 
-        //TODO need to rewrite this to not be asynchronous because apparently apollo doesn't like that
-        login: (_, args, { cache }) => {
+        login: (_, args, { cache }) : Promise<{error?: string}> => {
             const { key } = args;
 
-            return StellarService.verifyKey(key)
-                .then((account) => {
-                    return {
-                        loginStatus: {
-                            __typename: "LoginStatus",
-                            statusCode: StatusSymbols.LOGGED_IN
-                        }
-                    };
+            return new Promise((resolve) => {
 
-                }).catch((err) => {
-                    return {
-                        loginStatus: {
-                            __typename: "LoginStatus",
-                            statusCode: err.code
-                        }
-                    };
-                });
+
+                //check to make sure we have a valid key
+                if(!StellarService.setKey(key)){
+                    resolve({
+                        error: "Does not appear to be a valid format for a secret key!"
+                    });
+                    return;
+                }
+
+                //try to retrieve the account details -- store them in the StellarService
+                //but mark logged in in the apollo cache
+                return StellarService.getAccount()
+                    .then((account) => {
+
+                        console.log('closing modal');
+
+                        //close the modal and signal logged in
+                        cache.writeData({
+                            data: {
+                                loginModalOpen:false,
+                                loggedIn: true
+                            }
+                        });
+
+                        resolve({});
+
+                    }, (err) => {
+                        resolve({
+                            error: "No public account belonging to that key found!"
+                        })
+                    })
+            });
         },
 
         logout: (_, args, { cache }) => {
 
-            cache.writeQuery({
-                query: getLoginStatus,
+            //clear out the data from the service
+            StellarService.clearData();
+
+            //signal that user is no longer logged in
+            cache.writeData({
                 data: {
-                    loginStatus: {
-                        __typename: "LoginStatus",
-                        statusCode: StatusSymbols.LOGGED_OUT
-                    }
+                    loggedIn: false
                 }
             });
+
             return null;
         }
     },
@@ -86,9 +100,7 @@ export const getLoginModalOpenStatus = gql`
 
 export const getLoginStatus = gql`
     query {
-        loginStatus @client {
-            statusCode
-        }
+        loggedIn @client
     }
 `;
 

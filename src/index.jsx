@@ -16,15 +16,29 @@ import { resolvers, defaults } from "./models/local/login_modal";
 const cache = new InMemoryCache();
 const client = new ApolloClient({
     link: ApolloLink.from([
-        onError(({ graphQLErrors, networkError }) => {
-            if (graphQLErrors)
+
+
+        onError(({ operation, response, graphQLErrors, networkError, forward }) => {
+            if (graphQLErrors) {
+                console.log(graphQLErrors);
                 graphQLErrors.map(({ message, locations, path }) =>
                     console.log(
                         `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
                     )
                 );
-            if (networkError) console.log(`[Network error]: ${networkError}`);
+            }
+            if (networkError){
+                console.log(response);
+                console.log(operation);
+                console.log(networkError);
+                operation.setContext({
+                    errorPolicy: "none"
+                });
+                return  null;
+                console.log(`[Network error]: ${networkError}`);
+            }
         }),
+
 
         withClientState({
             cache: cache,

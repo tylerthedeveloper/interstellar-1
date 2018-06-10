@@ -9,22 +9,23 @@ import {
     DialogTitle,
     Button,
     TextField,
-    Divider
+    CircularProgress
 } from "@material-ui/core";
 import injectSheet from "react-jss";
 
-import {StatusSymbols} from '../../../models/local/login_modal';
+import { StatusSymbols } from "../../../models/local/login_modal";
 
 /****  TYPES ******/
 type classProp = {
     classes: { [$Keys<typeof styles>]: string }
 };
 
-type LoginModalProps = {
+export type LoginModalProps = {
     open: boolean,
     onClose: (event: SyntheticEvent<HTMLButtonElement>) => void,
-    onLogin: ({variables: {key: string}}) => void,
-    statusCode: any
+    onLogin: ({ variables: { key: string } }) => void,
+    errorMessage?: string,
+    loading: boolean
 };
 
 /****  COMPONENT ******/
@@ -33,12 +34,13 @@ type LoginModalProps = {
 //Secret Key (Public Network): SB6ZKPBDEWFQ7CGV7IPV3QUBU6MSR232LWHOIURIHPHICOSWCAPEQDSC
 //Secret Key (Test Network): SAKRB7EE6H23EF733WFU76RPIYOPEWVOMBBUXDQYQ3OF4NF6ZY6B6VLW
 
-class LoginModal extends React.Component<LoginModalProps & classProp, {key: string}> {
-
+class LoginModal extends React.Component<
+    LoginModalProps & classProp,
+    { key: string }
+> {
     state = {
         key: ""
     };
-
 
     onInput = (event: SyntheticEvent<HTMLInputElement>) => {
         this.setState({
@@ -47,7 +49,6 @@ class LoginModal extends React.Component<LoginModalProps & classProp, {key: stri
     };
 
     shouldComponentUpdate = (nextProps, nextState) => {
-
         //hack to clear the secret key if the modal closes without logging in
         if (this.props.open === true && nextProps.open === false) {
             this.setState({ key: "" });
@@ -56,10 +57,8 @@ class LoginModal extends React.Component<LoginModalProps & classProp, {key: stri
         return true;
     };
 
-
     render() {
-        const { classes, open, onClose, onLogin, statusCode } = this.props;
-        const invalid = statusCode !== StatusSymbols.LOGGED_IN && statusCode !== StatusSymbols.LOGGED_OUT;
+        const { classes, open, onClose, onLogin, errorMessage, loading } = this.props;
 
         return (
             <Dialog
@@ -70,7 +69,10 @@ class LoginModal extends React.Component<LoginModalProps & classProp, {key: stri
                 maxWidth={"sm"}
                 classes={{ paperWidthSm: classes.modalPaper }}
             >
-                <DialogTitle id="form-dialog-title"> Login or Sign Up with your Stellar Secret Key</DialogTitle>
+                <DialogTitle id="form-dialog-title">
+                    {" "}
+                    Login or Sign Up with your Stellar Secret Key
+                </DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
@@ -81,15 +83,16 @@ class LoginModal extends React.Component<LoginModalProps & classProp, {key: stri
                         onChange={this.onInput}
                         value={this.state.key}
                         fullWidth
-                        error = {invalid}
+                        error={Boolean(errorMessage)}
+                        InputProps={{
+                            endAdornment: loading && <CircularProgress/>
+                        }}
                     />
-                    {invalid &&
-                    <DialogContentText className={classes.errorText}>
-                        {statusCode === StatusSymbols.NO_ACCOUNT && "This secret key does not belong to a public account!"}
-                        {statusCode === StatusSymbols.INVALID_KEY_FORMAT && "This does not appear to a valid format for a secret key!"}
-                        {statusCode === StatusSymbols.NOT_ABLE_TO_VERIFY && "We weren't able to verify your ownership of this secret key!"}
-                    </DialogContentText>
-                    }
+                    { errorMessage && (
+                        <DialogContentText className={classes.errorText}>
+                            {errorMessage}
+                        </DialogContentText>
+                    )}
                 </DialogContent>
 
                 <DialogActions>
@@ -101,9 +104,11 @@ class LoginModal extends React.Component<LoginModalProps & classProp, {key: stri
                         Cancel
                     </Button>
                     <Button
-                        onClick={() => onLogin({
-                            variables: {key: this.state.key}
-                        })}
+                        onClick={() =>
+                            onLogin({
+                                variables: { key: this.state.key }
+                            })
+                        }
                         color="primary"
                         variant={"raised"}
                     >

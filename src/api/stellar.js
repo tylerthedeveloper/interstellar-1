@@ -1,31 +1,69 @@
 import stellar from 'stellar-sdk';
 
-import {StatusSymbols} from "../models/local/login_modal";
-
 class StellarService {
+
+    keyPair: stellar.Keypair;
+    account: Object;
+
+    static ErrorCodes = {
+        KEY_NOT_SET: 0,
+        NO_ACCOUNT: 1
+    };
 
     constructor(){
         this.server = new stellar.Server('https://horizon-testnet.stellar.org');
         stellar.Network.useTestNetwork();
     }
 
-    verifyKey = (key) => {
-        let publicKey;
+
+    clearData = (): void => {
+        this.keyPair = null;
+        this.account = null;
+    };
+
+
+    /***
+     * Sets the KeyPair; returns true iff it looks like a valid secretkey
+     */
+    setKey = (secretKey: String): Boolean => {
         try {
-            publicKey = stellar.Keypair.fromSecret(key).publicKey();
+            this.keyPair = stellar.Keypair.fromSecret(secretKey);
+            return true;
         }catch(err){
-            return Promise.reject({
-                code: StatusSymbols.INVALID_KEY_FORMAT,
-                message: "Invalid secret key"
-            });
+            return false;
+        }
+    };
+
+    /***
+     * Checks to see if the service has been set up with the proper keys
+     */
+    isInitialized = (): Boolean => {
+        return this.keyPair && this.keyPair.canSign();
+    };
+
+
+    /***
+     * Tries to load the account associated with the current KeyPair
+     *
+     * @returns {Promise<any>}
+     */
+    getAccount = ():Promise => {
+
+        if(!this.isInitialized()){
+            return Promise.reject(StellarService.ErrorCodes.KEY_NOT_SET);
         }
 
-        return this.server.loadAccount(publicKey)
-            .catch(err => {
-                return Promise.reject({
-                    code: StatusSymbols.NO_ACCOUNT,
-                    message: err
-                });
+        if(this.account){
+            return Promise.resolve(this.account);
+        }
+
+
+        return this.server.loadAccount(this.keyPair.publicKey())
+            .then(account => {
+              this.account = account;
+              return account;
+            }).catch(err => {
+                return Promise.reject(StellarService.ErrorCodes.NO_ACCOUNT);
             });
     }
 
