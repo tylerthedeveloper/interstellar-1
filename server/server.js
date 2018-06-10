@@ -34,7 +34,12 @@ app.use(
 );
 
 //graphql attachments
-app.use("/gql", bodyParser.json(), graphqlExpress({ schema: schema }));
+app.use("/gql", bodyParser.json(), graphqlExpress(req => ({
+    schema: schema,
+    context: {
+        session: req.session
+    }
+})));
 app.use("/iql", graphiqlExpress({ endpointURL: "/gql" }));
 
 

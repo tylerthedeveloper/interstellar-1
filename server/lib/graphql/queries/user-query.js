@@ -16,5 +16,12 @@ module.exports = {
         resolve(parentValue, { id }) {
             return UserService.getUserByUserId(id);
         }
+    },
+    currentUser : {
+        type: UserType,
+        resolve(user, args, context) {
+            if(!context.session.userID) return null;
+            else return getUserByUserId(context.session.userID);
+        }
     }
 };

@@ -45,7 +45,6 @@ class StellarService {
     /***
      * Tries to load the account associated with the current KeyPair
      *
-     * @returns {Promise<any>}
      */
     getAccount = ():Promise => {
 
@@ -65,6 +64,14 @@ class StellarService {
             }).catch(err => {
                 return Promise.reject(StellarService.ErrorCodes.NO_ACCOUNT);
             });
+    };
+
+    /**
+     * Creates a package to sign and send to the server for authentication
+     */
+
+    generatePackageToSign = () => {
+        return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     }
 
 }

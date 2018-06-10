@@ -58,7 +58,14 @@ class LoginModal extends React.Component<
     };
 
     render() {
-        const { classes, open, onClose, onLogin, errorMessage, loading } = this.props;
+        const {
+            classes,
+            open,
+            onClose,
+            onLogin,
+            errorMessage,
+            loading
+        } = this.props;
 
         return (
             <Dialog
@@ -85,10 +92,10 @@ class LoginModal extends React.Component<
                         fullWidth
                         error={Boolean(errorMessage)}
                         InputProps={{
-                            endAdornment: loading && <CircularProgress/>
+                            endAdornment: loading && <CircularProgress />
                         }}
                     />
-                    { errorMessage && (
+                    {errorMessage && (
                         <DialogContentText className={classes.errorText}>
                             {errorMessage}
                         </DialogContentText>
