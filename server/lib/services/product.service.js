@@ -18,6 +18,17 @@ class ProductService {
     //   :::::: P U B L I C   C R U D   M E T H O D S : :  :   :    :     :        :          :
     // ────────────────────────────────────────────────────────────────────────────────────────
     //
+    
+    addProduct(product) {
+        const doc = this.productsCollection.doc();
+        const docID = doc.id;
+        product.id = docID;
+        console.log(product)
+        // todo: index vs duplication users-products
+        return doc
+            .set(product)
+            .then((documentSnapshot) => docID);
+    }
 
     /**
      */
@@ -35,7 +46,8 @@ class ProductService {
      * @param  {string} productID
      */
     getProductById(productID) {
-        return this.z
+        console.log(productID)
+        return this.productsCollection
             .doc(productID)
             .get()
             .then((documentSnapshot) => documentSnapshot.data());
@@ -56,6 +68,21 @@ class ProductService {
                 )
             );
     }
+
+    updateProduct(product) {
+        return this.productsCollection
+                .doc(product.id)
+                .update(product, { merge: true})
+                .then((documentSnapshot) => documentSnapshot);
+    }
+
+    deleteProduct(productID) {
+        return this.productsCollection
+                .doc(productID)
+                .delete()
+                .then((documentSnapshot) => productID);
+    }
+
 
     // /**
     //  * @returns string

@@ -13,25 +13,17 @@ class UserService {
     //   :::::: P U B L I C   C R U D   M E T H O D S : :  :   :    :     :        :          :
     // ────────────────────────────────────────────────────────────────────────────────────────
     //
-    createNewUser(user) {
-        const doc = this.usersCollection.doc();
-        const docID = doc.id;
-        user.id = docID;
-        // todo: check if better return from post
-        return doc
-                .set(user)
-                .then((documentSnapshot) => docID);
-    }
-
+    
     getAllUsers() {
         return this.usersCollection
             .get()
             .then(snapshot => 
                 snapshot.docs.map((docSnapshot) => 
-                    docSnapshot.data()
-                )
-            );
+                docSnapshot.data()
+            )
+        );
     }
+
 
     /**
      * @param  {string} userID
@@ -45,10 +37,28 @@ class UserService {
             );
     }
 
+    createNewUser(user) {
+        const doc = this.usersCollection.doc();
+        const docID = doc.id;
+        user.id = docID;
+        // todo: check if better return from post
+        return doc
+                .set(user)
+                .then((documentSnapshot) => docID);
+    }
+
+    updateUser(user) {
+        return this.usersCollection
+                .doc(user.id)
+                .update(user, { merge: true})
+                .then((documentSnapshot) => console.log(documentSnapshot));
+    }
+
     /**
      * @param  {string} userID
      */
     // todo: test for first or take
+    // todo: test for now found user
     getUserByUserPublicKey(publicKey) {
         return this.usersCollection
             .where("publicKey", "==", publicKey)
@@ -56,6 +66,13 @@ class UserService {
             .then((QuerySnapshot) => 
                 QuerySnapshot.docs[0].data()
             );
+    }
+
+    deleteUser(userID) {
+        return this.usersCollection
+                .doc(userID)
+                .delete()
+                .then((documentSnapshot) => userID);
     }
 
     // /**

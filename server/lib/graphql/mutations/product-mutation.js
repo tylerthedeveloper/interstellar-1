@@ -1,7 +1,7 @@
 const graphql = require("graphql");
 const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString } = graphql;
 const ProductType = require("../types/product");
-const axios = require("axios");
+const ProductService = require("../../services/product.service")
 
 module.exports = {
     addProduct: {
@@ -12,19 +12,14 @@ module.exports = {
             userID: { type: new GraphQLNonNull(GraphQLID) }
         },
         resolve(parentValue, { productName, userID }) {
-            const product = Object.assign({ productName, userID });
-            return axios
-                .post(`http://localhost:3002/products`, product)
-                .then((res) => res.data);
+            return ProductService.addNewProduct(args);
         }
     },
     deleteProduct: {
         type: ProductType,
         args: { id: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { id }) {
-            return axios
-                .delete(`http://localhost:3002/products/${id}`)
-                .then((res) => res.data);
+            return ProductService.deleteProduct(id);
         }
     },
     updateProduct: {
@@ -32,12 +27,11 @@ module.exports = {
         // todo: add more props
         args: {
             id: { type: new GraphQLNonNull(GraphQLID) },
-            productName: { type: GraphQLID }
+            productName: { type: GraphQLID },
+            productShortDescription: { type: GraphQLID },
         },
         resolve(parentValue, args) {
-            return axios
-                .patch(`http://localhost:3002/products/${args.id}`, args)
-                .then((res) => res.data);
+            return ProductService.updateProduct(args);
         }
     }
 };

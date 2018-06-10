@@ -1,8 +1,7 @@
 const graphql = require("graphql");
-const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString } = graphql;
+const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString, GraphQLInt } = graphql;
 const UserType = require("../types/user");
 const UserService = require("../../services/user.service")
-// const axios = require("axios");
 
 module.exports = {
     addUser: {
@@ -20,9 +19,7 @@ module.exports = {
         type: UserType,
         args: { id: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { id }) {
-            return axios
-                .delete(`http://localhost:3002/users/${id}`)
-                .then((res) => res.data);
+            return UserService.deleteUser(id);
         }
     },
     updateUser: {
@@ -30,12 +27,11 @@ module.exports = {
         // todo: add more props
         args: {
             id: { type: new GraphQLNonNull(GraphQLID) },
-            userName: { type: GraphQLID }
+            userName: { type: GraphQLID },
+            age: { type: GraphQLInt },
         },
         resolve(parentValue, args) {
-            return axios
-                .patch(`http://localhost:3002/users/${args.id}`, args)
-                .then((res) => res.data);
+            return UserService.updateUser(args);
         }
     }
 };

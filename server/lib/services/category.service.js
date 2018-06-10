@@ -12,10 +12,13 @@ class CategoryService {
     // ────────────────────────────────────────────────────────────────────────────────────────
     //
     createNewCategory(category) {
+        const doc = this.categorysCollection.doc();
+        const docID = doc.id;
+        category.id = docID;
         console.log(category)
-        return this.categorysCollection
-            .add(category)
-            .then((docSnapshot) => docSnapshot.id);
+        return doc
+            .set(category)
+            .then((documentSnapshot) => docID);
     }
 
     getAllCategories() {
