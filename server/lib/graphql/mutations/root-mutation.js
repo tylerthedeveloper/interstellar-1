@@ -1,14 +1,15 @@
-const graphql = require("graphql");
-const {
+import  {
     GraphQLObjectType,
-    GraphQLList,
+    GraphQLString,
     GraphQLID,
-    GraphQLNonNull,
-    GraphQLString
-} = graphql;
-const cartItemsMutation = require("./cart-items-mutation");
-const productCategoryMutation = require("./product-category-mutation");
-const productMutation = require("./product-mutation");
+    GraphQLInt,
+    GraphQLList,
+    GraphQLBoolean,
+    GraphQLNonNull
+} from "graphql";
+import cartItemsMutation from "./cart-items-mutation";
+import productCategoryMutation from "./product-category-mutation";
+import productMutation from "./product-mutation";
 import userMutation from "./user-mutation";
 
 const fields = () => ({

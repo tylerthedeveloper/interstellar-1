@@ -1,5 +1,4 @@
-const graphql = require("graphql");
-const {
+import  {
     GraphQLObjectType,
     GraphQLString,
     GraphQLID,
@@ -7,9 +6,10 @@ const {
     GraphQLList,
     GraphQLBoolean,
     GraphQLNonNull
-} = graphql;
-const ProductType = require("./product");
-const ProductService = require("../../services/product.service")
+} from "graphql";
+
+import ProductType from "./product";
+import { getProductsByUserID } from "../../services/product.service";
 
 const UserType = new GraphQLObjectType({
     name: "UserType",
@@ -33,7 +33,7 @@ const UserType = new GraphQLObjectType({
             resolve(parentValue, args) {
                 const parentID = parentValue.id;
                 console.log(parentID);
-                return ProductService.getProductsByUserID(parentID);
+                return getProductsByUserID(parentID);
             }
         }
     })
@@ -60,34 +60,6 @@ const schema = `
         numberOfItemsSold: Int
         acceptedAssets: [AssetBalance]
     }
-
-    type Query {
-        users: [User]
-        users(id: String!): User
-    }
-
-    type Mutation {
-        updateUser (
-            # need to dump all attributes
-            currName: String!
-            newName: String
-        ): User
-    
-        addUser (
-            # {props}
-            name: String!
-        ): User
-    
-        deleteUser(fbid: String!): User
-    }
-    
-    type Subscription {
-        userUpdated: User
-        userAdded: User
-        userDeleted: User
-    }
 `;
-
-module.exports = schema;
 */
-module.exports = UserType;
+export default UserType;

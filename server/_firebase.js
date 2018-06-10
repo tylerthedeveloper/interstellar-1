@@ -1,8 +1,6 @@
-"use strict";
 /** Firebase */
-const firebase = require("firebase");
-const admin = require("firebase-admin");
-// const serviceAccount = require("./_firebase.js");
+import firebase from "firebase";
+import firebaseAdmin from "firebase-admin";
 
 const firebaseConfig = {
     // apiKey: 'AIzaSyBthCwhwO2SHLFMaY_V2aFIMJxRC23QFpI',
@@ -26,12 +24,10 @@ const firebaseConfig = {
         "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-hvsjj%40galactic-storage.iam.gserviceaccount.com"
 };
 
-admin.initializeApp({
-    credential: admin.credential.cert(firebaseConfig),
+firebaseAdmin.initializeApp({
+    credential: firebaseAdmin.credential.cert(firebaseConfig),
     databaseURL: "https://galactic-storage.firebaseio.com"
 });
 
-const firedb = admin.firestore();
-
-module.exports = firedb;
-//# sourceMappingURL=_firebase.js.map
+const firedb = firebaseAdmin.firestore();
+export default firedb;

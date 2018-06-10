@@ -1,6 +1,5 @@
-const graphql = require("graphql");
-const { GraphQLList, GraphQLID, GraphQLString, GraphQLNonNull } = graphql;
-const UserType = require("../types/user");
+import { GraphQLList, GraphQLID, GraphQLString, GraphQLNonNull } from "graphql";
+import UserType from "../types/user";
 import UserService from "../../services/user.service";
 
 export default {
@@ -14,7 +13,7 @@ export default {
         type: UserType,
         args: { id: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { id }) {
-            return UserService.getUserByUserId(id);
+            return UserService.getUserById(id);
         }
     },
     // todo: group or change name
@@ -29,7 +28,7 @@ export default {
         type: UserType,
         resolve(user, args, context) {
             if(!context.session.currentUserID) return null;
-            else return UserService.getUserByUserId(context.session.currentUserID);
+            else return UserService.getUserById(context.session.currentUserID);
         }
     }
 };

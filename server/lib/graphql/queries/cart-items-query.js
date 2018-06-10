@@ -1,14 +1,13 @@
-const graphql = require("graphql");
-const { GraphQLList, GraphQLID, GraphQLNonNull } = graphql;
-const ProductType = require("../types/product");
-const CartService = require("../../services/cart.service")
+import { GraphQLList, GraphQLID, GraphQLString, GraphQLNonNull } from "graphql";
+import ProductType from "../types/product";
+import { getMyCart } from "../../services/cart.service";
 
-module.exports = {
+export default {
     cart: {
         type: new GraphQLList(ProductType),
         args: { userID: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { userID }, context) {
-            return CartService.getMyCart(context.session.currentUserID || userID);
+            return getMyCart(context.session.currentUserID || userID);
         }
     }
 };

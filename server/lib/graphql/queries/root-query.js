@@ -1,9 +1,8 @@
-const graphql = require("graphql");
-const { GraphQLObjectType, GraphQLList, GraphQLID, GraphQLNonNull } = graphql;
+import { GraphQLObjectType, GraphQLList, GraphQLID, GraphQLString, GraphQLNonNull } from "graphql";
 // todo: https://github.com/KyleAMathews/deepmerge
-const cartItemQuery = require("./cart-items-query");
-const productCategoryQuery = require("./product-category-query");
-const productQuery = require("./product-query");
+import cartItemQuery from "./cart-items-query";
+import productCategoryQuery from "./product-category-query";
+import productQuery from "./product-query";
 import userQuery from "./user-query";
 
 const queryList = [cartItemQuery,productCategoryQuery, productQuery, userQuery];

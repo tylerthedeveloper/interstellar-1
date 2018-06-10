@@ -1,4 +1,4 @@
-const firedb = require("../../_firebase");
+import firedb  from "../../_firebase";
 import stellar from 'stellar-sdk';
 
 class UserService {
@@ -28,7 +28,7 @@ class UserService {
     /**
      * @param  {string} userID
      */
-    getUserByUserId(userID) {
+    getUserById(userID) {
         return this.usersCollection
             .doc(userID)
             .get()
@@ -37,7 +37,7 @@ class UserService {
             );
     }
 
-    createNewUser(user) {
+    createUser(user) {
         const doc = this.usersCollection.doc();
         const docID = doc.id;
         user.id = docID;
@@ -59,7 +59,7 @@ class UserService {
      */
     // todo: test for first or take
     // todo: test for not found user
-    getUserByUserPublicKey(publicKey) {
+    getUserByPublicKey(publicKey) {
         return this.usersCollection
             .where("publicKey", "==", publicKey)
             .get()

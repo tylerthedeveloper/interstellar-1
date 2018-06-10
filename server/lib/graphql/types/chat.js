@@ -1,47 +1,52 @@
-const graphql = require("graphql");
-const {
+import  {
     GraphQLObjectType,
     GraphQLString,
     GraphQLID,
     GraphQLInt,
     GraphQLList,
-    GraphQLBoolean
-} = graphql;
+    GraphQLBoolean,
+    GraphQLNonNull
+} from "graphql";
+import UserType from "../types/user";
+import UserService from "../../services/user.service";
 
-/*
-const UserType = new GraphQLObjectType({
-  name:  'ChatThread',
+
+const ChatThreadType = new GraphQLObjectType({
+  name:  'ChatThreadType',
   fields: () => ({
-        id: { type: GraphQLID },
-        userName: { type: GraphQLString },
-        fullName: { type: GraphQLString },
-        email: { type: GraphQLString },
-        birthdate: { type: GraphQLString },
-        age: { type: GraphQLInt }, 
+        chatThreadID: { type: new GraphQLID },
+        senderID: { 
+            type: UserType,
+            args: { userID: { type: new GraphQLNonNull(GraphQLID) } },
+            resolve(parentValue, { userID }, context) {
+                return this.UserService.getUserByUserId(userID)
+            }
+        },
+    // senderPublicKey: { type: GraphQLString },
+        receiverID: { 
+            type: UserType,
+            args: { userID: { type: new GraphQLNonNull(GraphQLID) } },
+            resolve(parentValue, { userID }, context) {
+                return this.UserService.getUserByUserId(userID)
+            }
+        },        
+    // receiverPublicKey: { type: GraphQLString },
+        // ChatMessages: 
+        // resolve        
     })
 });
 
-export class ChatMessage {
+const ChatMessageType = new GraphQLObjectType({
+    name:  'ChatMessageType',
+    fields: () => ({
+        chatMessageID: { type: GraphQLID },
+        chatThreadID: { type: GraphQLID },
+        sentAt: { type: GraphQLString }, // Date or timestring
+        senderID: { type: GraphQLString }, 
+        receiverID: { type: GraphQLString }, 
+        text: { type: GraphQLString }, 
+      })
+  });
 
-    messageid: string;
-    sentAt: Date;
-    isRead: boolean;
-    sender: string;
-    reciever: string;
-    // sender: ChatUser;
-    // reciever: ChatUser;
-    text: string;
-    // thread: ChatThread;
-    chatThreadID: string;
-
-    export class ChatThread {
-
-        chatThreadID: string;
-    
-        senderFbID: string;
-        senderPublicKeyFbID: string;
-    
-        receiverFbID: string;
-        receiverPublicKeyFbID: string;
-*/
-module.exports = UserType;
+  
+export default { ChatThreadType, ChatMessageType }

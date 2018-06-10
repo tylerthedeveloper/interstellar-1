@@ -1,5 +1,4 @@
-const graphql = require("graphql");
-const {
+import  {
     GraphQLObjectType,
     GraphQLString,
     GraphQLID,
@@ -7,16 +6,18 @@ const {
     GraphQLList,
     GraphQLBoolean,
     GraphQLNonNull
-} = graphql;
+} from "graphql";
 
-const ProductSellerDataType = new GraphQLObjectType({
-    name: "ProductSellerDataType",
-    fields: () => ({
-        productSellerID: { type: GraphQLString },
-        productSellerName: { type: GraphQLString },
-        productSellerPublicKey: { type: GraphQLString }
-    })
-});
+/*
+    const ProductSellerDataType = new GraphQLObjectType({
+        name: "ProductSellerDataType",
+        fields: () => ({
+            productSellerID: { type: GraphQLString },
+            productSellerName: { type: GraphQLString },
+            productSellerPublicKey: { type: GraphQLString }
+        })
+    });
+*/
 
 const ProductType = new GraphQLObjectType({
     name: "ProductType",
@@ -35,12 +36,13 @@ const ProductType = new GraphQLObjectType({
         productListedAt: { type: GraphQLString },
         productRating: { type: GraphQLInt },
 
-        // todo: clarify type (string, category)
+        // resolve these
         productCategoryID: { type: GraphQLString },
         // change? this was grouped for organizational purposes
         // productSellerData: { type: ProductSellerDataType }, 
         productSellerID: { type: GraphQLString }
-
+        // resolve getUserByUserId
+        
         // todo: long term
         // # productTags: [String] // in addition to category, extra options for search + filtering
         // # productReviews: [String]
@@ -49,82 +51,4 @@ const ProductType = new GraphQLObjectType({
     })
 });
 
-module.exports = ProductType;
-
-/*
-const schema = `
-    input ProductSellerDataInput {
-        productSellerID: String
-        productSellerName: String
-        productSellerPublicKey: String
-    }
-
-    
-    
-    input ProductInput {
-        # id: String
-        productName: String
-        productShortDescription: String
-        productLongDescription: String
-        fixedUSDAmount: Int
-        quantity: Int
-        productPrices: [AssetBalanceInput]
-        productAssetOptions: [String]
-        productThumbnailLink: String
-        productImages: [String]
-        productCategory: String
-        productSellerData: ProductSellerDataInput
-        productListedAt: Int
-        # some day
-        # productRating: Int
-        # productReviews: [String]
-        # shippingInfo: ShippingInformation
-    }
-    
-    type Product {
-        id: String
-        productName: String
-        productShortDescription: String
-        productLongDescription: String
-        fixedUSDAmount: Int
-        quantity: Int
-        productPrices: [AssetBalance]
-        productAssetOptions: [String]
-        productThumbnailLink: String
-        productImages: [String]
-        productCategory: String
-        productSellerData: ProductSellerData
-        productListedAt: Int
-        # some day
-        # productRating: Int
-        # productReviews: [String]
-        # shippingInfo: ShippingInformation
-    }
-
-    type Query {
-        products: [Product]
-        product(id: String!): Product
-    }
-
-    type Mutation {
-        updateProduct (
-            # need to dump all attributes
-            someAttr: String
-        ): Product
-    
-        addProduct (
-            input: ProductInput
-        ): Product
-    
-        deleteProduct(fbid: String!): Product
-    }
-    
-    type Subscription {
-        productUpdated: Product
-        productAdded: Product
-        productDeleted: Product
-    }
-`;
-
-module.exports = schema;
-*/
+export default ProductType;

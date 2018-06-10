@@ -13,23 +13,11 @@ const app = express();
 // Import graphQL for express
 const expressGraphQL = require("express-graphql");
 const schema = require("./graphql/schema");
-// The root provides a resolver function for each API endpoint
-const root = {
-    rollDice: function(args) {
-        var output = [];
-        for (var i = 0; i < args.numDice; i++) {
-            output.push(1 + Math.floor(Math.random() * (args.numSides || 6)));
-        }
-        return output;
-    }
-};
-
 app.use(
     "/graphql",
     expressGraphQL({
         graphiql: true,
         schema: schema
-        // rootValue: root
     })
 );
 

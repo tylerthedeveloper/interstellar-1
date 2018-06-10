@@ -1,5 +1,4 @@
-const graphql = require("graphql");
-const {
+import  {
     GraphQLObjectType,
     GraphQLString,
     GraphQLID,
@@ -7,10 +6,10 @@ const {
     GraphQLList,
     GraphQLBoolean,
     GraphQLNonNull
-} = graphql;
+} from "graphql";
 
-const ProductService = require("../../services/product.service")
-const ProductType = require("../types/product");
+import { getProductById } from "../../services/product.service";
+import ProductType from "../types/product";
 
 const CartItemType = new GraphQLObjectType({
     name: "CartItemType",
@@ -26,7 +25,7 @@ const CartItemType = new GraphQLObjectType({
         productID: { 
             type: ProductType,
             resolve(parentValue, args) {
-                return ProductService.getProductById(productID);
+                return getProductById(productID);
             }
         },
         quantityPurchased: { type: GraphQLInt },
@@ -44,9 +43,9 @@ const CartItemType = new GraphQLObjectType({
         oldQuantity: { type: GraphQLInt },
         fixedUSDAmount: { type: GraphQLInt },
         */
-    //    isInCheckout: { type: GraphQLString },
-    //    isPaidFor: { type: GraphQLString }
+    //    isInCheckout: { type: GraphQLBoolean },
+    //    isPaidFor: { type: GraphQLBoolean }
     })
 });
 
-module.exports = CartItemType;
+export default CartItemType;

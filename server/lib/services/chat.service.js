@@ -1,8 +1,4 @@
-"use strict";
-
-/** Firesbase */
-require("firebase");
-
+import "firebase";
 const chatRouter = require("express").Router();
 
 chatRouter.post("/threads", (req, res) => {
@@ -104,5 +100,5 @@ chatRouter.get("/threads/my-threads/:userID", (req, res) => {
         });
 });
 
-module.exports = chatRouter;
+export default chatRouter;
 //# sourceMappingURL=chats.js.map

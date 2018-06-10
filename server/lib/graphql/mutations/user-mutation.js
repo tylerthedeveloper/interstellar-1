@@ -1,7 +1,14 @@
-const graphql = require("graphql");
-const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString, GraphQLInt } = graphql;
-const UserType = require("../types/user");
-const UserService = require("../../services/user.service")
+import  {
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLID,
+    GraphQLInt,
+    GraphQLList,
+    GraphQLBoolean,
+    GraphQLNonNull
+} from "graphql";
+import UserType from "../types/user";
+import { createUser, deleteUser as _deleteUser, updateUser as _updateUser, verifySignature, getUserByUserPublicKey, getUserByUserId } from "../../services/user.service";
 
 export default {
     addUser: {
@@ -12,14 +19,14 @@ export default {
             publicKey: { type: GraphQLString }
         },
         resolve(parentValue, args) {
-            return UserService.createNewUser(args);
+            return createUser(args);
         }
     },
     deleteUser: {
         type: UserType,
         args: { id: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { id }) {
-            return UserService.deleteUser(id);
+            return _deleteUser(id);
         }
     },
     updateUser: {
@@ -31,7 +38,7 @@ export default {
             age: { type: GraphQLInt },
         },
         resolve(parentValue, args) {
-            return UserService.updateUser(args);
+            return _updateUser(args);
         }
     },
     login: {
@@ -45,20 +52,20 @@ export default {
 
 
             //only let the user through if they have the correct signature
-            if(!UserService.verifySignature(publicKey, payload, signature))
+            if(!verifySignature(publicKey, payload, signature))
                 return null;
 
 
-            return UserService.getUserByUserPublicKey(publicKey)
+            return getUserByPublicKey(publicKey)
 
                 //catch if the user does not exist and automatically create their account
                 .catch((err) => {
 
                     //account creation step
                     if(err === 'no user'){
-                        return UserService.createNewUser({publicKey: publicKey})
+                        return createNewUser({publicKey: publicKey})
                             .then((id) => {
-                                return UserService.getUserByUserId(data)
+                                return getUserById(data)
                             })
                     }
 

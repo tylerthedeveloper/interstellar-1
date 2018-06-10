@@ -1,4 +1,4 @@
-const firedb = require("../../_firebase");
+import firedb  from "../../_firebase";
 
 class CartService {
 
@@ -64,4 +64,4 @@ class CartService {
     // ────────────────────────────────────────────────────────────────────────────────
 }
 
-module.exports = new CartService();
+export default new CartService();

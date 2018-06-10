@@ -1,21 +1,20 @@
-const graphql = require("graphql");
-const { GraphQLList, GraphQLID, GraphQLNonNull } = graphql;
-const ProductType = require("../types/product");
-const ProductCategoryType = require("../types/product-category");
-const CategoryService = require("../../services/category.service")
+import { GraphQLList, GraphQLID, GraphQLString, GraphQLNonNull } from "graphql";
+import ProductType from "../types/product";
+import ProductCategoryType from "../types/product-category";
+import { getAllCategories, getProductsByCategory } from "../../services/category.service";
 
-module.exports = {
+export default {
     categories: {
         type: new GraphQLList(ProductCategoryType),
         resolve(parentValue, args) {
-            return CategoryService.getAllCategories();
+            return getAllCategories();
         }
     },
     productsInCategory: {
         type: new GraphQLList(ProductType),
         args: { categoryID: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { categoryID }) {
-            return CategoryService.getProductsByCategory(category);
+            return getProductsByCategory(category);
         }
     }
 };

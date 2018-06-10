@@ -1,9 +1,16 @@
-const graphql = require("graphql");
-const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString } = graphql;
-const ProductCategoryType = require("../types/product-category");
-const CategoryService = require("../../services/category.service")
+import  {
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLID,
+    GraphQLInt,
+    GraphQLList,
+    GraphQLBoolean,
+    GraphQLNonNull
+} from "graphql";
+import ProductCategoryType from "../types/product-category";
+import { createNewCategory } from "../../services/category.service";
 
-module.exports = {
+export default {
     addProductCategory: {
         type: ProductCategoryType,
         args: {
@@ -12,7 +19,7 @@ module.exports = {
             imageURL: { type: GraphQLString },
         },
         resolve(parentValue, args) {
-            return CategoryService.createNewCategory(args).then(res => res);
+            return createNewCategory(args).then(res => res);
         }
     }
 };

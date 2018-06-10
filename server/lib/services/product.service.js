@@ -1,7 +1,7 @@
 // import firebase from 'firebase';
 // import * as firebase from 'firebase/app';
 // import "@firebase/firestore";
-const firedb = require("../../_firebase");
+import firedb  from "../../_firebase";
 
 class ProductService {
 
@@ -97,4 +97,4 @@ class ProductService {
 }
 
 // ProductService = new ProductService();
-module.exports = new ProductService();
+export default new ProductService();

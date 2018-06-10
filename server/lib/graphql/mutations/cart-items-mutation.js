@@ -1,9 +1,17 @@
-const graphql = require("graphql");
-const { GraphQLID, GraphQLNonNull, GraphQLString, GraphQLInt } = graphql;
-const CartItemType = require("../types/cart-item");
-const CartService = require("../../services/cart.service")
+import  {
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLID,
+    GraphQLInt,
+    GraphQLList,
+    GraphQLBoolean,
+    GraphQLNonNull
+} from "graphql";
 
-module.exports = {
+import CartItemType from "../types/cart-item";
+import { addToCart as _addToCart, removeFromCart as _removeFromCart } from "../../services/cart.service";
+
+export default {
     addToCart : { 
         type: CartItemType,
         args: { 
@@ -18,7 +26,7 @@ module.exports = {
         resolve(parentValue, args, context) {
             // include context.session.currentUserID
             const userID = context.session.currentUserID;
-            return CartService.addToCart(userID, args);
+            return _addToCart(userID, args);
         }
     },
     removeFromCart: {
@@ -30,7 +38,7 @@ module.exports = {
         resolve(parentValue, { userID, cartItemID }, context) {
             // include context.session.currentUserID
             const _userID = context.session.currentUserID || userID;
-            return CartService.removeFromCart(_userID, cartItemID);
+            return _removeFromCart(_userID, cartItemID);
         }
     },
     // emptyCart: {

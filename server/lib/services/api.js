@@ -1,21 +1,21 @@
 "use strict";
 // https://coursetro.com/posts/code/84/Setting-up-an-Angular-4-MEAN-Stack-(Tutorial)
 /** express */
-const express = require("express");
-const router = express.Router();
-const userUtils = require("./utils.js");
+import { Router } from "express";
+const router = Router();
+import userUtils from "./utils.js";
 /** Express */
-const expressImport = require("express");
+import expressImport from "express";
 const expressEngine = expressImport();
 /** Cors */
-const cors = require("cors");
+import cors from "cors";
 expressEngine.use(cors({ origin: true }));
 /** Import Routes */
-const cartRoute = require("./cart.js");
-const categoryRoute = require("./category.js");
-const chatRoute = require("./chat.js");
-const usersRoute = require("./users.js");
-const productsRoute = require("./products.js");
+import cartRoute from "./cart.js";
+import categoryRoute from "./category.js";
+import chatRoute from "./chat.js";
+import usersRoute from "./users.js";
+import productsRoute from "./products.js";
 /** Assign Routes */
 router.use("/categories", categoryRoute);
 router.use("/cart", cartRoute);
@@ -27,5 +27,5 @@ const exporter = {
     router: router,
     expressEngine: expressEngine
 };
-module.exports = exporter;
+export default exporter;
 //# sourceMappingURL=api.js.map

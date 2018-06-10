@@ -1,5 +1,4 @@
-const graphql = require("graphql");
-const {
+import  {
     GraphQLObjectType,
     GraphQLString,
     GraphQLID,
@@ -7,10 +6,9 @@ const {
     GraphQLList,
     GraphQLBoolean,
     GraphQLNonNull
-} = graphql;
-
-const CategoryService = require("../../services/category.service")
-const ProductType = require("../types/product");
+} from "graphql";
+import { getProductsByCategory } from "../../services/category.service";
+import ProductType from "../types/product";
 
 const ProductCategoryType = new GraphQLObjectType({
     name: "ProductCategoryType",
@@ -24,7 +22,7 @@ const ProductCategoryType = new GraphQLObjectType({
         productsInCategory: {
             type: new GraphQLList(ProductType),
             resolve(parentValue, args) {
-                return CategoryService.getProductsByCategory(parentValue.category);
+                return getProductsByCategory(parentValue.category);
             }
         }
         // todo: long term:
@@ -33,4 +31,4 @@ const ProductCategoryType = new GraphQLObjectType({
     })
 });
 
-module.exports = ProductCategoryType;
+export default ProductCategoryType;

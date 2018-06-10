@@ -1,9 +1,17 @@
-const graphql = require("graphql");
-const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString } = graphql;
-const ProductType = require("../types/product");
-const ProductService = require("../../services/product.service").default
+import  {
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLID,
+    GraphQLInt,
+    GraphQLList,
+    GraphQLBoolean,
+    GraphQLNonNull
+} from "graphql";
 
-module.exports = {
+import ProductType from "../types/product";
+import ProductService from "../../services/product.service";
+
+export default {
     addProduct: {
         type: ProductType,
         // todo: add more props

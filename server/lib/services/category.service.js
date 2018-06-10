@@ -1,4 +1,4 @@
-const firedb = require("../../_firebase");
+import firedb  from "../../_firebase";
 
 class CategoryService {
 
@@ -42,4 +42,4 @@ class CategoryService {
     // ────────────────────────────────────────────────────────────────────────────────
 }
 
-module.exports = new CategoryService();
+export default new CategoryService();
