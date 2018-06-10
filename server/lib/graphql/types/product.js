@@ -32,18 +32,20 @@ const ProductType = new GraphQLObjectType({
         productAssetOptions: { type: new GraphQLList(GraphQLString) }, // valid???
         productThumbnailLink: { type: GraphQLString },
         productImages: { type: new GraphQLList(GraphQLString) },
-        productCategory: { type: GraphQLString },
-        productSellerData: { type: ProductSellerDataType },
         productListedAt: { type: GraphQLString },
+        productRating: { type: GraphQLInt },
 
-        // change???
-        // userID: { type: new GraphQLNonNull(GraphQLID) }
-        userID: { type: GraphQLID }
-        // # some day
-        // # productRating: Int
+        // todo: clarify type (string, category)
+        productCategoryID: { type: GraphQLString },
+        // change? this was grouped for organizational purposes
+        // productSellerData: { type: ProductSellerDataType }, 
+        productSellerID: { type: GraphQLString }
+
+        // todo: long term
+        // # productTags: [String] // in addition to category, extra options for search + filtering
         // # productReviews: [String]
         // # shippingInfo: ShippingInformation
-        // acceptedAssets: [AssetBalance]
+        // # acceptedAssets: [AssetBalance]
     })
 });
 

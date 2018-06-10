@@ -6,11 +6,11 @@ const firedb = require("../../_firebase");
 class ProductService {
 
     constructor() {
+        this.categorysCollection = firedb.collection('categories');
         this.productsCollection = firedb.collection('products');
-        this.userProductsCollection = firedb.collection('users-products');
+        // this.userProductsCollection = firedb.collection('users-products');
         // myProductRef;
         // this.productCategoriesCollection = afs.collection('products-categories');
-        // this.userProductsCollection = afs.collection('users-products');
     }
 
     //
@@ -23,9 +23,12 @@ class ProductService {
         const doc = this.productsCollection.doc();
         const docID = doc.id;
         product.id = docID;
-        console.log(product)
-        // todo: index vs duplication users-products
-        return doc
+        const categoryID = product.categoryID;
+        // todo: index vs duplication users-products / cat products
+        return this.categorysCollection
+            .doc(categoryID)
+            .collection("products")
+            .doc(docID)
             .set(product)
             .then((documentSnapshot) => docID);
     }
@@ -58,15 +61,23 @@ class ProductService {
      * @param  {string} userID
     */
     getProductsByUserID(userID) {
-        return this.userProductsCollection
-            .doc(userID)
-            .collection('products')
+        return this.productsCollection
+            .where("productSellerID", "==", userID)
             .get()
             .then(snapshot => 
                 snapshot.docs.map((docSnapshot) => 
                     docSnapshot.data()
                 )
             );
+        // return this.userProductsCollection
+        //     .doc(userID)
+        //     .collection('products')
+        //     .get()
+        //     .then(snapshot => 
+        //         snapshot.docs.map((docSnapshot) => 
+        //             docSnapshot.data()
+        //         )
+        //     );
     }
 
     updateProduct(product) {

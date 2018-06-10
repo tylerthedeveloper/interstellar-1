@@ -28,10 +28,10 @@ class CategoryService {
     /**
      * @param  {string} categoryID
      */
-    getProductsByCategory(category) {
-        console.log(category)
+    getProductsByCategory(categoryID) {
+        console.log(categoryID)
         return this.categorysCollection
-            .doc(category)
+            .doc(categoryID)
             .collection('products')
             .get()
             .then(snapshot => 

@@ -1,14 +1,7 @@
 const graphql = require("graphql");
 const { GraphQLList, GraphQLID, GraphQLNonNull, GraphQLString, GraphQLInt } = graphql;
 const UserType = require("../types/user");
-<<<<<<< HEAD
 const UserService = require("../../services/user.service")
-=======
-import UserService from  "../../services/user.service";
-
-
-// const axios = require("axios");
->>>>>>> c8b4d568b59f0995f6784f84873534788d21dfa6
 
 export default {
     addUser: {
