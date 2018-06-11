@@ -1,11 +1,12 @@
 import { GraphQLObjectType, GraphQLList, GraphQLID, GraphQLString, GraphQLNonNull } from "graphql";
 // todo: https://github.com/KyleAMathews/deepmerge
 import cartItemQuery from "./cart-items-query";
+import chatQuery from "./chat-query";
 import productCategoryQuery from "./product-category-query";
 import productQuery from "./product-query";
 import userQuery from "./user-query";
 
-const queryList = [cartItemQuery,productCategoryQuery, productQuery, userQuery];
+const queryList = [cartItemQuery, chatQuery, productCategoryQuery, productQuery, userQuery];
 
 /* 
     const sum = queryList.reduce((acc, cur) => {
@@ -24,6 +25,7 @@ const queryList = [cartItemQuery,productCategoryQuery, productQuery, userQuery];
 */ 
 const fields = () => ({
     ...cartItemQuery,
+    ...chatQuery,
     ...productCategoryQuery,
     ...productQuery,
     ...userQuery

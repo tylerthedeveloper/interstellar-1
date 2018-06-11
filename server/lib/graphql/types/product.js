@@ -51,7 +51,7 @@ const ProductType = new GraphQLObjectType({
             args: { productSellerID: { type: new GraphQLNonNull(GraphQLID) } },
             resolve(parentValue, args) {
                 const parentID = parentValue.id;
-                return UserService.getUserById(id);
+                return UserService.getUserById(parentValue.productSellerID);
             }
         }
         

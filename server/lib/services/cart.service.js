@@ -49,7 +49,6 @@ class CartService {
             .then((documentSnapshot) => 
                 documentSnapshot
             );
-
     }
     
     // todo: batching 

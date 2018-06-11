@@ -1,20 +1,37 @@
 import { GraphQLList, GraphQLID, GraphQLString, GraphQLNonNull } from "graphql";
-import { ChatThreadType, ChatMessageType } from "../types/chat";
-import CartService from "../../services/cart.service";
+import ChatThreadType from "../types/chat-thread";
+import ChatMessageType from "../types/chat-message";
+import ChatService from "../../services/chat.service";
 
 export default {
-    chats: {
+    chatThreads: {
         type: new GraphQLList(ChatThreadType),
         args: { userID: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { userID }, context) {
-            return CartService.getMyCart(context.session.currentUserID || userID);
+            const _userID = (context.session.currentUserID) ? context.session.currentUserID  : userID;
+            console.log(_userID)
+            return ChatService.getMyChats(_userID);
+        }
+    },
+    chatThread: {
+        type: ChatThreadType,
+        args: {             
+            userID: { type: new GraphQLNonNull(GraphQLID) },
+            chatThreadID: { type: new GraphQLNonNull(GraphQLID) },
+        },
+        resolve(parentValue, { userID, chatThreadID }, context) {
+            const _userID = (context.session.currentUserID) ? context.session.currentUserID  : userID;
+            return ChatService.getChatThread(_userID, chatThreadID);
         }
     },
     chatMessages: {
-        type: new GraphQLList(ProductType),
-        args: { userID: { type: new GraphQLNonNull(GraphQLID) } },
-        resolve(parentValue, { userID }, context) {
-            return CartService.getMyCart(context.session.currentUserID || userID);
+        type: new GraphQLList(ChatMessageType),
+        args: {             
+            userID: { type: new GraphQLNonNull(GraphQLID) },
+            chatThreadID: { type: new GraphQLNonNull(GraphQLID) },
+        },
+        resolve(parentValue, { userID, chatThreadID }, context) {
+            return ChatService.getMessagesForChat(context.session.currentUserID || userID, chatThreadID);
         }
     }
 };

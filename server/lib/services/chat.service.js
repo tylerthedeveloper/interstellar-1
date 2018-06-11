@@ -1,104 +1,83 @@
-import "firebase";
-const chatRouter = require("express").Router();
+// todo: duplication
+import firedb  from "../../_firebase";
 
-chatRouter.post("/threads", (req, res) => {
-    console.log("create thread");
-    const chatThreadObj = req.body;
-    const chatThreadID = chatThreadObj["chatThreadID"];
-    const senderFbID = chatThreadObj["senderFbID"];
-    const receiverFbID = chatThreadObj["receiverFbID"];
-    // console.log(req.afs)
-    console.log(chatThreadID);
-    const batch = req.db.batch();
-    const threadsRef = req.db.collection("user-chat-threads");
-    batch.set(
-        threadsRef
-            .doc(senderFbID)
+class ChatService {
+
+    constructor() {
+        this.chatMessagesCollection = firedb.collection('chat-threads');
+        this.userChatCollection = firedb.collection('user-chat-threads');
+    }
+
+    //
+    // ────────────────────────────────────────────────────────────────────────────── I ──────────
+    //   :::::: P U B L I C   C R U D   M E T H O D S : :  :   :    :     :        :          :
+    // ────────────────────────────────────────────────────────────────────────────────────────
+    //
+    createChatThread(chatThread) {
+        const doc = this.userChatCollection.doc();
+        const docID = doc.id;
+        chatThread.id = docID;
+        return doc
+            .set(chatThread)
+            .then((documentSnapshot) => docID);
+    }
+
+    getMyChats(userID) {
+        return this.userChatCollection
+            .doc(userID)
             .collection("chatThreads")
-            .doc(chatThreadID),
-        chatThreadObj
-    );
-    batch.set(
-        threadsRef
-            .doc(receiverFbID)
+            .get()
+            .then(snapshot => 
+                snapshot.docs.map((docSnapshot) => 
+                docSnapshot.data()
+            )
+        );
+    }
+
+    getChatThread(userID, chatThreadID) {
+        console.log(chatThreadID)
+        return this.chatMessagesCollection
+            // .doc(userID)
+            // .collection("chatThreads")
+            .doc(chatThreadID)
+            .get()
+            .then(docSnapshot => docSnapshot.data());
+    }
+
+    getMessagesForChat(userID, chatThreadID) {
+        return this.chatMessagesCollection
+            // .doc(userID)
+            // .collection("chatThreads")
+            .doc(chatThreadID)
+            .collection("chatMessages")
+            .get()
+            .then(snapshot => 
+                snapshot.docs.map((docSnapshot) => 
+                  docSnapshot.data()
+                )
+            );
+    }
+
+    addMessageToThread(userID, chatMessage) {
+        const doc = this.chatCollection.doc(userID).collection("chatThreads").doc(chatMessage.chatThreadID);
+        const docID = doc.id;
+        chatMessage.id = docID;
+        return doc
+            .set(chatMessage)
+            .then((documentSnapshot) => docID);
+    }
+
+    deleteChatThread(userID, chatThreadID) {
+        return this.chatCollection
+            .doc(userID)
             .collection("chatThreads")
-            .doc(chatThreadID),
-        chatThreadObj
-    );
-    batch
-        .commit()
-        .then((writeResult) => {
-            console.log(writeResult);
-            const IDPackage = JSON.stringify({ id: threadID });
-            res.status(res.statusCode).send(IDPackage);
-        })
-        .catch((err) => {
-            res.status(res.statusCode).json({ error: err.toString() });
-        });
-});
-
-chatRouter.get("/threads/:threadID", (req, res) => {
-    console.log("chat thread by id");
-    const threadID = req.params["threadID"];
-    req.db
-        .collection("chat-threads")
-        .doc(threadID)
-        .collection("chatMessages")
-        .orderBy("sentAt")
-        .get()
-        .then((collectionSnapshot) => {
-            const docs = collectionSnapshot.docs.map((documentSnapshot) =>
-                documentSnapshot.data()
+            .doc(chatThreadID)
+            .delete()
+            .then((documentSnapshot) => 
+                documentSnapshot
             );
-            // console.log(docs)
-            res.status(res.statusCode).send(docs);
-        })
-        .catch((err) => {
-            res.status(res.statusCode).json({ error: err.toString() });
-        });
-});
+    }
+    // ────────────────────────────────────────────────────────────────────────────────
+}
 
-chatRouter.post("/threads/:threadID", (req, res) => {
-    console.log("post message chat thread by id");
-    const threadID = req.params["threadID"];
-    const chatMessage = req.body;
-    console.log(chatMessage);
-    req.db
-        .collection("chat-threads")
-        .doc(threadID)
-        .collection("chatMessages")
-        .doc(threadID)
-        .set(chatMessage)
-        .then((writeResult) => {
-            // const docs = collectionSnapshot.docs.map((documentSnapshot) => documentSnapshot.data());
-            console.log(writeResult);
-            const IDPackage = JSON.stringify({ id: threadID });
-            res.status(res.statusCode).send(IDPackage);
-        })
-        .catch((err) => {
-            res.status(res.statusCode).json({ error: err.toString() });
-        });
-});
-
-chatRouter.get("/threads/my-threads/:userID", (req, res) => {
-    console.log("all user-chat-threads");
-    const userID = req.params["userID"];
-    req.db
-        .collection("user-chat-threads")
-        .doc(userID)
-        .collection("chatThreads")
-        .get()
-        .then((collectionSnapshot) => {
-            const docs = collectionSnapshot.docs.map((documentSnapshot) =>
-                documentSnapshot.data()
-            );
-            // console.log(docs)
-            res.status(res.statusCode).send(docs);
-        })
-        .catch((err) => {
-            res.status(res.statusCode).json({ error: err.toString() });
-        });
-});
-
-export default chatRouter;
-//# sourceMappingURL=chats.js.map
+export default new ChatService();

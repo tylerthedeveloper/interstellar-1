@@ -19,8 +19,6 @@ const CartItemType = new GraphQLObjectType({
         // cartItemID: { type: new GraphQLNonNull(GraphQLID) },
         cartItemID: { type: GraphQLID },
         timestamp: { type: GraphQLString },
-
-        // resolves these
         buyerUserID: {
             type: UserType,
             args: { buyerUserID: { type: new GraphQLNonNull(GraphQLID) } },
@@ -35,7 +33,6 @@ const CartItemType = new GraphQLObjectType({
                 return UserService.getUserById(sellerUserID);
             }
         },
-
         productID: { 
             type: ProductType,
             resolve(parentValue, args) {
