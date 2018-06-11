@@ -22,7 +22,6 @@ class CartService {
     }
 
     getMyCart(userID) {
-        console.log(userID)
         return this.cartItemsCollection
             .doc(userID)
             .collection("cartItems")

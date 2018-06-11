@@ -7,7 +7,7 @@ import  {
     GraphQLBoolean,
     GraphQLNonNull
 } from "graphql";
-import { getProductsByCategory } from "../../services/category.service";
+import CategoryService from "../../services/category.service";
 import ProductType from "../types/product";
 
 const ProductCategoryType = new GraphQLObjectType({
@@ -22,7 +22,7 @@ const ProductCategoryType = new GraphQLObjectType({
         productsInCategory: {
             type: new GraphQLList(ProductType),
             resolve(parentValue, args) {
-                return getProductsByCategory(parentValue.category);
+                return CategoryService.getProductsByCategory(parentValue.category);
             }
         }
         // todo: long term:

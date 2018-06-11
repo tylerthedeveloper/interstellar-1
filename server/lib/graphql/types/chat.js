@@ -9,7 +9,7 @@ import  {
 } from "graphql";
 import UserType from "../types/user";
 import UserService from "../../services/user.service";
-
+import ChatService from "../../services/chat.service";
 
 const ChatThreadType = new GraphQLObjectType({
   name:  'ChatThreadType',

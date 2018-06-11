@@ -8,7 +8,7 @@ import  {
     GraphQLNonNull
 } from "graphql";
 import ProductCategoryType from "../types/product-category";
-import { createNewCategory } from "../../services/category.service";
+import CategoryService from "../../services/category.service";
 
 export default {
     addProductCategory: {
@@ -19,7 +19,7 @@ export default {
             imageURL: { type: GraphQLString },
         },
         resolve(parentValue, args) {
-            return createNewCategory(args).then(res => res);
+            return CategoryService.createNewCategory(args).then(res => res);
         }
     }
 };

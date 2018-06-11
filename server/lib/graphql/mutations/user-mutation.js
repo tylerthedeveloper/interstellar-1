@@ -8,7 +8,7 @@ import  {
     GraphQLNonNull
 } from "graphql";
 import UserType from "../types/user";
-import { createUser, deleteUser as _deleteUser, updateUser as _updateUser, verifySignature, getUserByUserPublicKey, getUserByUserId } from "../../services/user.service";
+import UserService from "../../services/user.service";
 
 export default {
     addUser: {
@@ -19,14 +19,14 @@ export default {
             publicKey: { type: GraphQLString }
         },
         resolve(parentValue, args) {
-            return createUser(args);
+            return UserService.createUser(args);
         }
     },
     deleteUser: {
         type: UserType,
         args: { id: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { id }) {
-            return _deleteUser(id);
+            return UserService.deleteUser(id);
         }
     },
     updateUser: {
@@ -38,7 +38,7 @@ export default {
             age: { type: GraphQLInt },
         },
         resolve(parentValue, args) {
-            return _updateUser(args);
+            return UserService.updateUser(args);
         }
     },
     login: {
@@ -52,20 +52,20 @@ export default {
 
 
             //only let the user through if they have the correct signature
-            if(!verifySignature(publicKey, payload, signature))
+            if(!UserService.verifySignature(publicKey, payload, signature))
                 return null;
 
 
-            return getUserByPublicKey(publicKey)
+            return UserService.getUserByPublicKey(publicKey)
 
                 //catch if the user does not exist and automatically create their account
                 .catch((err) => {
 
                     //account creation step
                     if(err === 'no user'){
-                        return createNewUser({publicKey: publicKey})
+                        return UserService.createNewUser({publicKey: publicKey})
                             .then((id) => {
-                                return getUserById(data)
+                                return UserService.getUserById(data)
                             })
                     }
 

@@ -21,9 +21,23 @@ class CategoryService {
     }
 
     getAllCategories() {
-        return this.categorysCollection.get().then(snapshot => snapshot.docs.map((docSnapshot) => docSnapshot.data()));
+        return this.categorysCollection
+            .get()
+            .then(snapshot => 
+                snapshot.docs.map((docSnapshot) => 
+                docSnapshot.data()
+            )
+        );
     }
 
+    getCategoryByID(categoryID) {
+        return this.categorysCollection
+            .doc(categoryID)
+            .get()
+            .then((docSnapshot) => 
+                docSnapshot.data()
+            );
+    }
     /**
      * @param  {string} categoryID
      */

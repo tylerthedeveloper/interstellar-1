@@ -9,7 +9,7 @@ import  {
 } from "graphql";
 
 import ProductType from "./product";
-import { getProductsByUserID } from "../../services/product.service";
+import ProductService from "../../services/product.service";
 
 const UserType = new GraphQLObjectType({
     name: "UserType",
@@ -33,7 +33,7 @@ const UserType = new GraphQLObjectType({
             resolve(parentValue, args) {
                 const parentID = parentValue.id;
                 console.log(parentID);
-                return getProductsByUserID(parentID);
+                return ProductService.getProductsByUserID(parentID);
             }
         }
     })
