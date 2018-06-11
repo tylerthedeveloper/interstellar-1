@@ -10,6 +10,8 @@ import  {
 
 import ProductService from "../../services/product.service";
 import ProductType from "../types/product";
+import UserType from "../types/user";
+
 
 const CartItemType = new GraphQLObjectType({
     name: "CartItemType",
