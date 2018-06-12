@@ -17,8 +17,8 @@ export default {
         // todo: add more props
         args: {
             productName: { type: new GraphQLNonNull(GraphQLString) },
-            userID: { type: new GraphQLNonNull(GraphQLString) },
-            categoryID: { type: new GraphQLNonNull(GraphQLString) }
+            productSeller: { type: new GraphQLNonNull(GraphQLString) },
+            productCategory: { type: new GraphQLNonNull(GraphQLString) }
         },
         resolve(parentValue, args) {
             return ProductService.addProduct(args);

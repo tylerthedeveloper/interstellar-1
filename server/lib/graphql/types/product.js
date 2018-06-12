@@ -42,13 +42,13 @@ const ProductType = new GraphQLObjectType({
         productCategory: {
             type: ProductCategoryType,
             resolve(parentValue, args) {
-                return CategoryService.getCategoryByID(parentValue.category);
+                return CategoryService.getCategoryByID(parentValue.productCategory);
             }
         },
         productSeller: {
             type: UserType,
             resolve(parentValue, args) {
-                return UserService.getUserById(parentValue.productSellerID);
+                return UserService.getUserById(parentValue.productSeller);
             }
         }
         

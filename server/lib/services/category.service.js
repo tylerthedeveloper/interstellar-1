@@ -23,9 +23,9 @@ class CategoryService {
     getAllCategories() {
         return this.categorysCollection
             .get()
-            .then(snapshot => 
-                snapshot.docs.map((docSnapshot) => 
-                docSnapshot.data()
+            .then(querySnapshot => 
+                querySnapshot.docs.map((documentSnapshot) => 
+                    documentSnapshot.data()
             )
         );
     }
@@ -34,25 +34,12 @@ class CategoryService {
         return this.categorysCollection
             .doc(categoryID)
             .get()
-            .then((docSnapshot) => 
-                docSnapshot.data()
+            .then((documentSnapshot) => 
+                documentSnapshot.data()
             );
     }
-    /**
-     * @param  {string} categoryID
-     */
-    getProductsByCategory(categoryID) {
-        console.log(categoryID)
-        return this.categorysCollection
-            .doc(categoryID)
-            .collection('products')
-            .get()
-            .then(snapshot => 
-                snapshot.docs.map((docSnapshot) => 
-                    docSnapshot.data()
-                )
-            );
-    }
+
+
     // ────────────────────────────────────────────────────────────────────────────────
 }
 

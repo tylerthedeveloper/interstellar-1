@@ -1,6 +1,7 @@
 import { GraphQLList, GraphQLID, GraphQLString, GraphQLNonNull } from "graphql";
 import ProductType from "../types/product";
 import ProductService from "../../services/product.service";
+import UserType from "../types/user";
 
 export default {
     products: {
@@ -16,11 +17,16 @@ export default {
             return ProductService.getProductById(id);
         }
     },
+    sellers: {
+        type: new GraphQLList(UserType),
+        resolve (parentValue, args) {
+            return ProductService.getActiveSellers();
+        }
+    },
     userProducts: {
         type: new GraphQLList(ProductType),
         resolve (parentValue, { id }) {
             return ProductService.getProductsByUserID(id);
         }
-    },
-
+    }
 };

@@ -2,6 +2,7 @@ import { GraphQLList, GraphQLID, GraphQLString, GraphQLNonNull } from "graphql";
 import ProductType from "../types/product";
 import ProductCategoryType from "../types/product-category";
 import CategoryService from "../../services/category.service";
+import ProductService from "../../services/product.service";
 
 export default {
     categories: {
@@ -21,7 +22,7 @@ export default {
         type: new GraphQLList(ProductType),
         args: { categoryID: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { categoryID }) {
-            return CategoryService.getProductsByCategory(category);
+            return ProductService.getProductsByCategory(categoryID);
         }
     }
 };

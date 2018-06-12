@@ -75,22 +75,14 @@ class ChatService {
             .then((documentSnapshot) => docID);
     }
 
-    // todo: test for nested collection
-    // todo: decide if we want to allow this
-    // todo see above, how we decide who gets to delete?...
+    // todo: decide if we want to allow this; how we decide who gets to delete?
     deleteChatThread(chatPerson1, chatPerson2, chatThreadID) {
-        // const batch = firedb.batch();
-        // batch.
-        // return this`
-        //     // .where('chatPerson1', '==',`rson1)
-        //     // .where('chatPerson2', '==',`rson2)
-        //     .doc(chatThreadID)
-        //     // .collection("chatThreads")
-        //     // .delete()
-        //     .set(null)
-        //     .then((documentSnapshot) => 
-        //         documentSnapshot
-        //     );
+        return this.chatThreadsCollection
+            .doc(chatThreadID)
+            .set(null) // todo: test for nested collection
+            .then((documentSnapshot) => 
+                documentSnapshot
+            );
     }
     // ────────────────────────────────────────────────────────────────────────────────
 }

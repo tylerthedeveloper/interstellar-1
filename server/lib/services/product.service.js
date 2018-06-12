@@ -6,11 +6,9 @@ import firedb  from "../../_firebase";
 class ProductService {
 
     constructor() {
-        this.categorysCollection = firedb.collection('categories');
         this.productsCollection = firedb.collection('products');
-        // this.userProductsCollection = firedb.collection('users-products');
-        // myProductRef;
-        // this.productCategoriesCollection = afs.collection('products-categories');
+        this.sellersCollection = firedb.collection('users');
+        // // this.categorysCollection = firedb.collection('categories');
     }
 
     //
@@ -23,11 +21,9 @@ class ProductService {
         const doc = this.productsCollection.doc();
         const docID = doc.id;
         product.id = docID;
-        const categoryID = product.categoryID;
+        console.log(product)
         // todo: index vs duplication users-products / cat products
-        return this.categorysCollection
-            .doc(categoryID)
-            .collection("products")
+        return this.productsCollection
             .doc(docID)
             .set(product)
             .then((documentSnapshot) => docID);
@@ -38,9 +34,9 @@ class ProductService {
     getAllProducts() {
         return this.productsCollection
             .get()
-            .then(snapshot => 
-                snapshot.docs.map((docSnapshot) => 
-                    docSnapshot.data()
+            .then(querySnapshot => 
+                querySnapshot.docs.map((documentSnapshot) => 
+                    documentSnapshot.data()
                 )
             );
     }
@@ -53,9 +49,22 @@ class ProductService {
         return this.productsCollection
             .doc(productID)
             .get()
-            .then((documentSnapshot) => documentSnapshot.data());
+            .then((documentSnapshot) => 
+                documentSnapshot.data()
+            );
     }
 
+    getProductsByCategory(categoryID) {
+        console.log(categoryID)
+        return this.productsCollection
+            .where('category', '==', categoryID)
+            .get()
+            .then(snapshot => 
+                snapshot.docs.map((docSnapshot) => 
+                    docSnapshot.data()
+                )
+            );
+    }
 
     /**
      * @param  {string} userID
@@ -64,20 +73,28 @@ class ProductService {
         return this.productsCollection
             .where("productSellerID", "==", userID)
             .get()
-            .then(snapshot => 
-                snapshot.docs.map((docSnapshot) => 
-                    docSnapshot.data()
+            .then(querySnapshot => 
+                querySnapshot.docs.map((documentSnapshot) => 
+                    documentSnapshot.data()
                 )
             );
-        // return this.userProductsCollection
-        //     .doc(userID)
-        //     .collection('products')
-        //     .get()
-        //     .then(snapshot => 
-        //         snapshot.docs.map((docSnapshot) => 
-        //             docSnapshot.data()
-        //         )
-        //     );
+    }
+
+    getActiveSellers() {
+        return this.productsCollection 
+            .get()
+            .then(querySnapshot => {
+                const sellerIDs = new Set();
+                // FIXME: REMOVE THIS NULL CHECK, EVERY PRODUCT SHOULD HAVE A SELLER, THIS IS FOR CURRENT DATA TESTING ONLY
+                querySnapshot.docs.map((documentSnapshot) => {
+                    if (documentSnapshot.data().productSeller && documentSnapshot.data().productSeller !== null) 
+                        sellerIDs.add(this.sellersCollection.doc(documentSnapshot.data().productSeller))
+                    } 
+                )
+                console.log(sellerIDs)
+                return sellerIDs;
+            })
+            .then(sellerIDs => firedb.getAll(Array.from(sellerIDs)))
     }
 
     updateProduct(product) {
