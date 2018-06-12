@@ -19,24 +19,25 @@ const CartItemType = new GraphQLObjectType({
         // cartItemID: { type: new GraphQLNonNull(GraphQLID) },
         cartItemID: { type: GraphQLID },
         timestamp: { type: GraphQLString },
-        buyerUserID: {
+        buyer: {
             type: UserType,
-            args: { buyerUserID: { type: new GraphQLNonNull(GraphQLID) } },
-            resolve(parentValue, { buyerUserID }) {
-                return UserService.getUserById(buyerUserID);
+            // args: { buyerUserID: { type: new GraphQLNonNull(GraphQLID) } },
+            resolve(parentValue, args) {
+                return UserService.getUserById(parentValue.buyerUser);
             }
         },
-        sellerUserID: {
-            type: UserType,
-            args: { sellerUserID: { type: new GraphQLNonNull(GraphQLID) } },
-            resolve(parentValue, { sellerUserID }) {
-                return UserService.getUserById(sellerUserID);
-            }
-        },
-        productID: { 
+        // todo: Optional, we can get from product
+        // sellerUserID: {
+        //     type: UserType,
+        //     args: { sellerUserID: { type: new GraphQLNonNull(GraphQLID) } },
+        //     resolve(parentValue, { sellerUserID }) {
+        //         return UserService.getUserById(sellerUserID);
+        //     }
+        // },
+        product: { 
             type: ProductType,
             resolve(parentValue, args) {
-                return ProductService.getProductById(productID);
+                return ProductService.getProductById(parentValue.product);
             }
         },
         quantityPurchased: { type: GraphQLInt },

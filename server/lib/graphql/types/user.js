@@ -31,9 +31,7 @@ const UserType = new GraphQLObjectType({
         myProducts: {
             type: new GraphQLList(ProductType),
             resolve(parentValue, args) {
-                const parentID = parentValue.id;
-                console.log(parentID);
-                return ProductService.getProductsByUserID(parentID);
+                return ProductService.getProductsByUserID(parentValue.id);
             }
         }
     })

@@ -4,8 +4,7 @@ import firedb  from "../../_firebase";
 class ChatService {
 
     constructor() {
-        this.chatMessagesCollection = firedb.collection('chat-threads');
-        this.userChatCollection = firedb.collection('user-chat-threads');
+        this.chatThreadsCollection = firedb.collection('chat-threads');
     }
 
     //
@@ -14,40 +13,48 @@ class ChatService {
     // ────────────────────────────────────────────────────────────────────────────────────────
     //
     createChatThread(chatThread) {
-        const doc = this.userChatCollection.doc();
+        const doc = this.chatThreadsCollection.doc();
         const docID = doc.id;
-        chatThread.id = docID;
+        chatThread.chatThreadID = docID;
+        console.log(docID)
         return doc
             .set(chatThread)
             .then((documentSnapshot) => docID);
     }
 
+    // todo: verify this makes sense here 
     getMyChats(userID) {
-        return this.userChatCollection
-            .doc(userID)
-            .collection("chatThreads")
+        return this.chatThreadsCollection
+            .where('chatPerson1', '==', userID)
             .get()
             .then(snapshot => 
                 snapshot.docs.map((docSnapshot) => 
-                docSnapshot.data()
+                    docSnapshot.data()
+            )            
+        )
+        .then(firstColDocs => 
+            this.chatThreadsCollection
+                .where('chatPerson2', '==', userID)
+                .get()
+                .then(snapshot => 
+                    firstColDocs.concat(
+                        snapshot.docs.map(
+                            (docSnapshot) => 
+                                docSnapshot.data())
+                    )
+                )
             )
-        );
     }
 
-    getChatThread(userID, chatThreadID) {
-        console.log(chatThreadID)
-        return this.chatMessagesCollection
-            // .doc(userID)
-            // .collection("chatThreads")
+    getChatThread(chatThreadID) {
+        return this.chatThreadsCollection
             .doc(chatThreadID)
             .get()
             .then(docSnapshot => docSnapshot.data());
     }
 
-    getMessagesForChat(userID, chatThreadID) {
-        return this.chatMessagesCollection
-            // .doc(userID)
-            // .collection("chatThreads")
+    getMessagesForChat(chatThreadID) {
+        return this.chatThreadsCollection
             .doc(chatThreadID)
             .collection("chatMessages")
             .get()
@@ -58,24 +65,32 @@ class ChatService {
             );
     }
 
-    addMessageToThread(userID, chatMessage) {
-        const doc = this.chatCollection.doc(userID).collection("chatThreads").doc(chatMessage.chatThreadID);
+    addMessageToThread(chatMessage) {
+        const doc = this.chatThreadsCollection.doc(chatMessage.chatThread).collection("chatMessages").doc();
         const docID = doc.id;
-        chatMessage.id = docID;
+        chatMessage.chatMessageID = docID;
+        console.log(chatMessage)
         return doc
             .set(chatMessage)
             .then((documentSnapshot) => docID);
     }
 
-    deleteChatThread(userID, chatThreadID) {
-        return this.chatCollection
-            .doc(userID)
-            .collection("chatThreads")
-            .doc(chatThreadID)
-            .delete()
-            .then((documentSnapshot) => 
-                documentSnapshot
-            );
+    // todo: test for nested collection
+    // todo: decide if we want to allow this
+    // todo see above, how we decide who gets to delete?...
+    deleteChatThread(chatPerson1, chatPerson2, chatThreadID) {
+        // const batch = firedb.batch();
+        // batch.
+        // return this`
+        //     // .where('chatPerson1', '==',`rson1)
+        //     // .where('chatPerson2', '==',`rson2)
+        //     .doc(chatThreadID)
+        //     // .collection("chatThreads")
+        //     // .delete()
+        //     .set(null)
+        //     .then((documentSnapshot) => 
+        //         documentSnapshot
+        //     );
     }
     // ────────────────────────────────────────────────────────────────────────────────
 }

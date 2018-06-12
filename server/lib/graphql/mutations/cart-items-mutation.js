@@ -28,7 +28,8 @@ export default {
         type: CartItemType,
         args: { cartItemID: { type: new GraphQLNonNull(GraphQLID) } },
         resolve(parentValue, { cartItemID }, context) {
-            return CartService.removeFromCart(context.session.currentUserID, cartItemID);
+            if (context.session.currentUserID) return CartService.removeFromCart(context.session.currentUserID, cartItemID);
+            // else return context.session.Cart.removeFromCart(cartItemID);
         }
     },
     // emptyCart: {

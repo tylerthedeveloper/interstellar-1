@@ -16,38 +16,35 @@ export default {
     createChatThread: { 
         type: ChatThreadType,
         args: { 
-            // todo populated from context
-            senderID: { type: new GraphQLNonNull(GraphQLID) },
-            receiverID: { type: new GraphQLNonNull(GraphQLID) },
+            chatPerson1: { type: new GraphQLNonNull(GraphQLID) },
+            chatPerson2: { type: new GraphQLNonNull(GraphQLID) },
         },
-        resolve(parentValue, { senderID, receiverID }, context) {
-            return ChatService.createChatThread(context.session.currentUserID || senderID, receiverID);
+        resolve(parentValue, args, context) {
+            return ChatService.createChatThread(args);
         }
     },
-    deleteChatThread: {
-        type: ChatThreadType,
-            // todo populated from context        
-        args: {             
-                senderID: { type: new GraphQLNonNull(GraphQLID) },
-                chatThreadID: { type: new GraphQLNonNull(GraphQLID) },
-        },
-        resolve(parentValue, { senderID, chatThreadID }, context) {
-            return ChatService.deleteChatThread(context.session.currentUserID || senderID, chatThreadID);
-        }
-    },
+    // todo: not sure if i want to allow this
+    // deleteChatThread: {
+    //     type: ChatThreadType,
+    //     args: {             
+    //             chatThreadID: { type: new GraphQLNonNull(GraphQLID) },
+    //     },
+    //     resolve(parentValue, { chatThreadID }, context) {
+    //         return ChatService.deleteChatThread(chatThreadID);
+    //     }
+    // },
     addMessageToThread: {
         type: ChatMessageType,
         args: {
-            chatThreadID: { type: new GraphQLNonNull(GraphQLID) },
-            chatMessageID: { type: new GraphQLNonNull(GraphQLID) },
-            senderID: { type: new GraphQLNonNull(GraphQLID) },
-            receiverID: { type: new GraphQLNonNull(GraphQLID) },
-            receiverID: { type: new GraphQLNonNull(GraphQLString) },
+            chatThread: { type: new GraphQLNonNull(GraphQLID) },
+            sender: { type: new GraphQLNonNull(GraphQLID) },
+            receiver: { type: new GraphQLNonNull(GraphQLID) },
+            text: { type: new GraphQLNonNull(GraphQLString) },
             // todO: Date or timestring from here or server ??
             sentAt: { type: GraphQLString }, 
          },
         resolve(parentValue, args, context) {
-            return ChatService.addMessageToThread(context.session.currentUserID, args);
+            return ChatService.addMessageToThread(args);
         }
     }
     // markMessageAsRead: {}

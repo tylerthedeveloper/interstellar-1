@@ -15,27 +15,28 @@ import ChatMessageType from "./chat-message";
 const ChatThreadType = new GraphQLObjectType({
     name:  'ChatThreadType',
     fields: () => ({
-            chatThreadID: { type: new GraphQLNonNull(GraphQLID) },
-            senderID: { 
-                type: UserType,
-                resolve(parentValue, args, context) {
-                    return UserService.getUserById(parentValue.senderID)
-                }
-            },
-            receiverID: { 
-                type: UserType,
-                resolve(parentValue, args) {
-                    return UserService.getUserById(parentValue.receiverID)
-                }
-            },
-            chatMessages: {
-                type: new GraphQLList(ChatMessageType),
-                resolve(parentValue, args) {
-                    console.log(parentValue.chatThreadID)
-                    return ChatService.getMessagesForChat("some user id", parentValue.chatThreadID)
-                }
+        // chatThreadID: { type: new GraphQLNonNull(GraphQLID) },
+        chatThreadID: { type: GraphQLID },
+        chatPerson1: { 
+            type: UserType,
+            resolve(parentValue, args, context) {
+                return UserService.getUserById(parentValue.chatPerson1)
             }
-        })
-    });
+        },
+        chatPerson2: { 
+            type: UserType,
+            resolve(parentValue, args) {
+                return UserService.getUserById(parentValue.chatPerson2)
+            }
+        },
+        chatMessages: {
+            type: new GraphQLList(ChatMessageType),
+            resolve(parentValue, args) {
+                console.log(parentValue.chatThread)
+                return ChatService.getMessagesForChat("some user id", parentValue.chatThreadID)
+            }
+        }
+    })
+});
 
 export default ChatThreadType;

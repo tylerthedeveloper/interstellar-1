@@ -27,7 +27,7 @@ export default {
     currentUser : {
         type: UserType,
         resolve(user, args, context) {
-            if(!context.session.currentUserID) return null;
+            if (!context.session.currentUserID) return null;
             else return UserService.getUserById(context.session.currentUserID);
         }
     }

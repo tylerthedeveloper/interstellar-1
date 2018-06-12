@@ -15,23 +15,23 @@ const ChatMessageType = new GraphQLObjectType({
     name:  'ChatMessageType',
     fields: () => ({
         chatMessageID: { type: GraphQLID },
-        chatThreadID: { 
+        chatThread: { 
             type: ChatThreadType,
             resolve(parentValue, args, context) {
-                return ChatService.getChatThread(parentValue.chatThreadID)
+                return ChatService.getChatThread(parentValue.chatThread)
             }
         },
         sentAt: { type: GraphQLString }, // Date or timestring
-        senderID: { 
+        sender: { 
             type: UserType,
             resolve(parentValue, args, context) {
-                return UserService.getUserById(parentValue.senderID)
+                return UserService.getUserById(parentValue.sender)
             }
         },
-        receiverID: { 
+        receiver: { 
             type: UserType,
             resolve(parentValue, args) {
-                return UserService.getUserById(parentValue.receiverID)
+                return UserService.getUserById(parentValue.receiver)
             }
         },
         text: { type: GraphQLString },

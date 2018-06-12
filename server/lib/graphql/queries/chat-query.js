@@ -16,22 +16,20 @@ export default {
     chatThread: {
         type: ChatThreadType,
         args: {             
-            userID: { type: new GraphQLNonNull(GraphQLID) },
             chatThreadID: { type: new GraphQLNonNull(GraphQLID) },
         },
-        resolve(parentValue, { userID, chatThreadID }, context) {
-            const _userID = (context.session.currentUserID) ? context.session.currentUserID  : userID;
-            return ChatService.getChatThread(_userID, chatThreadID);
+        resolve(parentValue, { chatThreadID }, context) {
+            return ChatService.getChatThread(chatThreadID);
         }
     },
     chatMessages: {
         type: new GraphQLList(ChatMessageType),
         args: {             
-            userID: { type: new GraphQLNonNull(GraphQLID) },
+            // userID: { type: new GraphQLNonNull(GraphQLID) },
             chatThreadID: { type: new GraphQLNonNull(GraphQLID) },
         },
-        resolve(parentValue, { userID, chatThreadID }, context) {
-            return ChatService.getMessagesForChat(context.session.currentUserID || userID, chatThreadID);
+        resolve(parentValue, { chatThreadID }, context) {
+            return ChatService.getMessagesForChat(chatThreadID);
         }
     }
 };

@@ -7,6 +7,7 @@ import  {
     GraphQLBoolean,
     GraphQLNonNull
 } from "graphql";
+import ProductCategoryType from './product-category';
 import UserType from './user';
 import UserService from "../../services/user.service";
 
@@ -38,19 +39,15 @@ const ProductType = new GraphQLObjectType({
         productListedAt: { type: GraphQLString },
         productRating: { type: GraphQLInt },
 
-        // test these
-        productCategoryID: {
-            type: UserType,
-            args: { productCategoryID: { type: new GraphQLNonNull(GraphQLID) } },
+        productCategory: {
+            type: ProductCategoryType,
             resolve(parentValue, args) {
                 return CategoryService.getCategoryByID(parentValue.category);
             }
         },
-        productSellerID: {
+        productSeller: {
             type: UserType,
-            args: { productSellerID: { type: new GraphQLNonNull(GraphQLID) } },
             resolve(parentValue, args) {
-                const parentID = parentValue.id;
                 return UserService.getUserById(parentValue.productSellerID);
             }
         }
