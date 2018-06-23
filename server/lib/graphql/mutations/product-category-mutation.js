@@ -15,7 +15,7 @@ export default {
         type: ProductCategoryType,
         args: {
             category: { type: GraphQLString },
-            descripton: { type: GraphQLString },
+            description: { type: GraphQLString },
             imageURL: { type: GraphQLString },
         },
         resolve(parentValue, args) {

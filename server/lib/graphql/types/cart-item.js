@@ -3,9 +3,6 @@ import  {
     GraphQLString,
     GraphQLID,
     GraphQLInt,
-    GraphQLList,
-    GraphQLBoolean,
-    GraphQLNonNull
 } from "graphql";
 
 import ProductService from "../../services/product.service";

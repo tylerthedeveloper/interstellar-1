@@ -1,15 +1,11 @@
-const schema = `
-    input AssetBalanceInput {
-        balance: String
-        asset_type: String
-        coin_name: String
-    }
+import  {
+    GraphQLObjectType,
+} from "graphql";
 
-    type AssetBalance {
-        balance: String
-        asset_type: String
-        coin_name: String
-    }
-`;
-
-module.exports = schema;
+const AssetBalanceType = new GraphQLObjectType({
+    name:  'AssetBalanceType',
+    fields: () => ({
+        // ...
+    })
+})
+export default ChatMessageType;

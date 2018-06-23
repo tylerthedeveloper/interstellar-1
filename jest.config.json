@@ -1,0 +1,9 @@
+{
+    "verbose": true,
+    "bail": false,
+    "collectCoverage": false,
+    "modulePathIgnorePatterns": ["node_modules"],
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    }
+}

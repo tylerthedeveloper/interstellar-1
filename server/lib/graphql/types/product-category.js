@@ -4,8 +4,6 @@ import  {
     GraphQLID,
     GraphQLInt,
     GraphQLList,
-    GraphQLBoolean,
-    GraphQLNonNull
 } from "graphql";
 import CategoryService from "../../services/category.service";
 import ProductType from "../types/product";
@@ -16,7 +14,7 @@ const ProductCategoryType = new GraphQLObjectType({
         // id: { type: new GraphQLNonNull(GraphQLString) }, // todo issuer with null resolve coming back from a write
         id: { type: GraphQLID },
         category: { type: GraphQLString },
-        descripton: { type: GraphQLString },
+        description: { type: GraphQLString },
         imageURL: { type: GraphQLString },
         numberOfProducts: { type: GraphQLInt },
         productsInCategory: {

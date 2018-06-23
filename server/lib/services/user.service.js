@@ -20,9 +20,9 @@ class UserService {
             .get()
             .then(snapshot => 
                 snapshot.docs.map((docSnapshot) => 
-                docSnapshot.data()
-            )
-        );
+                    docSnapshot.data()
+                )
+            );
     }
 
     /**

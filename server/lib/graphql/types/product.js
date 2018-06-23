@@ -4,8 +4,6 @@ import  {
     GraphQLID,
     GraphQLInt,
     GraphQLList,
-    GraphQLBoolean,
-    GraphQLNonNull
 } from "graphql";
 import ProductCategoryType from './product-category';
 import UserType from './user';

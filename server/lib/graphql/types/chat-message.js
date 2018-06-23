@@ -2,10 +2,6 @@ import  {
     GraphQLObjectType,
     GraphQLString,
     GraphQLID,
-    GraphQLInt,
-    GraphQLList,
-    GraphQLBoolean,
-    GraphQLNonNull
 } from "graphql";
 import ChatThreadType from "../types/chat-thread";
 import ChatService from "../../services/chat.service";

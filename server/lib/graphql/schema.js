@@ -14,13 +14,9 @@
     module.exports = schema;
 */
 
-const graphql = require("graphql");
-const axios = require("axios");
-const { makeExecutableSchema, mergeSchemas } = require("graphql-tools");
-const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLSchema } = graphql;
-
 import query from "./queries/root-query.js";
 import mutation from "./mutations/root-mutation.js";
+import { GraphQLSchema } from "graphql";
 
 export default new GraphQLSchema({
     query,

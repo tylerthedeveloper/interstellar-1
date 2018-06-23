@@ -1,4 +1,4 @@
-import { GraphQLObjectType, GraphQLList, GraphQLID, GraphQLString, GraphQLNonNull } from "graphql";
+import { GraphQLObjectType } from "graphql";
 // todo: https://github.com/KyleAMathews/deepmerge
 import cartItemQuery from "./cart-items-query";
 import chatQuery from "./chat-query";

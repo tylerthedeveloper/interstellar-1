@@ -9,25 +9,6 @@ const schema = `
         assetBalance: [AssetBalance]
         memo: String!
     }
-    type TransactionRecord {
-        # TODO: below 2.....
-        transactionID: String!
-        timestamp: String!
-        buyerUserID: String!
-        senderPublicKey: String!
-        sellerUserID: String!
-        receiverPublicKey: String!
-        assetPurchaseDetails: AssetBalance
-        memo: String!
-        productID: String!
-        productName: String!
-        productShortDescription: String!
-        oldQuantity: Int!
-        quantityPurchased: Int!
-        fixedUSDAmount: Int!
-        productCategory: String!
-        orderType: OrderType
-    }
     type TransactionGroup {
         transactionGroupID: String!
         sellerPublicKey: String!
@@ -38,4 +19,45 @@ const schema = `
     }
 `;
 
-module.exports = schema;
+import  {
+    GraphQLObjectType,
+    GraphQLString,
+    GraphQLID,
+    GraphQLInt,
+} from "graphql";
+import UserType from "../types/user";
+import ProductType from "./product";
+import UserService from "../../services/user.service";
+
+const TransactionRecordType = new GraphQLObjectType({
+    name:  'TransactionRecordType',
+    fields: () => ({
+        transactionRecordID: { type: GraphQLID },
+        buyer: { 
+            type: UserType,
+            resolve(parentValue, args, context) {
+                return UserService.getUserById(parentValue.user)
+            }
+        },
+        product: { 
+            type: ProductType,
+            resolve(parentValue, args, context) {
+                return UserService.getUserById(parentValue.user)
+            }
+        },
+        quantityPurchased: { type: GraphQLInt },
+        transactionRecordTimestamp: { type: GraphQLString },
+        
+        // ???
+        orderType: { type: GraphQLString },
+        
+        // ???
+        memo: { type: GraphQLString },
+
+        // ???
+        assetPurchaseDetails: AssetBalance
+
+    })
+});
+
+export default ChatThreadType;
