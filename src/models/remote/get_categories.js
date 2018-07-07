@@ -6,7 +6,7 @@ export default gql`
         categories{
             id
             category
-            descripton
+            description
             numberOfProducts
         }
     }
