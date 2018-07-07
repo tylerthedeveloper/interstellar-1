@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import { ApolloProvider } from "react-apollo";
-import { Provider as MOBXProvider } from 'mobx-react';
+import { Provider as MOBXProvider } from "mobx-react";
 
 import client from "./api/gql/client";
 import StellarService from "./api/rest/stellar";

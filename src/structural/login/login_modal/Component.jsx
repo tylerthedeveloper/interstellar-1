@@ -12,7 +12,7 @@ import {
     CircularProgress
 } from "@material-ui/core";
 import injectSheet from "react-jss";
-import {observer, inject} from 'mobx-react';
+import { observer, inject } from "mobx-react";
 
 /****  TYPES ******/
 type classProp = {
@@ -37,14 +37,8 @@ export type LoginModalProps = {
 @inject("account")
 @observer
 class LoginModal extends React.Component<any, any> {
-
-
     render() {
-        const {
-            classes,
-            ui,
-            account
-        } = this.props;
+        const { classes, ui, account } = this.props;
 
         return (
             <Dialog
@@ -71,7 +65,9 @@ class LoginModal extends React.Component<any, any> {
                         fullWidth
                         error={Boolean(ui.loginModalErrorMessage)}
                         InputProps={{
-                            endAdornment: ui.loginModaLoading && <CircularProgress />
+                            endAdornment: ui.loginModaLoading && (
+                                <CircularProgress />
+                            )
                         }}
                     />
                     {ui.loginModalErrorMessage && (
@@ -90,7 +86,7 @@ class LoginModal extends React.Component<any, any> {
                         Cancel
                     </Button>
                     <Button
-                        onClick={()=>account.login()}
+                        onClick={() => account.login()}
                         color="primary"
                         variant={"raised"}
                     >

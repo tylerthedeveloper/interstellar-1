@@ -2,19 +2,15 @@
 
 import React from "react";
 import { Mutation, Query } from "react-apollo";
-import { inject } from 'mobx-react';
+import { inject } from "mobx-react";
 
-import {
-    getCurrentUser,
-    logout
-} from "../../api/gql/auth";
+import { getCurrentUser, logout } from "../../api/gql/auth";
 import NavBarComponent from "./Component";
 
-@inject('account')
+@inject("account")
 class NavBar extends React.PureComponent<any> {
     render() {
-
-        const {account} = this.props;
+        const { account } = this.props;
 
         return (
             <Query query={getCurrentUser}>
@@ -33,7 +29,6 @@ class NavBar extends React.PureComponent<any> {
                             }}
                             onCompleted={account.clearAccountInfo}
                         >
-
                             {(logout) => (
                                 <NavBarComponent
                                     loggedIn={Boolean(data.currentUser)}
