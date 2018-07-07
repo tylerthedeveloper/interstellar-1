@@ -1,7 +1,11 @@
 import gql from 'graphql-tag';
 
 
-export default gql`
+/*********************************
+ * Queries
+ *********************************/
+
+export const getCategoryInfo =  gql`
     query {
         categories{
             id

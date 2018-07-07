@@ -7,7 +7,7 @@ import { AppBar, Toolbar, Typography, Button, Icon } from "@material-ui/core";
 import injectSheet from "react-jss";
 
 import NavButton from "./NavButtonComponent";
-import { StatusSymbols } from "../../models/local/login_modal";
+import { inject, observer } from "mobx-react/index";
 
 /****  TYPES ******/
 type ClassProp = {
@@ -21,9 +21,12 @@ type ComponentProps = {
 };
 
 /****  COMPONENT ******/
-class NavBar extends React.PureComponent<ComponentProps & ClassProp> {
+@inject("ui")
+@inject("account")
+@observer
+class NavBar extends React.Component<any> {
     render() {
-        const { classes, toggleLoginModal, loggedIn, logout } = this.props;
+        const { classes, ui, account, loggedIn, logout } = this.props;
         return [
             <AppBar position="static" key={"app-bar"}>
                 <Toolbar>
@@ -42,7 +45,7 @@ class NavBar extends React.PureComponent<ComponentProps & ClassProp> {
                             </Button>
                         ) : (
                             <Button
-                                onClick={toggleLoginModal}
+                                onClick={ui.openLoginModal}
                                 variant={"raised"}
                             >
                                 Login / Sign Up
@@ -83,4 +86,4 @@ const styles = {
 };
 
 /****  EXPORT ******/
-export default (injectSheet(styles)(NavBar): ComponentType<ComponentProps>);
+export default (injectSheet(styles)(NavBar): ComponentType<any>);

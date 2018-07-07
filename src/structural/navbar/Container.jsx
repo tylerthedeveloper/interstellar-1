@@ -1,49 +1,49 @@
 // @flow
 
 import React from "react";
+import { Mutation, Query } from "react-apollo";
+import { inject } from 'mobx-react';
 
 import {
-    getLoginStatus,
-    toggleLoginModalStatus,
-    logout,
-    getCurrentUserID
-} from "../../models/local/login_modal";
+    getCurrentUser,
+    logout
+} from "../../api/gql/auth";
 import NavBarComponent from "./Component";
-import { Mutation, Query } from "react-apollo";
 
-class NavBar extends React.PureComponent<{}> {
+@inject('account')
+class NavBar extends React.PureComponent<any> {
     render() {
-        return (
-            <Mutation mutation={toggleLoginModalStatus}>
-                {(toggle) => (
-                    <Query query={getCurrentUserID}>
-                        {({ data, loading }) => {
-                            if (loading) return <div />;
 
-                            return (
-                                <Mutation
-                                    mutation={logout}
-                                    update={(cache) => {
-                                        cache.writeData({
-                                            data: {
-                                                currentUser: null
-                                            }
-                                        });
-                                    }}
-                                >
-                                    {(logout) => (
-                                        <NavBarComponent
-                                            loggedIn={Boolean(data.currentUser)}
-                                            toggleLoginModal={toggle}
-                                            logout={logout}
-                                        />
-                                    )}
-                                </Mutation>
-                            );
-                        }}
-                    </Query>
-                )}
-            </Mutation>
+        const {account} = this.props;
+
+        return (
+            <Query query={getCurrentUser}>
+                {({ data, loading }) => {
+                    if (loading) return <div />;
+
+                    return (
+                        <Mutation
+                            mutation={logout}
+                            update={(cache) => {
+                                cache.writeData({
+                                    data: {
+                                        currentUser: null
+                                    }
+                                });
+                            }}
+                            onCompleted={account.clearAccountInfo}
+                        >
+
+                            {(logout) => (
+                                <NavBarComponent
+                                    loggedIn={Boolean(data.currentUser)}
+                                    logout={logout}
+                                />
+                            )}
+                        </Mutation>
+                    );
+                }}
+            </Query>
         );
     }
 }

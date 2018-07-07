@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import query from "../../../models/remote/get_categories";
+import { getCategoryInfo } from "../../../api/gql/categories";
 
 import CategoryComponent from "./Component";
 import { Query } from "react-apollo";
@@ -10,7 +10,7 @@ import { Query } from "react-apollo";
 class Category extends React.PureComponent<{}> {
     render() {
         return (
-            <Query query={query}>
+            <Query query={ getCategoryInfo }>
                 {({ data, loading, error }) => {
                     if (loading || error) return <div />;
 

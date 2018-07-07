@@ -91,4 +91,4 @@ class StellarService {
 
 }
 
-export default new StellarService();
+export default StellarService;

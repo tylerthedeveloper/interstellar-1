@@ -12,8 +12,7 @@ import {
     CircularProgress
 } from "@material-ui/core";
 import injectSheet from "react-jss";
-
-import { StatusSymbols } from "../../../models/local/login_modal";
+import {observer, inject} from 'mobx-react';
 
 /****  TYPES ******/
 type classProp = {
@@ -34,43 +33,23 @@ export type LoginModalProps = {
 //Secret Key (Public Network): SB6ZKPBDEWFQ7CGV7IPV3QUBU6MSR232LWHOIURIHPHICOSWCAPEQDSC
 //Secret Key (Test Network): SAKRB7EE6H23EF733WFU76RPIYOPEWVOMBBUXDQYQ3OF4NF6ZY6B6VLW
 
-class LoginModal extends React.Component<
-    LoginModalProps & classProp,
-    { key: string }
-> {
-    state = {
-        key: ""
-    };
+@inject("ui")
+@inject("account")
+@observer
+class LoginModal extends React.Component<any, any> {
 
-    onInput = (event: SyntheticEvent<HTMLInputElement>) => {
-        this.setState({
-            key: (event.target: any).value
-        });
-    };
-
-    shouldComponentUpdate = (nextProps, nextState) => {
-        //hack to clear the secret key if the modal closes without logging in
-        if (this.props.open === true && nextProps.open === false) {
-            this.setState({ key: "" });
-        }
-
-        return true;
-    };
 
     render() {
         const {
             classes,
-            open,
-            onClose,
-            onLogin,
-            errorMessage,
-            loading
+            ui,
+            account
         } = this.props;
 
         return (
             <Dialog
-                open={open}
-                onBackdropClick={onClose}
+                open={ui.loginModalOpen}
+                onBackdropClick={ui.closeLoginModal}
                 aria-labelledby="form-dialog-title"
                 fullWidth={true}
                 maxWidth={"sm"}
@@ -87,35 +66,31 @@ class LoginModal extends React.Component<
                         id="private-key-log-in"
                         label="Secret Key"
                         type="password"
-                        onChange={this.onInput}
-                        value={this.state.key}
+                        onChange={account.setKeyFromInputEvent}
+                        value={account.secretKey}
                         fullWidth
-                        error={Boolean(errorMessage)}
+                        error={Boolean(ui.loginModalErrorMessage)}
                         InputProps={{
-                            endAdornment: loading && <CircularProgress />
+                            endAdornment: ui.loginModaLoading && <CircularProgress />
                         }}
                     />
-                    {errorMessage && (
+                    {ui.loginModalErrorMessage && (
                         <DialogContentText className={classes.errorText}>
-                            {errorMessage}
+                            {ui.loginModalErrorMessage}
                         </DialogContentText>
                     )}
                 </DialogContent>
 
                 <DialogActions>
                     <Button
-                        onClick={onClose}
+                        onClick={ui.closeLoginModal}
                         color="primary"
                         variant={"outlined"}
                     >
                         Cancel
                     </Button>
                     <Button
-                        onClick={() =>
-                            onLogin({
-                                variables: { key: this.state.key }
-                            })
-                        }
+                        onClick={()=>account.login()}
                         color="primary"
                         variant={"raised"}
                     >
@@ -143,6 +118,4 @@ const styles = {
 };
 
 /****  EXPORT ******/
-export default (injectSheet(styles)(LoginModal): ComponentType<
-    LoginModalProps
->);
+export default (injectSheet(styles)(LoginModal): ComponentType<any>);

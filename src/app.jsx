@@ -11,7 +11,7 @@ import Categories from "./pages/categories/Component";
 import Products from "./pages/products/Component";
 import People from "./pages/people/Component";
 import Cart from "./pages/cart/Component";
-import LoginModal from "./structural/login/login_modal/Container";
+import LoginModal from "./structural/login/login_modal/Component";
 
 /****  TYPES ******/
 type ClassProp = {
