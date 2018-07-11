@@ -1,34 +1,42 @@
 const StellarSdk = require('stellar-sdk');
 StellarSdk.Network.useTestNetwork();
-
 const server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
+
+const cartItems = require('./cart-items-data');
 
 // 1. Get items in cart: graphql cart query
 getCartItems = () => {
-     return; 
+     return cartItems; 
 }
 
-const CartItems = getCartItems()
+const myCartItems = getCartItems()
+
+const cmcAPI = require('./testGetUsd.js');
+
 // 2: handle usd conversions of items in cart
 //      todo: optimize, load into cache the request of listings and tickers rather than call every time
 //      todo: make a liust of most popular coins and have those ID's ready in a text file 
 getUsdEquivalentOfAsset = (asset_type, fixedUSDAmount) => {
-    const tickerPrice = getTickerID(asset_type)
-        .then(tickerID => getUsdPriceForTickerID(tickerID)
+    const tickerPrice = cmcAPI.getTickerID(asset_type)
+        .then(tickerID => cmcAPI.getUsdPriceForTickerID(tickerID)
             .then(tickerPrice => tickerPrice)
         )
     return (fixedUSDAmount / tickerPrice); // careful with precision
 }
 
-getCheckUsdValues = () => {
-  for (const item in CartItems)
-  {
-      if (item.fixedUSDAmount && !item.assetPrice) {
-          const currentPrice = getUsdEquivalentOfAsset(item.acceptedAsset.asset_code, item.fixedUSDAmount);
-          item.assetPrice = currentPrice;
-      }
-  }
+getCheckUsdValues = (myCartItems) => {
+    for (const item in myCartItems)
+    {
+        if (item.fixedUSDAmount && !item.assetPrice) {
+            const currentPrice = getUsdEquivalentOfAsset(item.acceptedAsset.asset_code, item.fixedUSDAmount).then(;
+            item.assetPrice = currentPrice;
+        }
+    }
+    console.log(myCartItems[0].acceptedAsset)
 }
+
+getCheckUsdValues(myCartItems)
+
 
 //
 // this is For UI and for aggregate calculations to see if can cover entire cart
@@ -37,7 +45,7 @@ getCheckUsdValues = () => {
 // 3....
 // get balances from stellar 
 // { asset_type: string, balance: string, limit: string, asset_code: string, asset_issuer: string }
-getBalancesSDK = (publicKey: string) => {
+getBalancesSDK = (publicKey) => {
   return server.loadAccount(publicKey)
       .then(account => account)
       .map(account => account.balances)
@@ -46,7 +54,7 @@ getBalancesSDK = (publicKey: string) => {
         // });
 }
 
-const myBalances = getBalances();
+// const myBalances = getBalances();
 
 // 3.1:
 // need to sort by preference ...
@@ -56,11 +64,11 @@ const myBalances = getBalances();
 
 // 4 loop through cart and create ops
 // var transaction = new StellarSdk.TransactionBuilder(source)
-createTransactionOps = (cartItems) => {
+createTransactionOps = (myCartItems) => {
   // if cant hold make each iteration of same structure OR just add on the fly ... 
   const tb = new StellarSdk.TransactionBuilder(pub); 
   const paymentOps = new Array(); // where operation is one of: payment, or pathpayment <StellarSdk.Operation>
-  for (const cartItem in cartItems)
+  for (const cartItem in myCartItems)
   {
       const curSellerPubKey = cartItem.sellerPubKey;
       const acceptedAsset = cartItem.acceptedAsset;
