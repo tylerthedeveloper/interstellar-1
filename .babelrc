@@ -1,5 +1,9 @@
 {
-  "presets": ["flow", ["env", {"modules": false}], "stage-3", "react"],
+  "presets": [
+    "@babel/env",
+    "@babel/typescript",
+    "@babel/react"
+  ],
   "plugins": [
     "transform-runtime",
     "transform-decorators-legacy",

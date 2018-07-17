@@ -1,7 +1,9 @@
 .idea
 bin
 dist
+build
 node_modules
 flow-typed
 sitespeed-result
 *.map
+*.log

@@ -25,9 +25,12 @@ module.exports = {
     },
 
     resolve: {
-        extensions: ['.mjs', '.js', '.jsx']
+        extensions: ['.mjs', '.js', '.jsx'],
+        alias: {
+            graphql: path.resolve(__dirname, '../node_modules/graphql')
+        }
     },
-    devtool: 'eval',
+    devtool: 'source-map',
     mode: 'development',
     watch: true,
 
@@ -51,12 +54,23 @@ module.exports = {
     module: {
         rules: [
 
-            //js
             {
-                test: /\.(js)?$/,
+                test: /\.(jsx|js)?$/,
                 exclude: /(node_modules)/,
                 use: {
                     loader: 'babel-loader',
+                    options: {
+                        cacheDirectory: true,
+                        babelrc: false,
+                        presets: [
+                            "@babel/env",
+                        ],
+                        plugins: [
+                            "@babel/plugin-transform-runtime",
+                            "transform-decorators-legacy",
+                            "transform-class-properties",
+                        ]
+                    }
                 }
             },
 
@@ -79,6 +93,9 @@ module.exports = {
     },
 
     plugins : [
+        new webpack.SourceMapDevToolPlugin({
+            include: "node_modules/postgraphile"
+        }),
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoEmitOnErrorsPlugin(),
         new webpack.DefinePlugin({
@@ -88,7 +105,8 @@ module.exports = {
         }),
         new StartServerPlugin({
             name: "server.js"
-        })
+        }),
+
     ]
 };
 

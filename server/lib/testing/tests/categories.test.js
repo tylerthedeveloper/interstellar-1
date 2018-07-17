@@ -26,7 +26,7 @@ expect.addSnapshotSerializer({
       imageURL: ${val.imageURL}`
 })
 
-/** test get all categories */
+/** test get sellers categories */
 test('Category-Service: getAllCategories()', () => {
     CategoryService.getAllCategories = jest.fn().mockImplementation(() => {
         return new Promise((resolve, reject) => {

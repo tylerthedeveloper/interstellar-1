@@ -18,7 +18,7 @@ module.exports = {
     entry: [
         'webpack-dev-server/client?http://localhost:3001',
         'webpack/hot/only-dev-server',
-        path.resolve(__dirname, '../src/index.jsx')
+        path.resolve(__dirname, '../src/index.tsx')
     ],
     output: {
         path: OUTPUT_PATH,
@@ -27,9 +27,16 @@ module.exports = {
     },
 
     resolve: {
-        extensions: ['.mjs', '.js', '.jsx']
+        extensions: ['.mjs', '.js', '.jsx', '.ts', '.tsx'],
+        alias : {
+            Stores: path.resolve(__dirname, '../src/stores/'),
+            Pages: path.resolve(__dirname, '../src/pages/'),
+            Structural: path.resolve(__dirname, '../src/structural/'),
+            GQLTypes: path.resolve(__dirname, '../src/types/gqlTypes/'),
+            Types: path.resolve(__dirname, '../src/types/')
+        }
     },
-    devtool: 'eval',
+    devtool: 'source-map',
     mode: 'development',
     watch: true,
     target: 'web',
@@ -56,10 +63,25 @@ module.exports = {
 
             //js
             {
-                test: /\.(jsx|js)?$/,
+                test: /\.(jsx|js|ts|tsx)?$/,
                 exclude: /(node_modules)/,
                 use: {
                     loader: 'babel-loader',
+                    options: {
+                        cacheDirectory: true,
+                        babelrc: false,
+                        presets: [
+                            "@babel/typescript",
+                            "@babel/react"
+                        ],
+                        plugins: [
+                            "@babel/plugin-transform-runtime",
+                            "transform-decorators-legacy",
+                            "transform-class-properties",
+                            "react-hot-loader/babel"
+
+                        ]
+                    }
                 }
             },
             {

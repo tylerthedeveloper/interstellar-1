@@ -1,4 +1,4 @@
-import * as UserService from '../../services/user.service';
+import * as UserService from '../../services/users';
 import { testUsers } from '../test-data/users.data';
 
 // expect.addSnapshotSerializer({
@@ -10,7 +10,7 @@ import { testUsers } from '../test-data/users.data';
 //       imageURL: ${val.imageURL}`
 // })
 
-/** Test get all users */
+/** Test get sellers users */
 test('User-Service: getAllUsers()', () => {
     UserService.getAllUsers = jest.fn().mockImplementation(() => {
         return new Promise((resolve, reject) => {
@@ -59,7 +59,7 @@ test('User-Service: createUser(userData)', () => {
 
 // const userId = "7KtTK9jXBT9HaU0bZ3uC";
 // test('User-Service: getUserById() for user: 7KtTK9jXBT9HaU0bZ3uC', () => {
-//     return UserService.default.getUserById(userId).then(user => {
+//     return Users.default.getUserById(userId).then(user => {
 //         // console.log(user)
 //         // expect.assertions(11)
 //         expect(user).toBeDefined();
@@ -101,7 +101,7 @@ test('User-Service: createUser(userData)', () => {
 //     publicKey: expect.any(String),
 //     userName: expect.any(String),
     
-//     return UserService.default.createUser().then(newUserID => {
+//     return Users.default.createUser().then(newUserID => {
 //         console.log(newUserID)
 //         return expect(newUserID).toBeDefined();
 //     });
@@ -112,7 +112,7 @@ test('User-Service: createUser(userData)', () => {
 // test('User-Service: verifySignature() for user: ...', () => {
 //     expect(privSignatureToVerify).toBeDefined();
 //     const localPubFromPriv = stellar.Keypair.fromPublicKey(privSignatureToVerify);
-//     const serverPubFromPriv = UserService.default.verifySignature(/* what goes here */);
+//     const serverPubFromPriv = Users.default.verifySignature(/* what goes here */);
 //     expect(localPubFromPriv).toBeDefined();
 //     expect(serverPubFromPriv).toBeDefined();
 //     expect(localPubFromPriv).toEqual(serverPubFromPriv)
@@ -121,7 +121,7 @@ test('User-Service: createUser(userData)', () => {
 
 // const toDeleteUserId = "...";
 // test('User-Service: deleteUser() for user: ...', () => {
-//     return UserService.default.deleteUserId(toDeleteUserId).then(deletedUserId => {
+//     return Users.default.deleteUserId(toDeleteUserId).then(deletedUserId => {
 //         console.log(deletedUserId)
 //         expect(deletedUserId).toBeDefined();
 //         expect(deletedUserId).toBe(toDeleteUserId);
