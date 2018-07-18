@@ -7,28 +7,21 @@ import {
     Tabs, Typography, WithStyles, withStyles,
 } from "@material-ui/core";
 import * as React from "react";
-import { NavLink, Route, Switch } from "react-router-dom";
+import { NavLink, Route, Switch, withRouter } from "react-router-dom";
 
-import ProductList from "Structural/products/product_list/Component";
-import InfoSection from "./InfoSectionComponent";
+import MainContent from "./ProfileContentComponent";
 
 /****  TYPES ******/
 import { ButtonProps } from "@material-ui/core/Button";
-import {RouteComponentProps} from "react-router";
-interface IComponentProps extends WithStyles<typeof styles>, RouteComponentProps<any> {}
+interface IComponentProps extends WithStyles<typeof styles> {
+    id: string;
+}
 
 /****  COMPONENT ******/
 class Component extends React.PureComponent<IComponentProps> {
     public render() {
 
-        const {
-            classes,
-            match: {
-                params: { id },
-            },
-        } = this.props;
-
-        const section = this.props.match.params.section || "sales";
+        const {id, classes} = this.props;
         const name = "Jack Langston";
 
         return (
@@ -37,7 +30,7 @@ class Component extends React.PureComponent<IComponentProps> {
                     <Avatar className={classes.avatar}>OP</Avatar>
                     <div>
                         <Typography variant={"display2"}>
-                            Person {id}
+                            Name {id}
                         </Typography>
                         <div className={classes.actionRow}>
                             <LocalButton className={classes.action}>
@@ -55,49 +48,11 @@ class Component extends React.PureComponent<IComponentProps> {
                         </div>
                     </div>
                 </div>
-                <div className={classes.mainContent}>
-                    <AppBar position={"static"} className={classes.tabs}>
-                        <Tabs value={section}>
-                            <Tab
-                                value="sales"
-                                label="Items for Sale"
-                                component={() => <NavLink to={`/people/${id}/sales`}/>}
-                            />
-                            <Tab
-                                value="reviews"
-                                label="Reviews"
-                                component={() => <NavLink to={`/people/${id}/reviews`}/>}
-                            />
-                            <Tab
-                                value="info"
-                                label="Information"
-                                component={() => <NavLink to={`/people/${id}/info`}/>}
-                            />
-                        </Tabs>
-                    </AppBar>
-                    <Switch>
-                        <Route
-                            exact={true}
-                            path={"/people/:id/(sales)?"}
-                            component={ProductList}
-                        />
-                        <Route
-                            path={"/people/:id/reviews"}
-                            component={filler}
-                        />
-                        <Route
-                            path={"/people/:id/info"}
-                            component={InfoSection}
-                        />
-                    </Switch>
-                </div>
+                <MainContent id={id}/>
             </div>
         );
     }
 }
-const filler = () => {
-    return <div>Needs to be implemented</div>;
-};
 
 const LocalButton = (props: ButtonProps) => {
     return <Button variant={"raised"} {...props} />;
@@ -109,8 +64,6 @@ const styles = createStyles({
         display: "flex",
         marginBottom: "30px",
     },
-
-    mainContent: {},
 
     actionRow: {
         paddingTop: "20px",
@@ -129,9 +82,7 @@ const styles = createStyles({
     container: {
         padding: "20px 250px 0",
     },
-    tabs: {
-        marginBottom: "20px",
-    },
+
 });
 
 /****  EXPORT ******/

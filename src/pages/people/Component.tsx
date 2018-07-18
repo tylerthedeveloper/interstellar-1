@@ -10,7 +10,12 @@ class CategoryComponent extends React.PureComponent<{}> {
         return (
             <Switch>
                 <Route exact={true} path={"/people"} component={PeopleAll} />
-                <Route path={"/people/:id/:section?"} component={Profile} />
+                <Route
+                    path={"/people/:id/"}
+                    render={(props) => (
+                        <Profile id={props.match.params.id}/>
+                    )}
+                />
             </Switch>
         );
     }

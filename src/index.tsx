@@ -2,7 +2,7 @@ import { Provider as MOBXProvider } from "mobx-react";
 import * as React from "react";
 import { ApolloProvider } from "react-apollo";
 import * as ReactDOM from "react-dom";
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 
 import StellarAccountStore from "Stores/stellar-account";
 import UIStore from "Stores/ui";
@@ -13,7 +13,8 @@ import App from "./app";
 const ui = new UIStore();
 const account = new StellarAccountStore(client, new StellarService(), ui);
 
-declare module "react-jss";
+import { registerObserver } from "react-perf-devtool";
+registerObserver();
 
 // app attachment
 const render = (Component: React.ComponentType) => {
@@ -21,7 +22,7 @@ const render = (Component: React.ComponentType) => {
         <MOBXProvider account={account} ui={ui}>
             <ApolloProvider client={client}>
                 <Router>
-                    <Component />
+                    <Component/>
                 </Router>
             </ApolloProvider>
         </MOBXProvider>,

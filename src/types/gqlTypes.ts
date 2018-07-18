@@ -1226,6 +1226,16 @@ export namespace GetProductCategory {
     description?: string | null; 
   }
 }
+export namespace AllSellerProducts {
+  export type Variables = {
+    sellerID: UUID;
+  }
+
+  export type Query = {
+    __typename?: "Query";
+    userById?: User | null; 
+  }
+}
 export namespace GetAllSellers {
   export type Variables = {
   }

@@ -12,7 +12,7 @@ interface IComponentProps {
     account: AccountStore;
 }
 
-class NavBar extends React.Component<IComponentProps> {
+class NavBar extends React.PureComponent<IComponentProps> {
     public render() {
         const { account } = this.props;
         const afterLogin = (cache: InMemoryCache) => {
@@ -22,6 +22,8 @@ class NavBar extends React.Component<IComponentProps> {
                 },
             });
         };
+
+        console.log("Navbar updating!");
 
         return (
             <Query query={getCurrentUser}>

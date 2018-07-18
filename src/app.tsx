@@ -7,7 +7,6 @@ import Cart from "./pages/cart/Component";
 import Categories from "./pages/categories/Component";
 import HomePage from "./pages/home/Component";
 import People from "./pages/people/Component";
-import Products from "./pages/products/Component";
 import LoginModal from "./structural/login/login_modal/Component";
 import Navbar from "./structural/navbar/Container";
 
@@ -15,9 +14,11 @@ import Navbar from "./structural/navbar/Container";
 interface IComponentProps extends WithStyles<typeof styles> {}
 
 /****  COMPONENT ******/
-class App extends React.Component<IComponentProps> {
+class App extends React.PureComponent<IComponentProps> {
     public render() {
         const { classes } = this.props;
+
+        console.log("App updating!");
         return (
             <div className={classes.container}>
                 <Navbar />
