@@ -1,12 +1,6 @@
-import {Product} from 'GQLTypes';
-import {OnlyForce} from "TypeUtil";
+import {Product} from "GQLTypes";
+import {generateTypeGuards, OnlyForce} from "TypeUtil";
 
-export function isPresentableProduct(product: Partial<Product> | null): product is PresentableProduct {
-    return Boolean(product && product.id && product.name && product.usdCost);
-}
+export interface IPresentableProduct extends  OnlyForce<Product, "id" | "name" | "usdCost"> {}
 
-export function retainPresentableProducts(products: (Partial<Product>|null)[]): PresentableProduct[] {
-    return products.filter(isPresentableProduct);
-}
-
-export interface PresentableProduct extends  OnlyForce<Product, 'id' | 'name' | 'usdCost'>{}
+export const IPresentableProductTypeGuards = generateTypeGuards<IPresentableProduct>(["id", "name", "usdCost"]);

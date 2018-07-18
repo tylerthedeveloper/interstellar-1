@@ -1,68 +1,68 @@
-import * as React from "react";
 import {
-    Stepper,
     Button,
-    StepContent,
-    Typography,
+    createStyles,
     Step,
-    StepLabel, WithStyles, createStyles, withStyles
+    StepContent,
+    StepLabel,
+    Stepper, Typography, WithStyles, withStyles,
 } from "@material-ui/core";
+import * as React from "react";
 
 /****  TYPES ******/
-interface ComponentProps extends WithStyles<typeof styles> {}
+interface IComponentProps extends WithStyles<typeof styles> {}
 
 /****  COMPONENT ******/
 
 const steps = [
     {
-        label: "Review Your Items"
+        label: "Review Your Items",
     },
     {
-        label: "Enter Shipping Information"
+        label: "Enter Shipping Information",
     },
     {
-        label: "Wait for Transaction Confirmation"
-    }
+        label: "Wait for Transaction Confirmation",
+    },
 ];
 
-class Component extends React.PureComponent<ComponentProps> {
+class Component extends React.PureComponent<IComponentProps> {
 
-    state: {
+    public state: {
         activeStep: number;
     };
 
-    constructor(props: ComponentProps) {
+    constructor(props: IComponentProps) {
         super(props);
         this.state = {
-            activeStep: 0
+            activeStep: 0,
         };
     }
 
-    handleNext = () => {
+    public handleNext = () => {
         this.setState({
-            activeStep: this.state.activeStep + 1
+            activeStep: this.state.activeStep + 1,
         });
-    };
+    }
 
-    handleMove = (index: number) => {
+    public handleMove = (index: number) => {
         this.setState({
-            activeStep: index
+            activeStep: index,
         });
-    };
+    }
 
-    handleBack = () => {
+    public handleBack = () => {
         this.setState({
-            activeStep: this.state.activeStep - 1
+            activeStep: this.state.activeStep - 1,
         });
-    };
+    }
 
-    handleReset = () => {
+    public handleReset = () => {
         this.setState({
-            activeStep: 0
+            activeStep: 0,
         });
-    };
+    }
 
-    render() {
+    public render() {
         const { classes } = this.props;
         const { activeStep } = this.state;
 
@@ -119,18 +119,18 @@ class Component extends React.PureComponent<ComponentProps> {
 const styles = createStyles({
     container: {
         width: "80%",
-        margin: "auto"
+        margin: "auto",
     },
     button: {
         marginTop: 10,
-        marginRight: 10
+        marginRight: 10,
     },
     actionsContainer: {
-        marginBottom: 20
+        marginBottom: 20,
     },
     resetContainer: {
-        padding: 30
-    }
+        padding: 30,
+    },
 });
 
 /****  EXPORT ******/

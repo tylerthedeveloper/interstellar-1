@@ -1,20 +1,19 @@
+import { createStyles, TextField, Typography, WithStyles, withStyles } from "@material-ui/core";
 import * as React from "react";
-import { Typography, TextField, WithStyles, createStyles, withStyles } from "@material-ui/core";
 
 import ProductList from "Structural/products/product_list/Container";
 
 /****  TYPES ******/
-import {PresentableCategory} from "../PresentableCategoryType";
+import {IPresentableCategory} from "../PresentableCategoryType";
 
-interface ComponentProps extends WithStyles<typeof styles>{
-    category: PresentableCategory
+interface IComponentProps extends WithStyles<typeof styles> {
+    category: IPresentableCategory;
 }
 
 /****  COMPONENT ******/
-class CategoryLanding extends React.PureComponent<ComponentProps> {
-    render() {
+class CategoryLanding extends React.PureComponent<IComponentProps> {
+    public render() {
         const { classes, category } = this.props;
-
 
         return (
             <div className={classes.container}>
@@ -51,41 +50,41 @@ class CategoryLanding extends React.PureComponent<ComponentProps> {
 /****  STYLES ******/
 const styles = createStyles({
     description: {
-      marginTop: "10px"
+      marginTop: "10px",
     },
     container: {
-        padding: "20px 250px 0"
+        padding: "20px 250px 0",
     },
     header: {
-        display: "flex"
+        display: "flex",
     },
     content: {
         display: "flex",
-        marginTop: "20px"
+        marginTop: "20px",
     },
     title: {
-        flex: 1
+        flex: 1,
     },
     search: {
-        width: "25%",
-        transition: "sellers 0.5s ease",
+        "width": "25%",
+        "transition": "sellers 0.5s ease",
         "&:focus-within": {
-            width: "600px"
-        }
+            width: "600px",
+        },
     },
     searchInput: {
-        width: "100%"
+        width: "100%",
     },
     filters: {
         width: "25%",
         height: "500px",
         backgroundColor: "lightgrey",
-        display: "inline-block"
+        display: "inline-block",
     },
     items: {
         flex: 1,
-        paddingRight: "30px"
-    }
+        paddingRight: "30px",
+    },
 });
 
 /****  EXPORT ******/

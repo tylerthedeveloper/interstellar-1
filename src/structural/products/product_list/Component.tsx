@@ -1,17 +1,17 @@
+import { createStyles, List, TextField, Typography, WithStyles, withStyles } from "@material-ui/core";
 import * as React from "react";
-import { Typography, TextField, List, WithStyles, withStyles, createStyles } from "@material-ui/core";
 
 import ProductListItem from "./ProductListItemComponent";
 
 /****  TYPES ******/
-import { PresentableProduct } from "./PresentableProductType";
-interface ComponentProps extends WithStyles<typeof styles> {
-    products : PresentableProduct[]
+import { IPresentableProduct } from "./PresentableProductType";
+interface IComponentProps extends WithStyles<typeof styles> {
+    products: IPresentableProduct[];
 }
 
 /****  COMPONENT ******/
-class Component extends React.PureComponent<ComponentProps> {
-    render() {
+class Component extends React.PureComponent<IComponentProps> {
+    public render() {
         const { classes, products } = this.props;
         return (
             <List component={"div"} className={classes.listContainer}>
@@ -26,8 +26,8 @@ class Component extends React.PureComponent<ComponentProps> {
 /****  STYLES ******/
 const styles = createStyles({
     listContainer: {
-        width: "100%"
-    }
+        width: "100%",
+    },
 });
 
 /****  EXPORT ******/

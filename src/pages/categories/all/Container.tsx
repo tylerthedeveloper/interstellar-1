@@ -1,23 +1,23 @@
+import gql from "graphql-tag";
 import * as React from "react";
 import { Query } from "react-apollo";
-import gql from "graphql-tag";
 
-import CategoryComponent from "./Component";
 import {GetCategoryInfo} from "GQLTypes";
-import { retainPresentableCategories } from "../PresentableCategoryType";
+import { IPresentableCategoryTypeGuards } from "../PresentableCategoryType";
+import CategoryComponent from "./Component";
 
 class Category extends React.PureComponent<{}> {
-    render() {
+    public render() {
         return (
             <Query query={query}>
                 {({data, loading, error }) => {
-                    if (loading || error) return <div />;
+                    if (loading || error) { return <div />; }
 
                     const {allProductCategories} = data as GetCategoryInfo.Query;
-                    if(!allProductCategories) return <div />;
+                    if (!allProductCategories) { return <div />; }
 
                     const {nodes: categories} = allProductCategories;
-                    return <CategoryComponent categories={retainPresentableCategories(categories)} />;
+                    return <CategoryComponent categories={IPresentableCategoryTypeGuards.retainOnly(categories)} />;
                 }}
             </Query>
         );

@@ -1,34 +1,34 @@
-import * as React from "react";
 import {
+    AppBar,
     Avatar,
-    Typography,
     Button,
+    createStyles,
     Tab,
-    Tabs,
-    AppBar, WithStyles, createStyles, withStyles
+    Tabs, Typography, WithStyles, withStyles,
 } from "@material-ui/core";
-import { NavLink, Switch, Route } from "react-router-dom";
+import * as React from "react";
+import { NavLink, Route, Switch } from "react-router-dom";
 
 import ProductList from "Structural/products/product_list/Component";
 import InfoSection from "./InfoSectionComponent";
 
 /****  TYPES ******/
-import {RouteComponentProps} from "react-router";
 import { ButtonProps } from "@material-ui/core/Button";
-interface ComponentProps extends WithStyles<typeof styles>, RouteComponentProps<any>{}
+import {RouteComponentProps} from "react-router";
+interface IComponentProps extends WithStyles<typeof styles>, RouteComponentProps<any> {}
 
 /****  COMPONENT ******/
-class Component extends React.PureComponent<ComponentProps> {
-    render() {
+class Component extends React.PureComponent<IComponentProps> {
+    public render() {
 
-        let {
+        const {
             classes,
             match: {
-                params: { id, section }
-            }
+                params: { id },
+            },
         } = this.props;
 
-        section = section || "sales";
+        const section = this.props.match.params.section || "sales";
         const name = "Jack Langston";
 
         return (
@@ -77,7 +77,7 @@ class Component extends React.PureComponent<ComponentProps> {
                     </AppBar>
                     <Switch>
                         <Route
-                            exact
+                            exact={true}
                             path={"/people/:id/(sales)?"}
                             component={ProductList}
                         />
@@ -107,31 +107,31 @@ const LocalButton = (props: ButtonProps) => {
 const styles = createStyles({
     header: {
         display: "flex",
-        marginBottom: "30px"
+        marginBottom: "30px",
     },
 
     mainContent: {},
 
     actionRow: {
         paddingTop: "20px",
-        display: "flex"
+        display: "flex",
     },
     action: {
-        marginRight: "20px"
+        marginRight: "20px",
     },
 
     avatar: {
         width: "150px",
         height: "150px",
-        marginRight: "30px"
+        marginRight: "30px",
     },
 
     container: {
-        padding: "20px 250px 0"
+        padding: "20px 250px 0",
     },
     tabs: {
-        marginBottom: "20px"
-    }
+        marginBottom: "20px",
+    },
 });
 
 /****  EXPORT ******/

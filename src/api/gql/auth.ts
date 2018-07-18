@@ -12,7 +12,6 @@ export const getCurrentUser =  gql`
     }
 `;
 
-
 /*********************************
  * Mutations
  *********************************/
@@ -22,4 +21,3 @@ export const logout = gql`
         logout
     }
 `;
-

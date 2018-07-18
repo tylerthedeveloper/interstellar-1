@@ -1,32 +1,26 @@
+import { Avatar, Button, createStyles, Grid, Typography, withStyles, WithStyles } from "@material-ui/core";
 import * as React from "react";
-import { Grid, Typography, Avatar, Button, withStyles, WithStyles, createStyles } from "@material-ui/core";
 import { NavLink } from "react-router-dom";
 import StarRatingComponent from "react-star-rating-component";
 
 /****  TYPES ******/
-import {Seller} from 'GQLTypes';
-interface SellerWithID extends Seller{
-    id: string
-}
+import { ButtonProps } from "@material-ui/core/Button";
+import {IPresentableSeller} from "./PresentableSellerType";
 
-interface ComponentProps extends WithStyles<typeof styles> {
-    seller: SellerWithID
+interface IComponentProps extends WithStyles<typeof styles> {
+    seller: IPresentableSeller;
 }
-export function isSellerWithID(seller: Seller | null): seller is SellerWithID {
-    return Boolean(seller && seller.id);
-}
-
 
 /****  COMPONENT ******/
-class Component extends React.PureComponent<ComponentProps> {
-    render() {
+class Component extends React.PureComponent<IComponentProps> {
+    public render() {
         const { seller: {id, username, displayName}, classes } = this.props;
         return (
-            <Grid item xl={2} lg={4} md={6} xs={12}>
+            <Grid item={true} xl={2} lg={4} md={6} xs={12}>
                 <Button
                     className={classes.button}
                     fullWidth={true}
-                    component={() => <NavLink to={`/people/${id}`}/>}
+                    component={(props: ButtonProps) => <NavLink to={`/people/${id}`} {...props as any}/>}
                 >
                     {displayName ?
                         <div>
@@ -39,10 +33,10 @@ class Component extends React.PureComponent<ComponentProps> {
                             </Typography>
                             <Typography
                                 className={classes.title}
-                                variant={"title"}
+                                variant={"subheading"}
                                 align={"center"}
                             >
-                                {username}
+                                {`(${username})`}
                             </Typography>
                         </div>
                         :
@@ -82,32 +76,32 @@ class Component extends React.PureComponent<ComponentProps> {
 /****  STYLES ******/
 const styles = createStyles({
     button: {
-        display: "block"
+        display: "block",
     },
     avatar: {
         margin: "10px auto",
         contentAlign: "center",
         width: "80px",
-        height: "80px"
+        height: "80px",
     },
     avatarContainer: {
-        alignItems: "center"
+        alignItems: "center",
     },
     title: {
-        display: "block !important"
+        display: "block !important",
     },
     stars: {
-        fontSize: "22px"
+        fontSize: "22px",
     },
     starsContainer: {
         display: "flex",
         justifyContent: "center",
-        marginBottom: "10px"
+        marginBottom: "10px",
     },
     ratingNum: {
         paddingLeft: "10px",
-        display: "flex"
-    }
+        display: "flex",
+    },
 });
 
 /****  EXPORT ******/

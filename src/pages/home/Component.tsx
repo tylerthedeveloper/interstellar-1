@@ -1,13 +1,13 @@
-import * as React from "react";
 import { createStyles, Typography, withStyles, WithStyles } from "@material-ui/core";
+import * as React from "react";
 import injectSheet from "react-jss";
 
 /****  TYPES ******/
-interface ComponentProps extends WithStyles<typeof styles> {}
+interface IComponentProps extends WithStyles<typeof styles> {}
 
 /****  COMPONENT ******/
-class Home extends React.PureComponent<ComponentProps> {
-    render() {
+class Home extends React.PureComponent<IComponentProps> {
+    public render() {
         const { classes } = this.props;
         return (
             <div className={classes.container}>
@@ -24,8 +24,8 @@ class Home extends React.PureComponent<ComponentProps> {
 /****  STYLES ******/
 const styles = createStyles({
     container: {
-        padding: "20px 250px 0"
-    }
+        padding: "20px 250px 0",
+    },
 });
 
 /****  EXPORT ******/

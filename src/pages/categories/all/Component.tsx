@@ -1,25 +1,25 @@
-import * as React from "react";
 import { createStyles, Grid, GridListTile, withStyles, WithStyles } from "@material-ui/core";
+import * as React from "react";
 
 import CategoryCard from "./CategoryCardComponent";
 
 /****  TYPES ******/
-import {PresentableCategory} from "../PresentableCategoryType";
+import {IPresentableCategory} from "../PresentableCategoryType";
 
-interface ComponentProps extends WithStyles<typeof styles> {
-    categories: PresentableCategory[]
+interface IComponentProps extends WithStyles<typeof styles> {
+    categories: IPresentableCategory[];
 }
 
 /****  COMPONENT ******/
-class CategoryLanding extends React.PureComponent<ComponentProps> {
-    render() {
+class CategoryLanding extends React.PureComponent<IComponentProps> {
+    public render() {
         const { classes, categories } = this.props;
         return (
             <div>
-                <Grid container alignContent={"center"} alignItems={"center"}>
+                <Grid container={true} alignContent={"center"} alignItems={"center"}>
                     {categories.map((category) => {
                         return (
-                            <Grid item xs={6} lg={3} key={category.id}>
+                            <Grid item={true} xs={6} lg={3} key={category.id}>
                                 <CategoryCard
                                     title={category.name}
                                     description={category.description}
@@ -37,8 +37,8 @@ class CategoryLanding extends React.PureComponent<ComponentProps> {
 /****  STYLES ******/
 const styles = createStyles({
     tile: {
-        padding: "10px"
-    }
+        padding: "10px",
+    },
 });
 
 /****  EXPORT ******/

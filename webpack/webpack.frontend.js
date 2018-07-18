@@ -32,8 +32,9 @@ module.exports = {
             Stores: path.resolve(__dirname, '../src/stores/'),
             Pages: path.resolve(__dirname, '../src/pages/'),
             Structural: path.resolve(__dirname, '../src/structural/'),
-            GQLTypes: path.resolve(__dirname, '../src/types/gqlTypes/'),
-            Types: path.resolve(__dirname, '../src/types/')
+            GQLTypes: path.resolve(__dirname, '../src/types/gqlTypes'),
+            Types: path.resolve(__dirname, '../src/types/'),
+            TypeUtil: path.resolve(__dirname, '../src/types/util')
         }
     },
     devtool: 'source-map',

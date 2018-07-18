@@ -1,32 +1,29 @@
-import {observable, action} from 'mobx';
+import {action, observable} from "mobx";
 
 class UIStore {
-
 
     /****************************
      * Login Modal
      ****************************/
 
-    @observable loginModalLoading = false;
-    @observable loginModalOpen = false;
-    @observable loginModalErrorMessage: string | null = null;
+    @observable public loginModalLoading = false;
+    @observable public loginModalOpen = false;
+    @observable public loginModalErrorMessage: string | null = null;
 
-
-    @action.bound closeLoginModal() {
+    @action.bound public closeLoginModal() {
         this.loginModalOpen = false;
         this.loginModalLoading = false;
         this.loginModalErrorMessage = null;
     }
 
-    @action.bound openLoginModal() {
+    @action.bound public openLoginModal() {
         this.loginModalOpen = true;
     }
 
-    @action.bound setLoginModalErrorMessage(err: string){
+    @action.bound public setLoginModalErrorMessage(err: string) {
         this.loginModalErrorMessage = err;
         this.loginModalLoading = false;
     }
-
 
 }
 

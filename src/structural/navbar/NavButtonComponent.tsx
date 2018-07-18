@@ -1,20 +1,20 @@
-import * as React from "react";
 import { Button, createStyles, WithStyles, withStyles } from "@material-ui/core";
+import { ButtonProps } from "@material-ui/core/Button";
+import * as React from "react";
 import { NavLink } from "react-router-dom";
-import injectSheet from "react-jss";
 
 /****  TYPES ******/
-interface ComponentProps extends WithStyles<typeof styles>{
-    to: string
+interface IComponentProps extends WithStyles<typeof styles> {
+    to: string;
 }
 
 /**** Component ******/
-class NavButton extends React.PureComponent<ComponentProps> {
-    render() {
+class NavButton extends React.PureComponent<IComponentProps> {
+    public render() {
         const { classes, children, to } = this.props;
-
+        const override = (props: ButtonProps) => <NavLink to={to} {...(props as any)}/>;
         return (
-            <Button className={classes.button} component={()=><NavLink to={to}/>}>
+            <Button className={classes.button} component={override}>
                     {children}
             </Button>
         );
@@ -24,8 +24,8 @@ class NavButton extends React.PureComponent<ComponentProps> {
 /****  STYLES ******/
 const styles = createStyles({
     button: {
-        color: "white"
-    }
+        color: "white",
+    },
 });
 
 /****  EXPORT ******/

@@ -1,32 +1,29 @@
 import * as React from "react";
-import injectSheet from "react-jss";
-import { Switch, Route } from "react-router-dom";
 import { hot } from "react-hot-loader";
+import { Route, Switch } from "react-router-dom";
 
-import Navbar from "./structural/navbar/Container";
-import HomePage from "./pages/home/Component";
-import Categories from "./pages/categories/Component";
-import Products from "./pages/products/Component";
-import People from "./pages/people/Component";
+import { createStyles, withStyles, WithStyles} from "@material-ui/core";
 import Cart from "./pages/cart/Component";
-import LoginModal from "./structural/login/login_modal/Component.tsx";
+import Categories from "./pages/categories/Component";
+import HomePage from "./pages/home/Component";
+import People from "./pages/people/Component";
+import Products from "./pages/products/Component";
+import LoginModal from "./structural/login/login_modal/Component";
+import Navbar from "./structural/navbar/Container";
 
 /****  TYPES ******/
-interface ClassProp {
-    classes: typeof styles
-}
+interface IComponentProps extends WithStyles<typeof styles> {}
 
 /****  COMPONENT ******/
-class App extends React.Component<ClassProp> {
-    render() {
+class App extends React.Component<IComponentProps> {
+    public render() {
         const { classes } = this.props;
-
         return (
             <div className={classes.container}>
                 <Navbar />
                 <div className={classes.content}>
                     <Switch>
-                        <Route path="/" exact component={HomePage} />
+                        <Route path="/" exact={true} component={HomePage} />
                         <Route path="/categories" component={Categories} />
                         <Route path="/people" component={People} />
                         <Route path="/cart" component={Cart} />
@@ -39,19 +36,19 @@ class App extends React.Component<ClassProp> {
 }
 
 /****  STYLES ******/
-const styles = {
+const styles = createStyles({
     container: {
-        position: "absolute1",
+        position: "absolute",
         height: "100%",
         width: "100%",
         margin: 0,
         padding: 0,
         top: 0,
-        left: 0
+        left: 0,
     },
     content: {
-        padding: "20px"
-    }
-};
+        padding: "20px",
+    },
+});
 
-export default hot(module)(injectSheet(styles)(App));
+export default hot(module)(withStyles(styles)(App));

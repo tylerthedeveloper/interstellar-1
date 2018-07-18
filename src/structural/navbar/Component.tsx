@@ -1,25 +1,25 @@
+import { AppBar, Button, createStyles, Icon, Toolbar, Typography, WithStyles, withStyles } from "@material-ui/core";
+import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { NavLink } from "react-router-dom";
-import { AppBar, Toolbar, Typography, Button, Icon, createStyles, WithStyles, withStyles } from "@material-ui/core";
+import UIStore from "Stores/ui";
+import { injectWithTypes } from "TypeUtil";
 import NavButton from "./NavButtonComponent";
-import { inject, observer } from "mobx-react";
 
 /****  TYPES ******/
 
-interface ComponentProps extends WithStyles<typeof styles> {
-    toggleLoginModal: () => void,
-    logout: () => void,
-    loggedIn: boolean
-};
+interface IComponentProps extends WithStyles<typeof styles> {
+    logout: () => void;
+    loggedIn: boolean;
+    ui: UIStore;
+}
 
 /****  COMPONENT ******/
-@inject("ui")
-@inject("account")
 @observer
-class NavBar extends React.Component<any> {
-    render() {
-        const { classes, ui, account, loggedIn, logout } = this.props;
-        return [
+class NavBar extends React.Component<IComponentProps> {
+    public render() {
+        const { classes, ui, loggedIn, logout } = this.props;
+        return (
             <AppBar position="static" key={"app-bar"}>
                 <Toolbar>
                     <Typography variant="display1" className={classes.logo}>
@@ -56,7 +56,7 @@ class NavBar extends React.Component<any> {
                     </div>
                 </Toolbar>
             </AppBar>
-        ];
+        );
     }
 }
 
@@ -64,17 +64,17 @@ class NavBar extends React.Component<any> {
 const styles = createStyles({
     logo: {
         color: "white",
-        marginRight: "25px"
+        marginRight: "25px",
     },
 
     navSection: {
-        flex: 1
+        flex: 1,
     },
 
     cartButton: {
-        marginLeft: "20px"
-    }
+        marginLeft: "20px",
+    },
 });
 
 /****  EXPORT ******/
-export default withStyles(styles)(NavBar);
+export default injectWithTypes("ui", withStyles(styles)(NavBar));

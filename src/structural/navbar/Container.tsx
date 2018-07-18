@@ -1,44 +1,44 @@
+import { InMemoryCache } from "apollo-cache-inmemory";
 import * as React from "react";
 import { Mutation, Query } from "react-apollo";
-import { inject } from "mobx-react";
+import {injectWithTypes} from "TypeUtil";
 
+import AccountStore from "Stores/stellar-account";
 import { getCurrentUser, logout } from "../../api/gql/auth";
 import NavBarComponent from "./Component";
-import AccountStore from "Stores/stellar-account";
-
 
 /****  TYPES ******/
-interface ComponentProps{
-    account: AccountStore,
+interface IComponentProps {
+    account: AccountStore;
 }
 
-
-
-@inject("account")
-class NavBar extends React.PureComponent<ComponentProps> {
-    render() {
+class NavBar extends React.Component<IComponentProps> {
+    public render() {
         const { account } = this.props;
+        const afterLogin = (cache: InMemoryCache) => {
+            cache.writeData({
+                data: {
+                    currentUser: null,
+                },
+            });
+        };
 
         return (
             <Query query={getCurrentUser}>
                 {({ data, loading }) => {
-                    if (loading) return <div />;
+                    if (loading) {
+                        return <div/>;
+                    }
                     return (
                         <Mutation
                             mutation={logout}
-                            update={(cache) => {
-                                cache.writeData({
-                                    data: {
-                                        currentUser: null
-                                    }
-                                });
-                            }}
+                            update={afterLogin}
                             onCompleted={account.clearAccountInfo}
                         >
-                            {(logout) => (
+                            {(logoutFn) => (
                                 <NavBarComponent
                                     loggedIn={Boolean(data.currentUser)}
-                                    logout={logout}
+                                    logout={logoutFn}
                                 />
                             )}
                         </Mutation>
@@ -49,4 +49,4 @@ class NavBar extends React.PureComponent<ComponentProps> {
     }
 }
 
-export default NavBar;
+export default injectWithTypes("account", NavBar);

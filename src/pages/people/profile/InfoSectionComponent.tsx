@@ -1,13 +1,13 @@
+import { createStyles, Divider, TextField, Typography, WithStyles, withStyles } from "@material-ui/core";
 import * as React from "react";
-import { TextField, Divider, Typography, WithStyles, createStyles, withStyles } from "@material-ui/core";
 
 /****  TYPES ******/
 
-interface ComponentProps extends WithStyles<typeof styles>{}
+interface IComponentProps extends WithStyles<typeof styles> {}
 
 /****  COMPONENT ******/
-class Component extends React.PureComponent<ComponentProps> {
-    render() {
+class Component extends React.PureComponent<IComponentProps> {
+    public render() {
         const { classes } = this.props;
         return (
             <form>
@@ -77,11 +77,11 @@ const LocalTextField = (props: any) => {
                 disableUnderline: true,
                 classes: {
                     input: classes.input,
-                    formControl: classes.inputControl
-                }
+                    formControl: classes.inputControl,
+                },
             }}
             InputLabelProps={{
-                classes: { shrink: classes.label }
+                classes: { shrink: classes.label },
             }}
         />
     );
@@ -92,24 +92,24 @@ const styles = createStyles({
     field: {
         display: "flex",
         flexDirection: "row",
-        margin: "10px 0"
+        margin: "10px 0",
     },
     label: {
         position: "static",
         transform: "none",
         lineHeight: "1.1875em",
-        width: "150px"
+        width: "150px",
     },
     input: {
         color: "black",
-        padding: 0
+        padding: 0,
     },
     inputControl: {
-        marginTop: "0 !important"
+        marginTop: "0 !important",
     },
     divider: {
-        margin: "20px 0"
-    }
+        margin: "20px 0",
+    },
 });
 
 /****  EXPORT ******/

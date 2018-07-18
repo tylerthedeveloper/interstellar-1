@@ -1,42 +1,43 @@
-import * as React from "react";
 import {
+    Button,
+    CircularProgress,
+    createStyles,
     Dialog,
+    DialogActions,
     DialogContent,
     DialogContentText,
-    DialogActions,
     DialogTitle,
-    Button,
     TextField,
-    CircularProgress,
     withStyles,
-    createStyles,
-    WithStyles
+    WithStyles,
 } from "@material-ui/core";
-import { observer, inject } from "mobx-react";
+import { observer } from "mobx-react";
+import * as React from "react";
+import { ChangeEvent } from "react";
+import {injectWithTypes} from "TypeUtil";
 
-import UIStore from "Stores/ui";
 import AccountStore from "Stores/stellar-account";
+import UIStore from "Stores/ui";
 
 /****  TYPES ******/
-interface LoginModalProps extends WithStyles<typeof styles>{
-    hair: string,
-    ui: UIStore,
-    account: AccountStore
+interface ILoginModalProps extends WithStyles<typeof styles> {
+    ui: UIStore;
+    account: AccountStore;
 }
 
 /****  COMPONENT ******/
 
-@inject("ui")
-@inject("account")
 @observer
-class LoginModal extends React.Component<LoginModalProps> {
-    render() {
-        const { classes, ui, account, hair } = this.props;
+class LoginModal extends React.Component<ILoginModalProps> {
+
+    public render() {
+        const { classes, ui, account } = this.props;
+        const updateKey = (event: ChangeEvent<HTMLInputElement>) => { account.secretKey = event.target.value; };
 
         return (
             <Dialog
                 open={ui.loginModalOpen}
-                onBackdropClick={ui.closeLoginModal}
+                onBackdropClick={ui!.closeLoginModal}
                 aria-labelledby="form-dialog-title"
                 fullWidth={true}
                 maxWidth={"sm"}
@@ -47,38 +48,39 @@ class LoginModal extends React.Component<LoginModalProps> {
                     Login or Sign Up with your Stellar Secret Key
                 </DialogTitle>
                 <DialogContent>
-                    <TextField autoFocus
+                    <TextField
+                        autoFocus={true}
                         margin="dense"
                         id="private-key-log-in"
                         label="Secret Key"
                         type="password"
-                        onChange={(event) => account.secretKey = event.target.value}
+                        onChange={updateKey}
                         value={account.secretKey}
-                        fullWidth
-                        error={Boolean(ui.loginModalErrorMessage)}
+                        fullWidth={true}
+                        error={Boolean(ui!.loginModalErrorMessage)}
                         InputProps={{
-                            endAdornment: ui.loginModalLoading && (
+                            endAdornment: ui!.loginModalLoading && (
                                 <CircularProgress />
-                            )
+                            ),
                         }}
                     />
-                    {ui.loginModalErrorMessage && (
+                    {ui!.loginModalErrorMessage && (
                         <DialogContentText className={classes.errorText}>
-                            {ui.loginModalErrorMessage}
+                            {ui!.loginModalErrorMessage}
                         </DialogContentText>
                     )}
                 </DialogContent>
 
                 <DialogActions>
                     <Button
-                        onClick={ui.closeLoginModal}
+                        onClick={ui!.closeLoginModal}
                         color="primary"
                         variant={"outlined"}
                     >
                         Cancel
                     </Button>
                     <Button
-                        onClick={() => account.login()}
+                        onClick={account.login}
                         color="primary"
                         variant={"raised"}
                     >
@@ -95,19 +97,16 @@ class LoginModal extends React.Component<LoginModalProps> {
 const styles = createStyles({
     modalPaper: {
         maxWidth: "1000px",
-        padding: "25px"
+        padding: "25px",
     },
     divider: {
-        margin: "50px 20px"
+        margin: "50px 20px",
     },
     errorText: {
         color: "red",
-        marginTop: "10px"
-    }
+        marginTop: "10px",
+    },
 });
 
-
 /****  EXPORT ******/
-export default withStyles(styles)(LoginModal);
-
-
+export default injectWithTypes(["account", "ui"], withStyles(styles)(LoginModal));

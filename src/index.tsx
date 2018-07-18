@@ -1,13 +1,13 @@
+import { Provider as MOBXProvider } from "mobx-react";
 import * as React from "react";
+import { ApolloProvider } from "react-apollo";
 import * as ReactDOM from "react-dom";
 import { BrowserRouter as Router } from "react-router-dom";
-import { ApolloProvider } from "react-apollo";
-import { Provider as MOBXProvider } from "mobx-react";
 
-import client from "./api/gql/client";
-import StellarService from "./api/rest/stellar";
 import StellarAccountStore from "Stores/stellar-account";
 import UIStore from "Stores/ui";
+import client from "./api/gql/client";
+import StellarService from "./api/rest/stellar";
 import App from "./app";
 
 const ui = new UIStore();
@@ -15,7 +15,7 @@ const account = new StellarAccountStore(client, new StellarService(), ui);
 
 declare module "react-jss";
 
-//app attachment
+// app attachment
 const render = (Component: React.ComponentType) => {
     ReactDOM.render(
         <MOBXProvider account={account} ui={ui}>
@@ -25,7 +25,7 @@ const render = (Component: React.ComponentType) => {
                 </Router>
             </ApolloProvider>
         </MOBXProvider>,
-        document.getElementById("root")
+        document.getElementById("root"),
     );
 };
 render(App);
