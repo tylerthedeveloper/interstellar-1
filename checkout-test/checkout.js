@@ -1,67 +1,103 @@
-// const StellarSdk = require('stellar-sdk');
-// StellarSdk.Network.useTestNetwork();
-// const server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
-//
-// const cartItems = require('./cart-items-data');
-//
-// // 1. Get items in cart: graphql cart query
-// getCartItems = () => {
-//      return cartItems;
-// }
-//
-// const myCartItems = getCartItems()
-//
-// const cmcAPI = require('./testGetUsd.js');
-//
-// // 2: handle usd conversions of items in cart
-// //      todo: optimize, load into cache the request of listings and tickers rather than call every time
-// //      todo: make a liust of most popular coins and have those ID's ready in a text file
-// getUsdEquivalentOfAsset = (asset_type, fixedUSDAmount) => {
-//     const tickerPrice = cmcAPI.getTickerID(asset_type)
-//         .then(tickerID => cmcAPI.getUsdPriceForTickerID(tickerID)
-//             .then(tickerPrice => tickerPrice)
-//         )
-//     return (fixedUSDAmount / tickerPrice); // careful with precision
-// }
-//
-// getCheckUsdValues = (myCartItems) => {
-//     for (const item in myCartItems)
-//     {
-//         if (item.fixedUSDAmount && !item.assetPrice) {
-//             const currentPrice = getUsdEquivalentOfAsset(item.acceptedAsset.asset_code, item.fixedUSDAmount).then(;
-//             item.assetPrice = currentPrice;
-//         }
-//     }
-//     console.log(myCartItems[0].acceptedAsset)
-// }
-//
+
+const StellarSdk = require('stellar-sdk');
+StellarSdk.Network.useTestNetwork();
+const server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
+const cmcAPI = require('./testGetUsd.js').default;
+const axios = require('axios');
+
+// 1. Get items in cart: graphql cart query
+const _cartItems = require('./cart-items-data');
+
+function getCartItems() {
+     return _cartItems; 
+}
+
+const myCartItems = getCartItems()
+
+// 2 get stellar balances
+const pubKey = "GCC4KURTZ6NAYFU6UR65G6VWAEQWRAJDHWCGEDDGZHRYCMLYNV4FCF25";
+
+// get balances from stellar
+// Array < { asset_type: string, balance: string, limit: string, asset_code: string, asset_issuer: string } >
+// can also use horizon
+    // const horizon = "https://horizon-testnet.stellar.org/accounts/";
+async function getStellarBalances (publicKey) {
+  return await server.loadAccount(publicKey)
+      .then(account => account)
+      .then(account => account.balances)
+    // return await axios.get(horizon + publicKey)
+    //     .then((response) => response.data.balances)
+    //   .then(myBalances => console.log(myBalances));
+}
+
+// const myBalances = getStellarBalances(pubKey);
+
+// 2.1 combineLikeAssets
+// 2.1.1 this is For UI
+// 2.1.2 this for aggregate calculations to see if can cover entire cart based on USD total ... 
+
+// 2.2:
+// need to sort by preference ...
+// need to decide structure: array or dict
+    // dict preferred for look up, but need to add order field on it
+
+// 3 handle usd conversions of items in cart
+//      todo: optimize, load into cache the request of listings and tickers rather than call every time
+//      todo: make a liust of most popular coins and have those ID's ready in a text file 
+
+// 3.1 get usd equivalent given current ticker price dict and item with associated asset preference
+function getUsdEquivalentOfAsset (usdPriceDict, item) {
+    const asset_type = item.acceptedAsset.asset_code;
+    const fixedUSDAmount = item.fixedUSDAmount;
+    const tickerPrice = usdPriceDict.find(ticker => ticker['symbol'] === asset_type).price;
+    if (tickerPrice) return (fixedUSDAmount / tickerPrice); // careful with precision
+    else return NaN;
+}
+
+// 3.2 check / set trust for asset
+function checkTrustForAsset (balances, asset_code, asset_issuer) {
+    return balances.some(balance => {
+        return (balance.asset_code === asset_code &&
+                balance.asset_issuer === asset_issuer);
+        }
+    );
+}
+getStellarBalances(pubKey).then(myBalances => 
+    console.log(checkTrustForAsset(myBalances, 'Tycoin', 'GDNZIMIWPMRQ3X3UNFF7A7XI26XILUP6QBFT6MX7B62GAKVO3ZWDWWUW')));
+
+
+// TODO: INEFFICIENT: repeat loop over items and duplicate conditional checks
+    // this is because i want to group promises together for lookup and because 
+    // dont currently have a hard-coded list of accepted assets, so need to look up every time.
+    // Will be fixed with the above.
+function  getCheckUsdValues (myCartItems) {
+    const getUsdValuesList = [];
+    for (const item of myCartItems)
+    {
+        const asset = item.acceptedAsset;
+        if (item.fixedUSDAmount && (!asset.balance || asset.balance == 0)) {
+            getUsdValuesList.push(asset.asset_code);
+        }``
+    }
+    cmcAPI.runner(getUsdValuesList).then(usdPriceDict => {
+        for (let index = 0; index < myCartItems.length; index++)
+        {
+            const item = myCartItems[index];
+            const asset = item.acceptedAsset;
+            if (item.fixedUSDAmount && (!asset.balance || asset.balance == 0)) {
+                const currentPrice = getUsdEquivalentOfAsset(usdPriceDict, item);
+                const newAsset = asset;
+                newAsset.balance = currentPrice;
+                item.acceptedAsset = newAsset;
+            }
+        }
+        console.log(myCartItems[0].acceptedAsset)
+    });
+}
+
 // getCheckUsdValues(myCartItems)
-//
-//
-// //
-// // this is For UI and for aggregate calculations to see if can cover entire cart
-// // 2... combineLikeAssets
-//
-// // 3....
-// // get balances from stellar
-// // { asset_type: string, balance: string, limit: string, asset_code: string, asset_issuer: string }
-// getBalancesSDK = (publicKey) => {
-//   return server.loadAccount(publicKey)
-//       .then(account => account)
-//       .map(account => account.balances)
-//         // account.balances.forEach(function(balance) {
-//         //   console.log('Type:', balance.asset_type, ', Code:', balance.asset_code, ', Balance:', balance.balance);
-//         // });
-// }
-//
-// // const myBalances = getBalances();
-//
-// // 3.1:
-// // need to sort by preference ...
-// // need to decide structure: array or dict
-//     // dict preferred for look up, but need to add order field on it
-//
-//
+
+
 // // 4 loop through cart and create ops
 // // var transaction = new StellarSdk.TransactionBuilder(source)
 // createTransactionOps = (myCartItems) => {
