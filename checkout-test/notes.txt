@@ -1,0 +1,111 @@
+tests 
+
+√ - 0. Check balances for account
+    server.loadAccount(pubKey3).then(function(account) {
+        account.balances.forEach(function(balance) {
+            console.log(JSON.stringify(balance));
+        });
+    });
+
+√ - 1. Send lumens to lumens account
+    server.loadAccount(pubKey)
+        .then(function(account){
+            var builder = new StellarSdk.TransactionBuilder(account)
+                .addOperation(StellarSdk.Operation.payment({
+                    destination: destinationId,
+                    asset: StellarSdk.Asset.native(),
+                    amount: "10"
+                }))
+              .build();
+        transaction.sign(sourceKeys);
+        return server.submitTransaction(transaction);
+      })
+
+X - 1.1 Send lumens to new lumens account
+
+√ - 2. Send multiple (lumens) operations in a single transaction 
+    server.loadAccount(pubKey)
+        .then(function(account){
+            var builder = new StellarSdk.TransactionBuilder(account)
+                .addOperation(StellarSdk.Operation.payment({
+                    destination: First-destinationId,
+                    asset: StellarSdk.Asset.native(),
+                    amount: "10"
+                }))
+                .addOperation(StellarSdk.Operation.payment({
+                    destination: Second-destinationId,
+                    asset: StellarSdk.Asset.native(),
+                    amount: "10"
+                }))
+              .build();
+        transaction.sign(sourceKeys);
+        return server.submitTransaction(transaction);
+      })
+
+
+√ - 2.1 abstract - Send multiple operations in a single transaction 
+
+        // where ops is passed in to a function or created 
+        // as an array of operation-like objects
+            // can create the actual operations before or during transaction building time
+        var ops = [
+            {
+                destination: pubKey2,
+                asset: StellarSdk.Asset.native(),
+                amount: "1"
+            },
+            {
+                destination: pubKey3,
+                asset: StellarSdk.Asset.native(),
+                amount: "1"
+            }
+        ];
+
+        server.loadAccount(pubKey)
+            .then(function(account){
+                var builder = new StellarSdk.TransactionBuilder(account);
+                let operations = ops.map(op => {
+                    return StellarSdk.Operation.payment({
+                        destination: op.destination,
+                        asset: op.asset,
+                        amount: op.amount
+                    });
+                });
+            builder.operations = operations;
+            let transaction = builder.build();
+            transaction.sign(StellarSdk.Keypair.fromSecret(privKey));
+            return server.submitTransaction(transaction);
+
+        ── ────────────────────────────────────────────────────────────────────────────────
+
+
+        var builder = new StellarSdk.TransactionBuilder(account)
+        var op1 = {
+            destination: pubKey2,
+            asset: StellarSdk.Asset.native(),
+            amount: "1"
+        };
+        var op2 = {
+            destination: pubKey3,
+            asset: StellarSdk.Asset.native(),
+            amount: "1"
+        };
+        var ops = [ op1, op2 ];
+        let operations = ops.map(op => {
+            return StellarSdk.Operation.payment({
+                destination: op.destination,
+                asset: op.asset,
+                amount: op.amount
+            });
+        });
+        builder.operations = operations;
+        let transaction = builder.build();
+        transaction.sign(StellarSdk.Keypair.fromSecret(privKey));
+        return server.submitTransaction(transaction);
+
+√ - 3. payment with one asset to same asset 
+
+4. pathfinding: A -> B (with trust)
+
+5. mutli asset to multi asset
+
