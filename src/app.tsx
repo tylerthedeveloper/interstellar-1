@@ -3,12 +3,13 @@ import { hot } from "react-hot-loader";
 import { Route, Switch } from "react-router-dom";
 
 import { createStyles, withStyles, WithStyles} from "@material-ui/core";
-import Cart from "./pages/cart/Component";
+import Cart from "./pages/cart/Container";
 import Categories from "./pages/categories/Component";
 import HomePage from "./pages/home/Component";
 import People from "./pages/people/Component";
 import LoginModal from "./structural/login/login_modal/Component";
 import Navbar from "./structural/navbar/Container";
+import Snackbar from "Structural/notification/Component";
 
 /****  TYPES ******/
 interface IComponentProps extends WithStyles<typeof styles> {}
@@ -31,6 +32,7 @@ class App extends React.PureComponent<IComponentProps> {
                     </Switch>
                 </div>
                 <LoginModal />
+                <Snackbar />
             </div>
         );
     }

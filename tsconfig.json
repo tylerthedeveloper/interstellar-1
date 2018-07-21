@@ -18,7 +18,8 @@
       "Pages/*": ["src/pages/"],
       "Structural/*": ["src/structural/*"],
       "GQLTypes": ["src/types/gqlTypes.ts"],
-      "TypeUtil": ["src/types/util.ts"]
+      "TypeUtil": ["src/types/util.ts"],
+      "Types/*": ["src/types/*"]
     },
     "baseUrl": "./"
   },
@@ -26,6 +27,6 @@
     "src/**/*"
   ],
   "exclude": [
-    "node_modules"
+    "../node_modules"
   ]
 }

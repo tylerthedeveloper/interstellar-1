@@ -1,11 +1,12 @@
 import gql from "graphql-tag";
 import * as React from "react";
 import { Query } from "react-apollo";
+import AddToCartComponent from "Structural/products/product_list/actions/AddToCartAction";
 import ProductListComponent from "Structural/products/product_list/Component";
 
 /***        Types       ***/
-import {AllSellerProducts } from "GQLTypes";
-import {IPresentableProductTypeGuards} from "Structural/products/product_list/PresentableProductType";
+import { AddItemToCart, AllSellerProducts } from "GQLTypes";
+import {IPresentableProductTypeGuards} from "Types/local/PresentableProductType";
 
 interface IComponentProps {
     sellerID: string;
@@ -30,7 +31,10 @@ class ProductList extends React.PureComponent<IComponentProps> {
 
                     const {nodes: products} = userById.productsBySellerId;
 
-                    return <ProductListComponent products={IPresentableProductTypeGuards.retainOnly(products)} />;
+                    return <ProductListComponent
+                        products={IPresentableProductTypeGuards.retainOnly(products)}
+                        ActionComponent={AddToCartComponent}
+                    />;
                 }}
 
             </Query>

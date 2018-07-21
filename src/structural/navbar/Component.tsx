@@ -1,4 +1,14 @@
-import { AppBar, Button, createStyles, Icon, Toolbar, Typography, WithStyles, withStyles } from "@material-ui/core";
+import {
+    AppBar,
+    Avatar,
+    Button,
+    createStyles,
+    Icon,
+    Toolbar,
+    Typography,
+    WithStyles,
+    withStyles
+} from "@material-ui/core";
 import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { NavLink } from "react-router-dom";
@@ -32,9 +42,31 @@ class NavBar extends React.Component<IComponentProps> {
                     </div>
                     <div>
                         {loggedIn ? (
-                            <Button onClick={logout} variant={"raised"}>
-                                Logout
-                            </Button>
+                            <div className={classes.userNavSection}>
+
+                                <Avatar
+                                    className={classes.userNavSectionItem}
+                                >
+                                    OP
+                                </Avatar>
+                                <Button
+                                    className={classes.userNavSectionItem}
+                                    variant={"raised"}
+                                    component={(props: any) => <NavLink to={"/cart"} {...props}/>}
+                                >
+                                    <Icon className={"material-icons"}>
+                                        shopping_cart
+                                    </Icon>
+                                </Button>
+                                <Button
+                                    onClick={logout}
+                                    variant={"raised"}
+                                    className={classes.userNavSectionItem}
+                                    color={"secondary"}
+                                >
+                                    Logout
+                                </Button>
+                            </div>
                         ) : (
                             <Button
                                 onClick={ui.openLoginModal}
@@ -44,15 +76,7 @@ class NavBar extends React.Component<IComponentProps> {
                             </Button>
                         )}
 
-                        <Button
-                            className={classes.cartButton}
-                            variant={"raised"}
-                            component={() => <NavLink to={"/cart"}/>}
-                        >
-                            <Icon className={"material-icons"}>
-                                shopping_cart
-                            </Icon>
-                        </Button>
+
                     </div>
                 </Toolbar>
             </AppBar>
@@ -71,9 +95,13 @@ const styles = createStyles({
         flex: 1,
     },
 
-    cartButton: {
-        marginLeft: "20px",
+    userNavSectionItem: {
+        margin: "0 10px",
     },
+
+    userNavSection: {
+        display: "flex",
+    }
 });
 
 /****  EXPORT ******/

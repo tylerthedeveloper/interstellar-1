@@ -1,4 +1,3 @@
-import * as t from "io-ts";
 import * as _ from "lodash";
 import { inject } from "mobx-react";
 import * as React from "react";
@@ -24,24 +23,37 @@ type Omit<T, K extends keyof T> = T extends any
     : never;
 
 // GraphQL Helper
-export type OnlyForce<O, T extends keyof O> = Required<{[k in T]: NonNullable<O[k]>}> & Partial<O>;
+export type OnlyForce<O, T extends keyof O> = Required<{[k in T]: NonNullable<O[k]>}> & PartialInput<O>;
 
-type Nullable<T> = { [P in keyof T]: T[P] | null };
+type Nullable2<T> = { [P in keyof T]: Partial<T[P]> | null};
+type Nullable<T> = { [P in keyof T]: Partial<Nullable2<T[P]>> | null | {}};
 type PartialInput<T> = Partial<Nullable<T>> | null;
 
 export function generateTypeGuards<T>(requiredProps: Array<keyof T>) {
 
-    function is(obj?: PartialInput<T> | null): obj is T {
+    function is(obj?: PartialInput<T>): obj is T {
         return _.isObjectLike(obj) &&
             requiredProps.reduce((stillTrue, prop) => stillTrue && !_.isNil(obj![prop]), true);
     }
 
-    function retainOnly(objs: Array<PartialInput<T>>) {
+    function retainOnly(objs: Array<PartialInput<T>>): T[] {
         return objs.filter(is);
     }
 
     return {
         is,
         retainOnly,
-    };
+    }
+}
+
+export function concatTypeGuards<T>(originalGuards: ReturnType<typeof generateTypeGuards>,
+                                    prop: keyof T,
+                                    extraGuards: ReturnType<typeof generateTypeGuards>)
+{
+    for (const field in originalGuards) {
+        if (originalGuards.hasOwnProperty(field)) {
+            (originalGuards as any)[field] = () => (extraGuards as any)[field].call(arguments)
+            && (originalGuards as any)[field].call(arguments);
+        }
+    }
 }

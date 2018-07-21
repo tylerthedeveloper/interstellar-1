@@ -95,6 +95,7 @@ class StellarAccountStore {
         this.account = {};
         this.secretKey = "";
         this.service.clearData();
+        localStorage.removeItem("token");
     }
 
 }

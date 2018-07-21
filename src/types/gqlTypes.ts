@@ -26,40 +26,37 @@ export interface Query extends Node {
   query: Query; /** Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form. */
   nodeId: string; /** The root query type must be a `Node` to work well with Relay 1 mutations. This just resolves to `query`. */
   node?: Node | null; /** Fetches an object given its globally unique `ID`. */
+  allCarts?: CartsConnection | null; /** Reads and enables pagination through a set of `Cart`. */
   allProductCategories?: ProductCategoriesConnection | null; /** Reads and enables pagination through a set of `ProductCategory`. */
   allProducts?: ProductsConnection | null; /** Reads and enables pagination through a set of `Product`. */
   allSellers?: SellersConnection | null; /** Reads and enables pagination through a set of `Seller`. */
   allUsers?: UsersConnection | null; /** Reads and enables pagination through a set of `User`. */
+  cartByItemIdAndUserId?: Cart | null; 
   productCategoryById?: ProductCategory | null; 
   productById?: Product | null; 
   productByName?: Product | null; 
   userById?: User | null; 
+  cart?: Cart | null; /** Reads a single `Cart` using its globally unique `ID`. */
   productCategory?: ProductCategory | null; /** Reads a single `ProductCategory` using its globally unique `ID`. */
   product?: Product | null; /** Reads a single `Product` using its globally unique `ID`. */
   user?: User | null; /** Reads a single `User` using its globally unique `ID`. */
   currentUser?: User | null; /** The currently logged in User. Returns 'null' if noone is logged in. */
 }
-/** A connection to a list of `ProductCategory` values. */
-export interface ProductCategoriesConnection {
-  nodes: (ProductCategory | null)[]; /** A list of `ProductCategory` objects. */
-  edges: ProductCategoriesEdge[]; /** A list of edges which contains the `ProductCategory` and cursor to aid in pagination. */
+/** A connection to a list of `Cart` values. */
+export interface CartsConnection {
+  nodes: (Cart | null)[]; /** A list of `Cart` objects. */
+  edges: CartsEdge[]; /** A list of edges which contains the `Cart` and cursor to aid in pagination. */
   pageInfo: PageInfo; /** Information to aid in pagination. */
-  totalCount?: number | null; /** The count of *all* `ProductCategory` you could get from the connection. */
+  totalCount?: number | null; /** The count of *all* `Cart` you could get from the connection. */
 }
 
-export interface ProductCategory extends Node {
+export interface Cart extends Node {
   nodeId: string; /** A globally unique identifier. Can be used in various places throughout the system to identify this single value. */
-  id: UUID; 
-  name: string; 
-  description?: string | null; 
-  productsByCategory: ProductsConnection; /** Reads and enables pagination through a set of `Product`. */
-}
-/** A connection to a list of `Product` values. */
-export interface ProductsConnection {
-  nodes: (Product | null)[]; /** A list of `Product` objects. */
-  edges: ProductsEdge[]; /** A list of edges which contains the `Product` and cursor to aid in pagination. */
-  pageInfo: PageInfo; /** Information to aid in pagination. */
-  totalCount?: number | null; /** The count of *all* `Product` you could get from the connection. */
+  itemId: UUID; 
+  userId: UUID; 
+  quantity: number; 
+  product?: Product | null; /** Reads a single `Product` that is related to this `Cart`. */
+  user?: User | null; /** Reads a single `User` that is related to this `Cart`. */
 }
 
 export interface Product extends Node {
@@ -72,6 +69,7 @@ export interface Product extends Node {
   description?: string | null; 
   userBySellerId?: User | null; /** Reads a single `User` that is related to this `Product`. */
   productCategoryByCategory?: ProductCategory | null; /** Reads a single `ProductCategory` that is related to this `Product`. */
+  carts: CartsConnection; /** Reads and enables pagination through a set of `Cart`. */
 }
 
 export interface User extends Node {
@@ -81,6 +79,14 @@ export interface User extends Node {
   stellarPublicKey: string; 
   displayName?: string | null; 
   productsBySellerId: ProductsConnection; /** Reads and enables pagination through a set of `Product`. */
+  cart: CartsConnection; /** Reads and enables pagination through a set of `Cart`. */
+}
+/** A connection to a list of `Product` values. */
+export interface ProductsConnection {
+  nodes: (Product | null)[]; /** A list of `Product` objects. */
+  edges: ProductsEdge[]; /** A list of edges which contains the `Product` and cursor to aid in pagination. */
+  pageInfo: PageInfo; /** Information to aid in pagination. */
+  totalCount?: number | null; /** The count of *all* `Product` you could get from the connection. */
 }
 /** A `Product` edge in the connection. */
 export interface ProductsEdge {
@@ -93,6 +99,26 @@ export interface PageInfo {
   hasPreviousPage: boolean; /** When paginating backwards, are there more items? */
   startCursor?: Cursor | null; /** When paginating backwards, the cursor to continue. */
   endCursor?: Cursor | null; /** When paginating forwards, the cursor to continue. */
+}
+
+export interface ProductCategory extends Node {
+  nodeId: string; /** A globally unique identifier. Can be used in various places throughout the system to identify this single value. */
+  id: UUID; 
+  name: string; 
+  description?: string | null; 
+  productsByCategory: ProductsConnection; /** Reads and enables pagination through a set of `Product`. */
+}
+/** A `Cart` edge in the connection. */
+export interface CartsEdge {
+  cursor?: Cursor | null; /** A cursor for use in pagination. */
+  node?: Cart | null; /** The `Cart` at the end of the edge. */
+}
+/** A connection to a list of `ProductCategory` values. */
+export interface ProductCategoriesConnection {
+  nodes: (ProductCategory | null)[]; /** A list of `ProductCategory` objects. */
+  edges: ProductCategoriesEdge[]; /** A list of edges which contains the `ProductCategory` and cursor to aid in pagination. */
+  pageInfo: PageInfo; /** Information to aid in pagination. */
+  totalCount?: number | null; /** The count of *all* `ProductCategory` you could get from the connection. */
 }
 /** A `ProductCategory` edge in the connection. */
 export interface ProductCategoriesEdge {
@@ -132,9 +158,12 @@ export interface UsersEdge {
 }
 /** The root mutation type which contains root level fields which mutate data. */
 export interface Mutation {
+  createCart?: CreateCartPayload | null; /** Creates a single `Cart`. */
   createProductCategory?: CreateProductCategoryPayload | null; /** Creates a single `ProductCategory`. */
   createProduct?: CreateProductPayload | null; /** Creates a single `Product`. */
   createUser?: CreateUserPayload | null; /** Creates a single `User`. */
+  updateCart?: UpdateCartPayload | null; /** Updates a single `Cart` using its globally unique id and a patch. */
+  updateCartByItemIdAndUserId?: UpdateCartPayload | null; /** Updates a single `Cart` using a unique key and a patch. */
   updateProductCategory?: UpdateProductCategoryPayload | null; /** Updates a single `ProductCategory` using its globally unique id and a patch. */
   updateProductCategoryById?: UpdateProductCategoryPayload | null; /** Updates a single `ProductCategory` using a unique key and a patch. */
   updateProduct?: UpdateProductPayload | null; /** Updates a single `Product` using its globally unique id and a patch. */
@@ -142,6 +171,8 @@ export interface Mutation {
   updateProductByName?: UpdateProductPayload | null; /** Updates a single `Product` using a unique key and a patch. */
   updateUser?: UpdateUserPayload | null; /** Updates a single `User` using its globally unique id and a patch. */
   updateUserById?: UpdateUserPayload | null; /** Updates a single `User` using a unique key and a patch. */
+  deleteCart?: DeleteCartPayload | null; /** Deletes a single `Cart` using its globally unique id. */
+  deleteCartByItemIdAndUserId?: DeleteCartPayload | null; /** Deletes a single `Cart` using a unique key. */
   deleteProductCategory?: DeleteProductCategoryPayload | null; /** Deletes a single `ProductCategory` using its globally unique id. */
   deleteProductCategoryById?: DeleteProductCategoryPayload | null; /** Deletes a single `ProductCategory` using a unique key. */
   deleteProduct?: DeleteProductPayload | null; /** Deletes a single `Product` using its globally unique id. */
@@ -149,9 +180,19 @@ export interface Mutation {
   deleteProductByName?: DeleteProductPayload | null; /** Deletes a single `Product` using a unique key. */
   deleteUser?: DeleteUserPayload | null; /** Deletes a single `User` using its globally unique id. */
   deleteUserById?: DeleteUserPayload | null; /** Deletes a single `User` using a unique key. */
+  addToCart?: AddToCartPayload | null; 
   createAndLoadUserByStellarPublicKey?: CreateAndLoadUserByStellarPublicKeyPayload | null; /** Reads and enables pagination through a set of `User`. */
   login?: User | null; /** Login mechanism for the server */
   logout?: boolean | null; /** Logout mechanism for the server */
+}
+/** The output of our create `Cart` mutation. */
+export interface CreateCartPayload {
+  clientMutationId?: string | null; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+  cart?: Cart | null; /** The `Cart` that was created by this mutation. */
+  query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
+  product?: Product | null; /** Reads a single `Product` that is related to this `Cart`. */
+  user?: User | null; /** Reads a single `User` that is related to this `Cart`. */
+  cartEdge?: CartsEdge | null; /** An edge for our `Cart`. May be used by Relay 1. */
 }
 /** The output of our create `ProductCategory` mutation. */
 export interface CreateProductCategoryPayload {
@@ -176,6 +217,15 @@ export interface CreateUserPayload {
   query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
   userEdge?: UsersEdge | null; /** An edge for our `User`. May be used by Relay 1. */
 }
+/** The output of our update `Cart` mutation. */
+export interface UpdateCartPayload {
+  clientMutationId?: string | null; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+  cart?: Cart | null; /** The `Cart` that was updated by this mutation. */
+  query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
+  product?: Product | null; /** Reads a single `Product` that is related to this `Cart`. */
+  user?: User | null; /** Reads a single `User` that is related to this `Cart`. */
+  cartEdge?: CartsEdge | null; /** An edge for our `Cart`. May be used by Relay 1. */
+}
 /** The output of our update `ProductCategory` mutation. */
 export interface UpdateProductCategoryPayload {
   clientMutationId?: string | null; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
@@ -198,6 +248,16 @@ export interface UpdateUserPayload {
   user?: User | null; /** The `User` that was updated by this mutation. */
   query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
   userEdge?: UsersEdge | null; /** An edge for our `User`. May be used by Relay 1. */
+}
+/** The output of our delete `Cart` mutation. */
+export interface DeleteCartPayload {
+  clientMutationId?: string | null; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+  cart?: Cart | null; /** The `Cart` that was deleted by this mutation. */
+  deletedCartId?: string | null; 
+  query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
+  product?: Product | null; /** Reads a single `Product` that is related to this `Cart`. */
+  user?: User | null; /** Reads a single `User` that is related to this `Cart`. */
+  cartEdge?: CartsEdge | null; /** An edge for our `Cart`. May be used by Relay 1. */
 }
 /** The output of our delete `ProductCategory` mutation. */
 export interface DeleteProductCategoryPayload {
@@ -225,6 +285,11 @@ export interface DeleteUserPayload {
   query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
   userEdge?: UsersEdge | null; /** An edge for our `User`. May be used by Relay 1. */
 }
+/** The output of our `addToCart` mutation. */
+export interface AddToCartPayload {
+  clientMutationId?: string | null; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+  query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
+}
 /** The output of our `createAndLoadUserByStellarPublicKey` mutation. */
 export interface CreateAndLoadUserByStellarPublicKeyPayload {
   clientMutationId?: string | null; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
@@ -232,11 +297,11 @@ export interface CreateAndLoadUserByStellarPublicKeyPayload {
   query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
   userEdge?: UsersEdge | null; /** An edge for our `User`. May be used by Relay 1. */
 }
-/** A condition to be used against `ProductCategory` object types. All fields are tested for equality and combined with a logical ‘and.’ */
-export interface ProductCategoryCondition {
-  id?: UUID | null; /** Checks for equality with the object’s `id` field. */
-  name?: string | null; /** Checks for equality with the object’s `name` field. */
-  description?: string | null; /** Checks for equality with the object’s `description` field. */
+/** A condition to be used against `Cart` object types. All fields are tested for equality and combined with a logical ‘and.’ */
+export interface CartCondition {
+  itemId?: UUID | null; /** Checks for equality with the object’s `itemId` field. */
+  userId?: UUID | null; /** Checks for equality with the object’s `userId` field. */
+  quantity?: number | null; /** Checks for equality with the object’s `quantity` field. */
 }
 /** A condition to be used against `Product` object types. All fields are tested for equality and combined with a logical ‘and.’ */
 export interface ProductCondition {
@@ -245,6 +310,12 @@ export interface ProductCondition {
   category?: UUID | null; /** Checks for equality with the object’s `category` field. */
   name?: string | null; /** Checks for equality with the object’s `name` field. */
   usdCost?: BigFloat | null; /** Checks for equality with the object’s `usdCost` field. */
+  description?: string | null; /** Checks for equality with the object’s `description` field. */
+}
+/** A condition to be used against `ProductCategory` object types. All fields are tested for equality and combined with a logical ‘and.’ */
+export interface ProductCategoryCondition {
+  id?: UUID | null; /** Checks for equality with the object’s `id` field. */
+  name?: string | null; /** Checks for equality with the object’s `name` field. */
   description?: string | null; /** Checks for equality with the object’s `description` field. */
 }
 /** A condition to be used against `Seller` object types. All fields are tested for equality and combined with a logical ‘and.’ */
@@ -260,6 +331,17 @@ export interface UserCondition {
   username?: string | null; /** Checks for equality with the object’s `username` field. */
   stellarPublicKey?: string | null; /** Checks for equality with the object’s `stellarPublicKey` field. */
   displayName?: string | null; /** Checks for equality with the object’s `displayName` field. */
+}
+/** All input for the create `Cart` mutation. */
+export interface CreateCartInput {
+  clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
+  cart: CartInput; /** The `Cart` to be created by this mutation. */
+}
+/** An input for mutations affecting `Cart` */
+export interface CartInput {
+  itemId: UUID; 
+  userId: UUID; 
+  quantity: number; 
 }
 /** All input for the create `ProductCategory` mutation. */
 export interface CreateProductCategoryInput {
@@ -297,6 +379,25 @@ export interface UserInput {
   username?: string | null; 
   stellarPublicKey: string; 
   displayName?: string | null; 
+}
+/** All input for the `updateCart` mutation. */
+export interface UpdateCartInput {
+  clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
+  nodeId: string; /** The globally unique `ID` which will identify a single `Cart` to be updated. */
+  cartPatch: CartPatch; /** An object where the defined keys will be set on the `Cart` being updated. */
+}
+/** Represents an update to a `Cart`. Fields that are set will be updated. */
+export interface CartPatch {
+  itemId?: UUID | null; 
+  userId?: UUID | null; 
+  quantity?: number | null; 
+}
+/** All input for the `updateCartByItemIdAndUserId` mutation. */
+export interface UpdateCartByItemIdAndUserIdInput {
+  clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
+  cartPatch: CartPatch; /** An object where the defined keys will be set on the `Cart` being updated. */
+  itemId: UUID; 
+  userId: UUID; 
 }
 /** All input for the `updateProductCategory` mutation. */
 export interface UpdateProductCategoryInput {
@@ -362,6 +463,17 @@ export interface UpdateUserByIdInput {
   userPatch: UserPatch; /** An object where the defined keys will be set on the `User` being updated. */
   id: UUID; /** This is a cool thing. */
 }
+/** All input for the `deleteCart` mutation. */
+export interface DeleteCartInput {
+  clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
+  nodeId: string; /** The globally unique `ID` which will identify a single `Cart` to be deleted. */
+}
+/** All input for the `deleteCartByItemIdAndUserId` mutation. */
+export interface DeleteCartByItemIdAndUserIdInput {
+  clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
+  itemId: UUID; 
+  userId: UUID; 
+}
 /** All input for the `deleteProductCategory` mutation. */
 export interface DeleteProductCategoryInput {
   clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
@@ -397,6 +509,13 @@ export interface DeleteUserByIdInput {
   clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
   id: UUID; /** This is a cool thing. */
 }
+/** All input for the `addToCart` mutation. */
+export interface AddToCartInput {
+  clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
+  userId?: UUID | null; 
+  productId?: UUID | null; 
+  quantity?: number | null; 
+}
 /** All input for the `createAndLoadUserByStellarPublicKey` mutation. */
 export interface CreateAndLoadUserByStellarPublicKeyInput {
   clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
@@ -404,6 +523,15 @@ export interface CreateAndLoadUserByStellarPublicKeyInput {
 }
 export interface NodeQueryArgs {
   nodeId: string; /** The globally unique `ID`. */
+}
+export interface AllCartsQueryArgs {
+  first?: number | null; /** Only read the first `n` values of the set. */
+  last?: number | null; /** Only read the last `n` values of the set. */
+  offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
+  before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
+  after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
+  orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
+  condition?: CartCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
 }
 export interface AllProductCategoriesQueryArgs {
   first?: number | null; /** Only read the first `n` values of the set. */
@@ -441,6 +569,10 @@ export interface AllUsersQueryArgs {
   orderBy?: UsersOrderBy[] | null; /** The method to use when ordering `User`. */
   condition?: UserCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
 }
+export interface CartByItemIdAndUserIdQueryArgs {
+  itemId: UUID; 
+  userId: UUID; 
+}
 export interface ProductCategoryByIdQueryArgs {
   id: UUID; 
 }
@@ -453,6 +585,9 @@ export interface ProductByNameQueryArgs {
 export interface UserByIdQueryArgs {
   id: UUID; 
 }
+export interface CartQueryArgs {
+  nodeId: string; /** The globally unique `ID` to be used in selecting a single `Cart`. */
+}
 export interface ProductCategoryQueryArgs {
   nodeId: string; /** The globally unique `ID` to be used in selecting a single `ProductCategory`. */
 }
@@ -462,14 +597,14 @@ export interface ProductQueryArgs {
 export interface UserQueryArgs {
   nodeId: string; /** The globally unique `ID` to be used in selecting a single `User`. */
 }
-export interface ProductsByCategoryProductCategoryArgs {
+export interface CartsProductArgs {
   first?: number | null; /** Only read the first `n` values of the set. */
   last?: number | null; /** Only read the last `n` values of the set. */
   offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
   before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
   after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
-  orderBy?: ProductsOrderBy[] | null; /** The method to use when ordering `Product`. */
-  condition?: ProductCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
+  orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
+  condition?: CartCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
 }
 export interface ProductsBySellerIdUserArgs {
   first?: number | null; /** Only read the first `n` values of the set. */
@@ -480,6 +615,27 @@ export interface ProductsBySellerIdUserArgs {
   orderBy?: ProductsOrderBy[] | null; /** The method to use when ordering `Product`. */
   condition?: ProductCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
 }
+export interface CartUserArgs {
+  first?: number | null; /** Only read the first `n` values of the set. */
+  last?: number | null; /** Only read the last `n` values of the set. */
+  offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
+  before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
+  after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
+  orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
+  condition?: CartCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
+}
+export interface ProductsByCategoryProductCategoryArgs {
+  first?: number | null; /** Only read the first `n` values of the set. */
+  last?: number | null; /** Only read the last `n` values of the set. */
+  offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
+  before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
+  after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
+  orderBy?: ProductsOrderBy[] | null; /** The method to use when ordering `Product`. */
+  condition?: ProductCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
+}
+export interface CreateCartMutationArgs {
+  input: CreateCartInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+}
 export interface CreateProductCategoryMutationArgs {
   input: CreateProductCategoryInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
 }
@@ -488,6 +644,12 @@ export interface CreateProductMutationArgs {
 }
 export interface CreateUserMutationArgs {
   input: CreateUserInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+}
+export interface UpdateCartMutationArgs {
+  input: UpdateCartInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+}
+export interface UpdateCartByItemIdAndUserIdMutationArgs {
+  input: UpdateCartByItemIdAndUserIdInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
 }
 export interface UpdateProductCategoryMutationArgs {
   input: UpdateProductCategoryInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
@@ -510,6 +672,12 @@ export interface UpdateUserMutationArgs {
 export interface UpdateUserByIdMutationArgs {
   input: UpdateUserByIdInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
 }
+export interface DeleteCartMutationArgs {
+  input: DeleteCartInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+}
+export interface DeleteCartByItemIdAndUserIdMutationArgs {
+  input: DeleteCartByItemIdAndUserIdInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+}
 export interface DeleteProductCategoryMutationArgs {
   input: DeleteProductCategoryInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
 }
@@ -531,6 +699,9 @@ export interface DeleteUserMutationArgs {
 export interface DeleteUserByIdMutationArgs {
   input: DeleteUserByIdInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
 }
+export interface AddToCartMutationArgs {
+  input: AddToCartInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+}
 export interface CreateAndLoadUserByStellarPublicKeyMutationArgs {
   input: CreateAndLoadUserByStellarPublicKeyInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
 }
@@ -538,6 +709,9 @@ export interface LoginMutationArgs {
   stellarPublicKey: string; 
   payload: string; 
   signature: string; 
+}
+export interface CartEdgeCreateCartPayloadArgs {
+  orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
 }
 export interface ProductCategoryEdgeCreateProductCategoryPayloadArgs {
   orderBy?: ProductCategoriesOrderBy[] | null; /** The method to use when ordering `ProductCategory`. */
@@ -548,6 +722,9 @@ export interface ProductEdgeCreateProductPayloadArgs {
 export interface UserEdgeCreateUserPayloadArgs {
   orderBy?: UsersOrderBy[] | null; /** The method to use when ordering `User`. */
 }
+export interface CartEdgeUpdateCartPayloadArgs {
+  orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
+}
 export interface ProductCategoryEdgeUpdateProductCategoryPayloadArgs {
   orderBy?: ProductCategoriesOrderBy[] | null; /** The method to use when ordering `ProductCategory`. */
 }
@@ -556,6 +733,9 @@ export interface ProductEdgeUpdateProductPayloadArgs {
 }
 export interface UserEdgeUpdateUserPayloadArgs {
   orderBy?: UsersOrderBy[] | null; /** The method to use when ordering `User`. */
+}
+export interface CartEdgeDeleteCartPayloadArgs {
+  orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
 }
 export interface ProductCategoryEdgeDeleteProductCategoryPayloadArgs {
   orderBy?: ProductCategoriesOrderBy[] | null; /** The method to use when ordering `ProductCategory`. */
@@ -569,15 +749,15 @@ export interface UserEdgeDeleteUserPayloadArgs {
 export interface UserEdgeCreateAndLoadUserByStellarPublicKeyPayloadArgs {
   orderBy?: UsersOrderBy[] | null; /** The method to use when ordering `User`. */
 }
-/** Methods to use when ordering `ProductCategory`. */
-export enum ProductCategoriesOrderBy {
+/** Methods to use when ordering `Cart`. */
+export enum CartsOrderBy {
   NATURAL = "NATURAL",
-  ID_ASC = "ID_ASC",
-  ID_DESC = "ID_DESC",
-  NAME_ASC = "NAME_ASC",
-  NAME_DESC = "NAME_DESC",
-  DESCRIPTION_ASC = "DESCRIPTION_ASC",
-  DESCRIPTION_DESC = "DESCRIPTION_DESC",
+  ITEM_ID_ASC = "ITEM_ID_ASC",
+  ITEM_ID_DESC = "ITEM_ID_DESC",
+  USER_ID_ASC = "USER_ID_ASC",
+  USER_ID_DESC = "USER_ID_DESC",
+  QUANTITY_ASC = "QUANTITY_ASC",
+  QUANTITY_DESC = "QUANTITY_DESC",
   PRIMARY_KEY_ASC = "PRIMARY_KEY_ASC",
   PRIMARY_KEY_DESC = "PRIMARY_KEY_DESC",
 }
@@ -594,6 +774,18 @@ export enum ProductsOrderBy {
   NAME_DESC = "NAME_DESC",
   USD_COST_ASC = "USD_COST_ASC",
   USD_COST_DESC = "USD_COST_DESC",
+  DESCRIPTION_ASC = "DESCRIPTION_ASC",
+  DESCRIPTION_DESC = "DESCRIPTION_DESC",
+  PRIMARY_KEY_ASC = "PRIMARY_KEY_ASC",
+  PRIMARY_KEY_DESC = "PRIMARY_KEY_DESC",
+}
+/** Methods to use when ordering `ProductCategory`. */
+export enum ProductCategoriesOrderBy {
+  NATURAL = "NATURAL",
+  ID_ASC = "ID_ASC",
+  ID_DESC = "ID_DESC",
+  NAME_ASC = "NAME_ASC",
+  NAME_DESC = "NAME_DESC",
   DESCRIPTION_ASC = "DESCRIPTION_ASC",
   DESCRIPTION_DESC = "DESCRIPTION_DESC",
   PRIMARY_KEY_ASC = "PRIMARY_KEY_ASC",
@@ -632,14 +824,17 @@ export namespace QueryResolvers {
     query?: QueryResolver; /** Exposes the root query type nested one level down. This is helpful for Relay 1 which can only query top level fields if they are in a particular form. */
     nodeId?: NodeIdResolver; /** The root query type must be a `Node` to work well with Relay 1 mutations. This just resolves to `query`. */
     node?: NodeResolver; /** Fetches an object given its globally unique `ID`. */
+    allCarts?: AllCartsResolver; /** Reads and enables pagination through a set of `Cart`. */
     allProductCategories?: AllProductCategoriesResolver; /** Reads and enables pagination through a set of `ProductCategory`. */
     allProducts?: AllProductsResolver; /** Reads and enables pagination through a set of `Product`. */
     allSellers?: AllSellersResolver; /** Reads and enables pagination through a set of `Seller`. */
     allUsers?: AllUsersResolver; /** Reads and enables pagination through a set of `User`. */
+    cartByItemIdAndUserId?: CartByItemIdAndUserIdResolver; 
     productCategoryById?: ProductCategoryByIdResolver; 
     productById?: ProductByIdResolver; 
     productByName?: ProductByNameResolver; 
     userById?: UserByIdResolver; 
+    cart?: CartResolver; /** Reads a single `Cart` using its globally unique `ID`. */
     productCategory?: ProductCategoryResolver; /** Reads a single `ProductCategory` using its globally unique `ID`. */
     product?: ProductResolver; /** Reads a single `Product` using its globally unique `ID`. */
     user?: UserResolver; /** Reads a single `User` using its globally unique `ID`. */
@@ -649,6 +844,17 @@ export namespace QueryResolvers {
   export type QueryResolver = Resolver<Query>;  export type NodeIdResolver = Resolver<string>;  export type NodeResolver = Resolver<Node | null, NodeArgs>;
   export interface NodeArgs {
     nodeId: string; /** The globally unique `ID`. */
+  }
+
+  export type AllCartsResolver = Resolver<CartsConnection | null, AllCartsArgs>;
+  export interface AllCartsArgs {
+    first?: number | null; /** Only read the first `n` values of the set. */
+    last?: number | null; /** Only read the last `n` values of the set. */
+    offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
+    before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
+    after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
+    orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
+    condition?: CartCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
   }
 
   export type AllProductCategoriesResolver = Resolver<ProductCategoriesConnection | null, AllProductCategoriesArgs>;
@@ -695,6 +901,12 @@ export namespace QueryResolvers {
     condition?: UserCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
   }
 
+  export type CartByItemIdAndUserIdResolver = Resolver<Cart | null, CartByItemIdAndUserIdArgs>;
+  export interface CartByItemIdAndUserIdArgs {
+    itemId: UUID; 
+    userId: UUID; 
+  }
+
   export type ProductCategoryByIdResolver = Resolver<ProductCategory | null, ProductCategoryByIdArgs>;
   export interface ProductCategoryByIdArgs {
     id: UUID; 
@@ -715,6 +927,11 @@ export namespace QueryResolvers {
     id: UUID; 
   }
 
+  export type CartResolver = Resolver<Cart | null, CartArgs>;
+  export interface CartArgs {
+    nodeId: string; /** The globally unique `ID` to be used in selecting a single `Cart`. */
+  }
+
   export type ProductCategoryResolver = Resolver<ProductCategory | null, ProductCategoryArgs>;
   export interface ProductCategoryArgs {
     nodeId: string; /** The globally unique `ID` to be used in selecting a single `ProductCategory`. */
@@ -731,16 +948,118 @@ export namespace QueryResolvers {
   }
 
   export type CurrentUserResolver = Resolver<User | null>;  
-}/** A connection to a list of `ProductCategory` values. */
-export namespace ProductCategoriesConnectionResolvers {
+}/** A connection to a list of `Cart` values. */
+export namespace CartsConnectionResolvers {
   export interface Resolvers {
-    nodes?: NodesResolver; /** A list of `ProductCategory` objects. */
-    edges?: EdgesResolver; /** A list of edges which contains the `ProductCategory` and cursor to aid in pagination. */
+    nodes?: NodesResolver; /** A list of `Cart` objects. */
+    edges?: EdgesResolver; /** A list of edges which contains the `Cart` and cursor to aid in pagination. */
     pageInfo?: PageInfoResolver; /** Information to aid in pagination. */
-    totalCount?: TotalCountResolver; /** The count of *all* `ProductCategory` you could get from the connection. */
+    totalCount?: TotalCountResolver; /** The count of *all* `Cart` you could get from the connection. */
   }
 
-  export type NodesResolver = Resolver<(ProductCategory | null)[]>;  export type EdgesResolver = Resolver<ProductCategoriesEdge[]>;  export type PageInfoResolver = Resolver<PageInfo>;  export type TotalCountResolver = Resolver<number | null>;  
+  export type NodesResolver = Resolver<(Cart | null)[]>;  export type EdgesResolver = Resolver<CartsEdge[]>;  export type PageInfoResolver = Resolver<PageInfo>;  export type TotalCountResolver = Resolver<number | null>;  
+}
+export namespace CartResolvers {
+  export interface Resolvers {
+    nodeId?: NodeIdResolver; /** A globally unique identifier. Can be used in various places throughout the system to identify this single value. */
+    itemId?: ItemIdResolver; 
+    userId?: UserIdResolver; 
+    quantity?: QuantityResolver; 
+    product?: ProductResolver; /** Reads a single `Product` that is related to this `Cart`. */
+    user?: UserResolver; /** Reads a single `User` that is related to this `Cart`. */
+  }
+
+  export type NodeIdResolver = Resolver<string>;  export type ItemIdResolver = Resolver<UUID>;  export type UserIdResolver = Resolver<UUID>;  export type QuantityResolver = Resolver<number>;  export type ProductResolver = Resolver<Product | null>;  export type UserResolver = Resolver<User | null>;  
+}
+export namespace ProductResolvers {
+  export interface Resolvers {
+    nodeId?: NodeIdResolver; /** A globally unique identifier. Can be used in various places throughout the system to identify this single value. */
+    id?: IdResolver; 
+    sellerId?: SellerIdResolver; 
+    category?: CategoryResolver; 
+    name?: NameResolver; 
+    usdCost?: UsdCostResolver; 
+    description?: DescriptionResolver; 
+    userBySellerId?: UserBySellerIdResolver; /** Reads a single `User` that is related to this `Product`. */
+    productCategoryByCategory?: ProductCategoryByCategoryResolver; /** Reads a single `ProductCategory` that is related to this `Product`. */
+    carts?: CartsResolver; /** Reads and enables pagination through a set of `Cart`. */
+  }
+
+  export type NodeIdResolver = Resolver<string>;  export type IdResolver = Resolver<UUID>;  export type SellerIdResolver = Resolver<UUID>;  export type CategoryResolver = Resolver<UUID | null>;  export type NameResolver = Resolver<string>;  export type UsdCostResolver = Resolver<BigFloat>;  export type DescriptionResolver = Resolver<string | null>;  export type UserBySellerIdResolver = Resolver<User | null>;  export type ProductCategoryByCategoryResolver = Resolver<ProductCategory | null>;  export type CartsResolver = Resolver<CartsConnection, CartsArgs>;
+  export interface CartsArgs {
+    first?: number | null; /** Only read the first `n` values of the set. */
+    last?: number | null; /** Only read the last `n` values of the set. */
+    offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
+    before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
+    after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
+    orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
+    condition?: CartCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
+  }
+
+  
+}
+export namespace UserResolvers {
+  export interface Resolvers {
+    nodeId?: NodeIdResolver; /** A globally unique identifier. Can be used in various places throughout the system to identify this single value. */
+    id?: IdResolver; /** This is a cool thing. */
+    username?: UsernameResolver; 
+    stellarPublicKey?: StellarPublicKeyResolver; 
+    displayName?: DisplayNameResolver; 
+    productsBySellerId?: ProductsBySellerIdResolver; /** Reads and enables pagination through a set of `Product`. */
+    cart?: CartResolver; /** Reads and enables pagination through a set of `Cart`. */
+  }
+
+  export type NodeIdResolver = Resolver<string>;  export type IdResolver = Resolver<UUID>;  export type UsernameResolver = Resolver<string | null>;  export type StellarPublicKeyResolver = Resolver<string>;  export type DisplayNameResolver = Resolver<string | null>;  export type ProductsBySellerIdResolver = Resolver<ProductsConnection, ProductsBySellerIdArgs>;
+  export interface ProductsBySellerIdArgs {
+    first?: number | null; /** Only read the first `n` values of the set. */
+    last?: number | null; /** Only read the last `n` values of the set. */
+    offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
+    before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
+    after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
+    orderBy?: ProductsOrderBy[] | null; /** The method to use when ordering `Product`. */
+    condition?: ProductCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
+  }
+
+  export type CartResolver = Resolver<CartsConnection, CartArgs>;
+  export interface CartArgs {
+    first?: number | null; /** Only read the first `n` values of the set. */
+    last?: number | null; /** Only read the last `n` values of the set. */
+    offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
+    before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
+    after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
+    orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
+    condition?: CartCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
+  }
+
+  
+}/** A connection to a list of `Product` values. */
+export namespace ProductsConnectionResolvers {
+  export interface Resolvers {
+    nodes?: NodesResolver; /** A list of `Product` objects. */
+    edges?: EdgesResolver; /** A list of edges which contains the `Product` and cursor to aid in pagination. */
+    pageInfo?: PageInfoResolver; /** Information to aid in pagination. */
+    totalCount?: TotalCountResolver; /** The count of *all* `Product` you could get from the connection. */
+  }
+
+  export type NodesResolver = Resolver<(Product | null)[]>;  export type EdgesResolver = Resolver<ProductsEdge[]>;  export type PageInfoResolver = Resolver<PageInfo>;  export type TotalCountResolver = Resolver<number | null>;  
+}/** A `Product` edge in the connection. */
+export namespace ProductsEdgeResolvers {
+  export interface Resolvers {
+    cursor?: CursorResolver; /** A cursor for use in pagination. */
+    node?: NodeResolver; /** The `Product` at the end of the edge. */
+  }
+
+  export type CursorResolver = Resolver<Cursor | null>;  export type NodeResolver = Resolver<Product | null>;  
+}/** Information about pagination in a connection. */
+export namespace PageInfoResolvers {
+  export interface Resolvers {
+    hasNextPage?: HasNextPageResolver; /** When paginating forwards, are there more items? */
+    hasPreviousPage?: HasPreviousPageResolver; /** When paginating backwards, are there more items? */
+    startCursor?: StartCursorResolver; /** When paginating backwards, the cursor to continue. */
+    endCursor?: EndCursorResolver; /** When paginating forwards, the cursor to continue. */
+  }
+
+  export type HasNextPageResolver = Resolver<boolean>;  export type HasPreviousPageResolver = Resolver<boolean>;  export type StartCursorResolver = Resolver<Cursor | null>;  export type EndCursorResolver = Resolver<Cursor | null>;  
 }
 export namespace ProductCategoryResolvers {
   export interface Resolvers {
@@ -763,72 +1082,24 @@ export namespace ProductCategoryResolvers {
   }
 
   
-}/** A connection to a list of `Product` values. */
-export namespace ProductsConnectionResolvers {
-  export interface Resolvers {
-    nodes?: NodesResolver; /** A list of `Product` objects. */
-    edges?: EdgesResolver; /** A list of edges which contains the `Product` and cursor to aid in pagination. */
-    pageInfo?: PageInfoResolver; /** Information to aid in pagination. */
-    totalCount?: TotalCountResolver; /** The count of *all* `Product` you could get from the connection. */
-  }
-
-  export type NodesResolver = Resolver<(Product | null)[]>;  export type EdgesResolver = Resolver<ProductsEdge[]>;  export type PageInfoResolver = Resolver<PageInfo>;  export type TotalCountResolver = Resolver<number | null>;  
-}
-export namespace ProductResolvers {
-  export interface Resolvers {
-    nodeId?: NodeIdResolver; /** A globally unique identifier. Can be used in various places throughout the system to identify this single value. */
-    id?: IdResolver; 
-    sellerId?: SellerIdResolver; 
-    category?: CategoryResolver; 
-    name?: NameResolver; 
-    usdCost?: UsdCostResolver; 
-    description?: DescriptionResolver; 
-    userBySellerId?: UserBySellerIdResolver; /** Reads a single `User` that is related to this `Product`. */
-    productCategoryByCategory?: ProductCategoryByCategoryResolver; /** Reads a single `ProductCategory` that is related to this `Product`. */
-  }
-
-  export type NodeIdResolver = Resolver<string>;  export type IdResolver = Resolver<UUID>;  export type SellerIdResolver = Resolver<UUID>;  export type CategoryResolver = Resolver<UUID | null>;  export type NameResolver = Resolver<string>;  export type UsdCostResolver = Resolver<BigFloat>;  export type DescriptionResolver = Resolver<string | null>;  export type UserBySellerIdResolver = Resolver<User | null>;  export type ProductCategoryByCategoryResolver = Resolver<ProductCategory | null>;  
-}
-export namespace UserResolvers {
-  export interface Resolvers {
-    nodeId?: NodeIdResolver; /** A globally unique identifier. Can be used in various places throughout the system to identify this single value. */
-    id?: IdResolver; /** This is a cool thing. */
-    username?: UsernameResolver; 
-    stellarPublicKey?: StellarPublicKeyResolver; 
-    displayName?: DisplayNameResolver; 
-    productsBySellerId?: ProductsBySellerIdResolver; /** Reads and enables pagination through a set of `Product`. */
-  }
-
-  export type NodeIdResolver = Resolver<string>;  export type IdResolver = Resolver<UUID>;  export type UsernameResolver = Resolver<string | null>;  export type StellarPublicKeyResolver = Resolver<string>;  export type DisplayNameResolver = Resolver<string | null>;  export type ProductsBySellerIdResolver = Resolver<ProductsConnection, ProductsBySellerIdArgs>;
-  export interface ProductsBySellerIdArgs {
-    first?: number | null; /** Only read the first `n` values of the set. */
-    last?: number | null; /** Only read the last `n` values of the set. */
-    offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
-    before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
-    after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
-    orderBy?: ProductsOrderBy[] | null; /** The method to use when ordering `Product`. */
-    condition?: ProductCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
-  }
-
-  
-}/** A `Product` edge in the connection. */
-export namespace ProductsEdgeResolvers {
+}/** A `Cart` edge in the connection. */
+export namespace CartsEdgeResolvers {
   export interface Resolvers {
     cursor?: CursorResolver; /** A cursor for use in pagination. */
-    node?: NodeResolver; /** The `Product` at the end of the edge. */
+    node?: NodeResolver; /** The `Cart` at the end of the edge. */
   }
 
-  export type CursorResolver = Resolver<Cursor | null>;  export type NodeResolver = Resolver<Product | null>;  
-}/** Information about pagination in a connection. */
-export namespace PageInfoResolvers {
+  export type CursorResolver = Resolver<Cursor | null>;  export type NodeResolver = Resolver<Cart | null>;  
+}/** A connection to a list of `ProductCategory` values. */
+export namespace ProductCategoriesConnectionResolvers {
   export interface Resolvers {
-    hasNextPage?: HasNextPageResolver; /** When paginating forwards, are there more items? */
-    hasPreviousPage?: HasPreviousPageResolver; /** When paginating backwards, are there more items? */
-    startCursor?: StartCursorResolver; /** When paginating backwards, the cursor to continue. */
-    endCursor?: EndCursorResolver; /** When paginating forwards, the cursor to continue. */
+    nodes?: NodesResolver; /** A list of `ProductCategory` objects. */
+    edges?: EdgesResolver; /** A list of edges which contains the `ProductCategory` and cursor to aid in pagination. */
+    pageInfo?: PageInfoResolver; /** Information to aid in pagination. */
+    totalCount?: TotalCountResolver; /** The count of *all* `ProductCategory` you could get from the connection. */
   }
 
-  export type HasNextPageResolver = Resolver<boolean>;  export type HasPreviousPageResolver = Resolver<boolean>;  export type StartCursorResolver = Resolver<Cursor | null>;  export type EndCursorResolver = Resolver<Cursor | null>;  
+  export type NodesResolver = Resolver<(ProductCategory | null)[]>;  export type EdgesResolver = Resolver<ProductCategoriesEdge[]>;  export type PageInfoResolver = Resolver<PageInfo>;  export type TotalCountResolver = Resolver<number | null>;  
 }/** A `ProductCategory` edge in the connection. */
 export namespace ProductCategoriesEdgeResolvers {
   export interface Resolvers {
@@ -886,9 +1157,12 @@ export namespace UsersEdgeResolvers {
 }/** The root mutation type which contains root level fields which mutate data. */
 export namespace MutationResolvers {
   export interface Resolvers {
+    createCart?: CreateCartResolver; /** Creates a single `Cart`. */
     createProductCategory?: CreateProductCategoryResolver; /** Creates a single `ProductCategory`. */
     createProduct?: CreateProductResolver; /** Creates a single `Product`. */
     createUser?: CreateUserResolver; /** Creates a single `User`. */
+    updateCart?: UpdateCartResolver; /** Updates a single `Cart` using its globally unique id and a patch. */
+    updateCartByItemIdAndUserId?: UpdateCartByItemIdAndUserIdResolver; /** Updates a single `Cart` using a unique key and a patch. */
     updateProductCategory?: UpdateProductCategoryResolver; /** Updates a single `ProductCategory` using its globally unique id and a patch. */
     updateProductCategoryById?: UpdateProductCategoryByIdResolver; /** Updates a single `ProductCategory` using a unique key and a patch. */
     updateProduct?: UpdateProductResolver; /** Updates a single `Product` using its globally unique id and a patch. */
@@ -896,6 +1170,8 @@ export namespace MutationResolvers {
     updateProductByName?: UpdateProductByNameResolver; /** Updates a single `Product` using a unique key and a patch. */
     updateUser?: UpdateUserResolver; /** Updates a single `User` using its globally unique id and a patch. */
     updateUserById?: UpdateUserByIdResolver; /** Updates a single `User` using a unique key and a patch. */
+    deleteCart?: DeleteCartResolver; /** Deletes a single `Cart` using its globally unique id. */
+    deleteCartByItemIdAndUserId?: DeleteCartByItemIdAndUserIdResolver; /** Deletes a single `Cart` using a unique key. */
     deleteProductCategory?: DeleteProductCategoryResolver; /** Deletes a single `ProductCategory` using its globally unique id. */
     deleteProductCategoryById?: DeleteProductCategoryByIdResolver; /** Deletes a single `ProductCategory` using a unique key. */
     deleteProduct?: DeleteProductResolver; /** Deletes a single `Product` using its globally unique id. */
@@ -903,9 +1179,15 @@ export namespace MutationResolvers {
     deleteProductByName?: DeleteProductByNameResolver; /** Deletes a single `Product` using a unique key. */
     deleteUser?: DeleteUserResolver; /** Deletes a single `User` using its globally unique id. */
     deleteUserById?: DeleteUserByIdResolver; /** Deletes a single `User` using a unique key. */
+    addToCart?: AddToCartResolver; 
     createAndLoadUserByStellarPublicKey?: CreateAndLoadUserByStellarPublicKeyResolver; /** Reads and enables pagination through a set of `User`. */
     login?: LoginResolver; /** Login mechanism for the server */
     logout?: LogoutResolver; /** Logout mechanism for the server */
+  }
+
+  export type CreateCartResolver = Resolver<CreateCartPayload | null, CreateCartArgs>;
+  export interface CreateCartArgs {
+    input: CreateCartInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
   }
 
   export type CreateProductCategoryResolver = Resolver<CreateProductCategoryPayload | null, CreateProductCategoryArgs>;
@@ -921,6 +1203,16 @@ export namespace MutationResolvers {
   export type CreateUserResolver = Resolver<CreateUserPayload | null, CreateUserArgs>;
   export interface CreateUserArgs {
     input: CreateUserInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+  }
+
+  export type UpdateCartResolver = Resolver<UpdateCartPayload | null, UpdateCartArgs>;
+  export interface UpdateCartArgs {
+    input: UpdateCartInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+  }
+
+  export type UpdateCartByItemIdAndUserIdResolver = Resolver<UpdateCartPayload | null, UpdateCartByItemIdAndUserIdArgs>;
+  export interface UpdateCartByItemIdAndUserIdArgs {
+    input: UpdateCartByItemIdAndUserIdInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
   }
 
   export type UpdateProductCategoryResolver = Resolver<UpdateProductCategoryPayload | null, UpdateProductCategoryArgs>;
@@ -958,6 +1250,16 @@ export namespace MutationResolvers {
     input: UpdateUserByIdInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
   }
 
+  export type DeleteCartResolver = Resolver<DeleteCartPayload | null, DeleteCartArgs>;
+  export interface DeleteCartArgs {
+    input: DeleteCartInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+  }
+
+  export type DeleteCartByItemIdAndUserIdResolver = Resolver<DeleteCartPayload | null, DeleteCartByItemIdAndUserIdArgs>;
+  export interface DeleteCartByItemIdAndUserIdArgs {
+    input: DeleteCartByItemIdAndUserIdInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+  }
+
   export type DeleteProductCategoryResolver = Resolver<DeleteProductCategoryPayload | null, DeleteProductCategoryArgs>;
   export interface DeleteProductCategoryArgs {
     input: DeleteProductCategoryInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
@@ -993,6 +1295,11 @@ export namespace MutationResolvers {
     input: DeleteUserByIdInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
   }
 
+  export type AddToCartResolver = Resolver<AddToCartPayload | null, AddToCartArgs>;
+  export interface AddToCartArgs {
+    input: AddToCartInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+  }
+
   export type CreateAndLoadUserByStellarPublicKeyResolver = Resolver<CreateAndLoadUserByStellarPublicKeyPayload | null, CreateAndLoadUserByStellarPublicKeyArgs>;
   export interface CreateAndLoadUserByStellarPublicKeyArgs {
     input: CreateAndLoadUserByStellarPublicKeyInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
@@ -1006,6 +1313,23 @@ export namespace MutationResolvers {
   }
 
   export type LogoutResolver = Resolver<boolean | null>;  
+}/** The output of our create `Cart` mutation. */
+export namespace CreateCartPayloadResolvers {
+  export interface Resolvers {
+    clientMutationId?: ClientMutationIdResolver; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+    cart?: CartResolver; /** The `Cart` that was created by this mutation. */
+    query?: QueryResolver; /** Our root query field type. Allows us to run any query from our mutation payload. */
+    product?: ProductResolver; /** Reads a single `Product` that is related to this `Cart`. */
+    user?: UserResolver; /** Reads a single `User` that is related to this `Cart`. */
+    cartEdge?: CartEdgeResolver; /** An edge for our `Cart`. May be used by Relay 1. */
+  }
+
+  export type ClientMutationIdResolver = Resolver<string | null>;  export type CartResolver = Resolver<Cart | null>;  export type QueryResolver = Resolver<Query | null>;  export type ProductResolver = Resolver<Product | null>;  export type UserResolver = Resolver<User | null>;  export type CartEdgeResolver = Resolver<CartsEdge | null, CartEdgeArgs>;
+  export interface CartEdgeArgs {
+    orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
+  }
+
+  
 }/** The output of our create `ProductCategory` mutation. */
 export namespace CreateProductCategoryPayloadResolvers {
   export interface Resolvers {
@@ -1053,6 +1377,23 @@ export namespace CreateUserPayloadResolvers {
   }
 
   
+}/** The output of our update `Cart` mutation. */
+export namespace UpdateCartPayloadResolvers {
+  export interface Resolvers {
+    clientMutationId?: ClientMutationIdResolver; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+    cart?: CartResolver; /** The `Cart` that was updated by this mutation. */
+    query?: QueryResolver; /** Our root query field type. Allows us to run any query from our mutation payload. */
+    product?: ProductResolver; /** Reads a single `Product` that is related to this `Cart`. */
+    user?: UserResolver; /** Reads a single `User` that is related to this `Cart`. */
+    cartEdge?: CartEdgeResolver; /** An edge for our `Cart`. May be used by Relay 1. */
+  }
+
+  export type ClientMutationIdResolver = Resolver<string | null>;  export type CartResolver = Resolver<Cart | null>;  export type QueryResolver = Resolver<Query | null>;  export type ProductResolver = Resolver<Product | null>;  export type UserResolver = Resolver<User | null>;  export type CartEdgeResolver = Resolver<CartsEdge | null, CartEdgeArgs>;
+  export interface CartEdgeArgs {
+    orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
+  }
+
+  
 }/** The output of our update `ProductCategory` mutation. */
 export namespace UpdateProductCategoryPayloadResolvers {
   export interface Resolvers {
@@ -1097,6 +1438,24 @@ export namespace UpdateUserPayloadResolvers {
   export type ClientMutationIdResolver = Resolver<string | null>;  export type UserResolver = Resolver<User | null>;  export type QueryResolver = Resolver<Query | null>;  export type UserEdgeResolver = Resolver<UsersEdge | null, UserEdgeArgs>;
   export interface UserEdgeArgs {
     orderBy?: UsersOrderBy[] | null; /** The method to use when ordering `User`. */
+  }
+
+  
+}/** The output of our delete `Cart` mutation. */
+export namespace DeleteCartPayloadResolvers {
+  export interface Resolvers {
+    clientMutationId?: ClientMutationIdResolver; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+    cart?: CartResolver; /** The `Cart` that was deleted by this mutation. */
+    deletedCartId?: DeletedCartIdResolver; 
+    query?: QueryResolver; /** Our root query field type. Allows us to run any query from our mutation payload. */
+    product?: ProductResolver; /** Reads a single `Product` that is related to this `Cart`. */
+    user?: UserResolver; /** Reads a single `User` that is related to this `Cart`. */
+    cartEdge?: CartEdgeResolver; /** An edge for our `Cart`. May be used by Relay 1. */
+  }
+
+  export type ClientMutationIdResolver = Resolver<string | null>;  export type CartResolver = Resolver<Cart | null>;  export type DeletedCartIdResolver = Resolver<string | null>;  export type QueryResolver = Resolver<Query | null>;  export type ProductResolver = Resolver<Product | null>;  export type UserResolver = Resolver<User | null>;  export type CartEdgeResolver = Resolver<CartsEdge | null, CartEdgeArgs>;
+  export interface CartEdgeArgs {
+    orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
   }
 
   
@@ -1150,6 +1509,14 @@ export namespace DeleteUserPayloadResolvers {
   }
 
   
+}/** The output of our `addToCart` mutation. */
+export namespace AddToCartPayloadResolvers {
+  export interface Resolvers {
+    clientMutationId?: ClientMutationIdResolver; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+    query?: QueryResolver; /** Our root query field type. Allows us to run any query from our mutation payload. */
+  }
+
+  export type ClientMutationIdResolver = Resolver<string | null>;  export type QueryResolver = Resolver<Query | null>;  
 }/** The output of our `createAndLoadUserByStellarPublicKey` mutation. */
 export namespace CreateAndLoadUserByStellarPublicKeyPayloadResolvers {
   export interface Resolvers {
@@ -1186,6 +1553,39 @@ export namespace Logout {
   export type Mutation = {
     __typename?: "Mutation";
     logout?: boolean | null; 
+  }
+}
+export namespace GetUserCart {
+  export type Variables = {
+  }
+
+  export type Query = {
+    __typename?: "Query";
+    currentUser?: CurrentUser | null; 
+  }
+
+  export type CurrentUser = {
+    __typename?: "User";
+    id: UUID; 
+    cart: Cart; 
+  }
+
+  export type Cart = {
+    __typename?: "CartsConnection";
+    nodes: (Nodes | null)[]; 
+  }
+
+  export type Nodes = {
+    __typename?: "Cart";
+    quantity: number; 
+    product?: Product | null; 
+  }
+
+  export type Product = {
+    __typename?: "Product";
+    id: UUID; 
+    name: string; 
+    usdCost: BigFloat; 
   }
 }
 export namespace GetCategoryInfo {
@@ -1226,6 +1626,29 @@ export namespace GetProductCategory {
     description?: string | null; 
   }
 }
+export namespace AllProductsByCategoryId {
+  export type Variables = {
+    categoryID: UUID;
+  }
+
+  export type Query = {
+    __typename?: "Query";
+    allProducts?: AllProducts | null; 
+  }
+
+  export type AllProducts = {
+    __typename?: "ProductsConnection";
+    nodes: (Nodes | null)[]; 
+  }
+
+  export type Nodes = {
+    __typename?: "Product";
+    id: UUID; 
+    name: string; 
+    usdCost: BigFloat; 
+    description?: string | null; 
+  }
+}
 export namespace AllSellerProducts {
   export type Variables = {
     sellerID: UUID;
@@ -1233,7 +1656,25 @@ export namespace AllSellerProducts {
 
   export type Query = {
     __typename?: "Query";
-    userById?: User | null; 
+    userById?: UserById | null; 
+  }
+
+  export type UserById = {
+    __typename?: "User";
+    productsBySellerId: ProductsBySellerId; 
+  }
+
+  export type ProductsBySellerId = {
+    __typename?: "ProductsConnection";
+    nodes: (Nodes | null)[]; 
+  }
+
+  export type Nodes = {
+    __typename?: "Product";
+    id: UUID; 
+    name: string; 
+    usdCost: BigFloat; 
+    description?: string | null; 
   }
 }
 export namespace GetAllSellers {
@@ -1275,26 +1716,105 @@ export namespace Login {
     username?: string | null; 
   }
 }
-export namespace AllProductsByCategoryId {
+export namespace AddItemToCart {
   export type Variables = {
-    categoryID: UUID;
+    userID: UUID;
+    itemID: UUID;
+    quantity: number;
+  }
+
+  export type Mutation = {
+    __typename?: "Mutation";
+    addToCart?: AddToCart | null; 
+  }
+
+  export type AddToCart = {
+    __typename?: "AddToCartPayload";
+    clientMutationId?: string | null; 
+  }
+}
+export namespace UpdateCartQuantity {
+  export type Variables = {
+    itemID: UUID;
+    userID: UUID;
+    quantity: number;
+  }
+
+  export type Mutation = {
+    __typename?: "Mutation";
+    updateCartByItemIdAndUserId?: UpdateCartByItemIdAndUserId | null; 
+  }
+
+  export type UpdateCartByItemIdAndUserId = {
+    __typename?: "UpdateCartPayload";
+    cart?: Cart | null; 
+  }
+
+  export type Cart = {
+    __typename?: "Cart";
+    quantity: number; 
+  }
+}
+export namespace GetCurrentCartQuantity {
+  export type Variables = {
+    itemID: UUID;
+    userID: UUID;
   }
 
   export type Query = {
     __typename?: "Query";
-    allProducts?: AllProducts | null; 
+    cartByItemIdAndUserId?: CartByItemIdAndUserId | null; 
   }
 
-  export type AllProducts = {
-    __typename?: "ProductsConnection";
+  export type CartByItemIdAndUserId = {
+    __typename?: "Cart";
+    quantity: number; 
+  }
+}
+export namespace GetCurrentCartStatus {
+  export type Variables = {
+  }
+
+  export type Query = {
+    __typename?: "Query";
+    currentUser?: CurrentUser | null; 
+  }
+
+  export type CurrentUser = {
+    __typename?: "User";
+    id: UUID; 
+    cart: Cart; 
+  }
+
+  export type Cart = {
+    __typename?: "CartsConnection";
     nodes: (Nodes | null)[]; 
   }
 
   export type Nodes = {
+    __typename?: "Cart";
+    quantity: number; 
+    product?: Product | null; 
+  }
+
+  export type Product = {
     __typename?: "Product";
     id: UUID; 
-    name: string; 
-    usdCost: BigFloat; 
-    description?: string | null; 
+  }
+}
+export namespace RemoveFromCart {
+  export type Variables = {
+    userID: UUID;
+    itemID: UUID;
+  }
+
+  export type Mutation = {
+    __typename?: "Mutation";
+    deleteCartByItemIdAndUserId?: DeleteCartByItemIdAndUserId | null; 
+  }
+
+  export type DeleteCartByItemIdAndUserId = {
+    __typename?: "DeleteCartPayload";
+    clientMutationId?: string | null; 
   }
 }

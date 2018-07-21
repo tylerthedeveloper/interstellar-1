@@ -6,27 +6,25 @@ import {
     TextField, Typography, WithStyles, withStyles,
 } from "@material-ui/core";
 import * as React from "react";
-import { MouseEvent } from "react";
 import StarRatingComponent from "react-star-rating-component";
 
 /****  TYPES ******/
-import { IPresentableProduct } from "./PresentableProductType";
+import { IPresentableProduct } from "Types/local/PresentableProductType";
 interface IComponentProps extends WithStyles<typeof styles> {
    product: IPresentableProduct;
+   ActionComponent: React.ComponentType<{product?: IPresentableProduct, quantity?: number}>;
 }
 
 /****  COMPONENT ******/
 class ProductListItem extends React.PureComponent<IComponentProps> {
 
-    // stop the ripple effect when clicking on the add to cart form
-    public static onclickForm(event: MouseEvent<HTMLFormElement>): void {
-        event.stopPropagation();
-    }
 
     public render() {
-        const { classes, product: {name, usdCost, description} } = this.props;
+        const { classes, product, ActionComponent } = this.props;
         const rating = null;
-        return (
+        const {name, description} = product;
+
+        return(
             <ListItem divider={true} button={true}>
                 <Grid container={true}>
                     <Grid item={true} xs={2} className={classes.image}>
@@ -51,23 +49,7 @@ class ProductListItem extends React.PureComponent<IComponentProps> {
                         <Typography variant={"body1"}>{description}</Typography>
                     </Grid>
                     <Grid item={true} xs={3}>
-                        <Typography variant={"subheading"}>
-                            Price: {usdCost}
-                            <form onMouseDown={ProductListItem.onclickForm}>
-                                <TextField
-                                    className={classes.cartCounter}
-                                    id={"atc-" + name}
-                                    label="Add to Cart"
-                                    type="number"
-                                    defaultValue={1}
-                                    InputLabelProps={{ shrink: true }}
-                                    margin="normal"
-                                />
-                                <IconButton className={"material-icons"}>
-                                    shopping_cart
-                                </IconButton>
-                            </form>
-                        </Typography>
+                        <ActionComponent product={product}/>
                     </Grid>
                 </Grid>
             </ListItem>

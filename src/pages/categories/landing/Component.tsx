@@ -1,7 +1,7 @@
 import { createStyles, TextField, Typography, WithStyles, withStyles } from "@material-ui/core";
 import * as React from "react";
 
-import ProductList from "Structural/products/product_list/Container";
+import ProductList from "./ProductListByCategory";
 
 /****  TYPES ******/
 import {IPresentableCategory} from "../PresentableCategoryType";

@@ -60,14 +60,43 @@ export function currentUserPlugin (builder) {
 
             const resolve = (parent, args, context, info) => {
 
-                const { session } = context;
+                const { session, req } = context;
 
-                console.log("Trying to find currentUser: ", session.currentUserID);
-                if (session.currentUserID) {
-                    return oldResolver(parent, { id: session.currentUserID }, context, info);
-                } else {
-                    return null;
-                }
+                return new Promise((resolve, reject) => {
+
+                    const authHeader = req.get('Authorization');
+                    if(!authHeader) {
+                        resolve(null);
+                        return;
+                    }
+
+                    const authPieces  = authHeader.split(' ');
+                    if(authPieces[0] !== "Bearer"){
+                        resolve(null);
+                        return;
+                    }
+
+                    const token = authPieces[1];
+
+                    console.log("Received token and verifying");
+                    jwt.verify(token, "jack", function(err, decoded) {
+                        if(err){
+                            reject(err);
+                            return;
+                        }
+
+                        if(!decoded.id){
+                            resolve(null);
+                            return;
+                        }
+
+                        console.log("HERE");
+                        resolve(oldResolver(parent, { id: decoded.id }, context, info).then(res => {
+                            console.log(res);
+                            return res;
+                        }));
+                    });
+                });
             };
 
             return extend(

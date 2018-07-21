@@ -25,6 +25,23 @@ class UIStore {
         this.loginModalLoading = false;
     }
 
+    /****************************
+     * Notification MBar
+     ****************************/
+
+    @observable public notificationOpen = false;
+    @observable public notificationMessage: string | null = null;
+
+    @action.bound public displayNotification(notification: string) {
+        this.notificationOpen = true;
+        this.notificationMessage = notification;
+    }
+
+    @action.bound public closeNotification(){
+        this.notificationOpen = false;
+        this.notificationMessage = null;
+    }
+
 }
 
 export default UIStore;

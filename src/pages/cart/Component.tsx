@@ -7,23 +7,15 @@ import {
     Stepper, Typography, WithStyles, withStyles,
 } from "@material-ui/core";
 import * as React from "react";
+import { ICartItem } from "Types/local/CartItemType";
+import ItemReview from "./item_review/Container";
 
 /****  TYPES ******/
-interface IComponentProps extends WithStyles<typeof styles> {}
+interface IComponentProps extends WithStyles<typeof styles> {
+    items: ICartItem[];
+}
 
 /****  COMPONENT ******/
-
-const steps = [
-    {
-        label: "Review Your Items",
-    },
-    {
-        label: "Enter Shipping Information",
-    },
-    {
-        label: "Wait for Transaction Confirmation",
-    },
-];
 
 class Component extends React.PureComponent<IComponentProps> {
 
@@ -63,14 +55,27 @@ class Component extends React.PureComponent<IComponentProps> {
     }
 
     public render() {
-        const { classes } = this.props;
+        const { classes, items } = this.props;
         const { activeStep } = this.state;
+
+        const steps = [
+            {
+                label: "Review Your Items",
+                content: <ItemReview items={items} />,
+            },
+            {
+                label: "Enter Shipping Information",
+            },
+            {
+                label: "Wait for Transaction Confirmation",
+            },
+        ];
 
         return (
             <div className={classes.container}>
                 <Typography variant={"display2"}> Cart </Typography>
                 <Stepper activeStep={activeStep} orientation="vertical">
-                    {steps.map(({ label }, index) => {
+                    {steps.map(({ label, content }, index) => {
                         return (
                             <Step key={index}>
                                 <StepLabel>
@@ -86,6 +91,7 @@ class Component extends React.PureComponent<IComponentProps> {
                                 <StepContent>
                                     <div className={classes.actionsContainer}>
                                         <div>
+                                            <div>{content ? content : ""}</div>
                                             <Button
                                                 disabled={activeStep === 0}
                                                 onClick={this.handleBack}
