@@ -6,17 +6,15 @@ import { postgraphile} from 'postgraphile';
 import cors from 'cors';
 import {Pool} from 'pg';
 
-
-
-
-
+import config from '../config.json';
 import {currentUserPlugin, resolveFromSourceFirst} from './lib/graphql/authPlugin';
 
 const app = express();
 const pool = new Pool({
     user: 'postgres',
-    host: 'localhost',
+    host: 'interstellar.market',
     database: 'silent_shop',
+    password: config.pg.password,
     port: 5432,
 });
 

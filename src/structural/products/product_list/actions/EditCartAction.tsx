@@ -20,8 +20,6 @@ import {
 } from "GQLTypes";
 import { IPresentableProduct } from "Types/local/PresentableProductType";
 
-import { InspectorNotification } from "inspector";
-import { render } from "react-dom";
 import UIStore from "src/stores/ui";
 import { injectWithTypes } from "TypeUtil";
 
@@ -125,7 +123,7 @@ class ProductListItemAddToCart extends React.PureComponent<IComponentProps> {
                     if (!cartByItemIdAndUserId || !cartByItemIdAndUserId.quantity) {
                         return <div/>;
                     }
-                    console.log("quantity updated!");
+
                     return <InnerComponent quantity={cartByItemIdAndUserId.quantity}{...props}/>;
                 }}
             </Query >

@@ -7,3 +7,4 @@ flow-typed
 sitespeed-result
 *.map
 *.log
+config.json
