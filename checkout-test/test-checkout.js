@@ -34,8 +34,8 @@ function getStellarBalances (publicKey) {
   return server.loadAccount(publicKey)
       .then(account => account)
       .then(account => account.balances)
+      .catch(err => console.log(err) )
 }
-
 
 // -------------------------------------------------------------------- //
 // desc: create transaction given arbirary amount of arbitrary types of operations
@@ -58,27 +58,6 @@ function createTransaction(senderPub, senderPriv, operations) {
         .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
 }
 
-// -------------------------------------------------------------------- //
-// desc: creates a trust line between a user and a specific asset-anchor
-// inputs: pubkey: string, privkey: string, asset: Asset
-// returns: transactionResult
-// -------------------------------------------------------------------- //
-function changeTrust(pubkey, privkey, asset) {
-    return server.loadAccount(pubkey)
-        .then(function(account){
-            const transaction = new StellarSdk.TransactionBuilder(account)
-                .addOperation(StellarSdk.Operation.changeTrust({
-                    asset: asset,
-                }))
-                .build();
-            transaction.sign(StellarSdk.Keypair.fromSecret(privkey));
-            return server.submitTransaction(transaction);
-        })
-        .then(transactionResult => transactionResult)
-        .then(err => console.log(err) )
-}
-
-
 // todo: check for trust ...
 // depends on UI when to use this but very simple look up
 // -------------------------------------------------------------------- //
@@ -87,33 +66,65 @@ function changeTrust(pubkey, privkey, asset) {
 // returns: boolean
 // -------------------------------------------------------------------- //
 function checkForTrust(receiverPub, asset) {
-    const asset_issuer = asset.issuer;
+    const asset_code = asset.getCode();
+    const asset_issuer = asset.getIssuer();
     return getStellarBalances(receiverPub)
-        .then(balances => balances.some(bal => bal.asset_issuer === asset_issuer))
+        .then(balances => balances.some(bal => (bal.asset_code === asset_code && 
+                                                bal.asset_issuer === asset_issuer)))
 }
 
-// TODO: need to figure out how to determine best path option
-// might be lowest source_amount
+// -------------------------------------------------------------------- //
+// desc: creates, updates, or removes a trust line between a user and a specific asset-anchor
+// inputs: pubkey: string, privkey: string, asset: Asset, trustOpType: enum, limit: num | string
+// returns: transactionResult
+// -------------------------------------------------------------------- //
+const TrustOpType = {
+    UpdateTrust: 'update',
+    RemoveTrust: 'remove'
+}
+
+function changeTrust(pubkey, privkey, asset, trustOpType, limit = null) {
+    return server.loadAccount(pubkey)
+        .then(function(account) {
+            const op = {
+                asset: asset,
+                source: pubkey,
+            }
+            if (limit) op.limit = new String(limit);
+            else if (trustOpType == TrustOpType.RemoveTrust) op.limit = '0';
+            // console.log(op.limit)
+            const transaction = new StellarSdk.TransactionBuilder(account)
+                .addOperation(StellarSdk.Operation.changeTrust(op))
+                .build();
+            transaction.sign(StellarSdk.Keypair.fromSecret(privkey));
+            return server.submitTransaction(transaction);
+        })
+        .then(transactionResult => transactionResult)
+        .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
+        // .catch(err => console.error(err))
+}
+
+// Cheapest = lowest source_amount
 // -------------------------------------------------------------------- //
 // desc: finds the first path given the necessary inputs
 // inputs: sender: string, receiver: string, sendAsset: Asset, destAsset: Asset, destAmount: string | num, 
 // returns: PathPaymentResult | transactionResult
 // -------------------------------------------------------------------- //
-function findFirstPath(sender, receiver, sendAsset, destAsset, destAmount) {
+function findCheapestPath(sender, receiver, sendAsset, destAsset, destAmount) {
     return server.paths(sender, receiver, destAsset, destAmount)
         .call()
         .then(paths => {
             const _paths = JSON.parse(JSON.stringify(paths)).records;
             const source_asset_code = sendAsset.getCode();
             const source_asset_issuer = sendAsset.getIssuer();
-            // TODO: JUST GETS FIRST NOT NECESSARILY BEST
-            const firstPath = _paths.find(path => (path.source_asset_code == source_asset_code && 
+            const pathList = _paths.filter(path => (path.source_asset_code == source_asset_code && 
                                                     path.source_asset_issuer == source_asset_issuer))
-            // console.log(firstPath);
-            if (firstPath) return firstPath;
+            const cheapestPath = pathList.reduce((prev, curr) => (prev.source_amount < curr.source_amount ? prev : curr));
+            if (cheapestPath) return cheapestPath;
             throw Error('err: No path exists between the corresponding assets')
         })
-        .catch(err => console.log(err))
+        .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
+
 }
 
 // -------------------------------------------------------------------- //
@@ -137,13 +148,12 @@ function createPath(sender, receiver, sendAsset, destAsset, destAmount, pathPaym
         destAmount: '1',
         path: _path,
     };
-    console.log(res)
+    // console.log(res)
     return StellarSdk.Operation.pathPayment(res);
 }
 
 
 // ----- Test Data ----- //
-
 
 // sample op-like data object
 const ops = [
@@ -225,9 +235,9 @@ const mobiAssetPath = StellarSdk.Operation.pathPayment({
 //  ---- sample runs ---- //
 //  ---- ---------------- //
 
-// getStellarBalances(pubKey)
-// getStellarBalances(pubKey2)
-// getStellarBalances(pubKey3)
+// getStellarBalances(pubKey).then(res => console.log(res))
+// getStellarBalances(pubKey2).then(res => console.log(res))
+// getStellarBalances(pubKey3).then(res => console.log(res))
 
 // createTransaction(pubKey, privKey, operations);
 // createTransaction(pubKey, privKey, mobiAssetPmtOpt);
@@ -240,15 +250,18 @@ const mobiAssetPath = StellarSdk.Operation.pathPayment({
 // checkForTrust(pubKey2, repoAsset).then(res => console.log(res)) // false
 // checkForTrust(pubKey3, eurtAsset).then(res => console.log(res)) // true
 
+// getStellarBalances(pubKey3).then(res => console.log(res))
+// changeTrust(pubKey3, privKey3, cnyAsset, TrustOpType.changeTrust, 5000).then(res => console.log(res)) // true
+
 // ------ TEST THAT WONT WORK INTENTIONALLY ------ ///
 // this will not work because no paths exists for: futbolAsset 
 // findFirstPath(pubKey, pubKey3, mobiAsset, futbolAsset, 1)
 
 // ------ TEST THAT WORKS INTENTIONALLY ------ ///
-// findFirstPath(pubKey, pubKey3, mobiAsset, repoAsset, 1)
+findCheapestPath(pubKey, pubKey3, mobiAsset, repoAsset, 1)
+    .then(res => console.log(res))
 //     .catch(err => console.log(err))
 //     .then(foundPath => createPath(pubKey, pubKey3, mobiAsset, repoAsset, 1, foundPath))
 //     .then(pathPayment => createTransaction(pubKey, privKey, pathPayment))
 //     .catch(err => console.log(err))
         
-
