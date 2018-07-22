@@ -63,6 +63,8 @@ class InfoSection extends React.PureComponent<IComponentPropsWithApollo> {
                     next: (res) => {
                         if (res.data && res.data.currentUser && res.data.currentUser.id) {
                             this.setState({currentUserID: res.data.currentUser.id});
+                        }else{
+                            this.setState({currentUserID: null});
                         }
                     },
                 }),
