@@ -1,3 +1,4 @@
+import { LinearProgress } from "@material-ui/core";
 import gql from "graphql-tag";
 import * as React from "react";
 import InfoSectionComponent from "./Component";
@@ -75,7 +76,7 @@ class InfoSection extends React.PureComponent<IComponentPropsWithApollo> {
     public render() {
         const {user, currentUserID} = this.state;
         if (!user) {
-            return <div/>;
+            return <LinearProgress />;
         }
 
         return (
