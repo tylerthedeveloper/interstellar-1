@@ -24,6 +24,7 @@ class ProductList extends React.PureComponent<IComponentProps> {
             >
 
                 {({data, loading, error }) => {
+                    console.log(error);
                     if (loading || error) { return <div />; }
 
                     const {userById} = data as AllSellerProducts.Query;
@@ -45,6 +46,7 @@ class ProductList extends React.PureComponent<IComponentProps> {
 const query = gql`
     query AllSellerProducts($sellerID: UUID!){
         userById(id: $sellerID){
+            id
             productsBySellerId{
                 nodes {
                     id
