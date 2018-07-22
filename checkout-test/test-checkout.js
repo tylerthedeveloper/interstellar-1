@@ -1,8 +1,8 @@
 const StellarSdk = require('stellar-sdk');
 StellarSdk.Network.usePublicNetwork();
+const server = new StellarSdk.Server('https://horizon.stellar.org');
 
-// import request from 'request';
-
+// ----- keys / pairs ----- //
 const pubKey = 'GDUZVNG4E7AJTCHBNHOQRXUSED7RSVXBZ2NZRFZTZ5TKRGDG5GLV6MAF';
 const privKey = 'SCMUH4YUWKAN3GV33T5BD32A2FULPGHC4BJ7KI625BLCJGCVKZV3BHRW';
 
@@ -12,15 +12,140 @@ const privKey2 = 'SCYY5YZ6FSYRPNF474W627BI6RCBNDBM6ODZ6MS53CC4UOBYUYZN4AGI';
 const pubKey3 = 'GBG5JTXIOQEP2W3XJGQPYCJ7633KLFPA4SS5MB7FVOHIOWBXKEH2ZWBJ';
 const privKey3 = 'SB2CRANE2SXYNSEW5UTTIGZLKICQKM65LLPLNAVKDVJYWBGTJLV33RU6';
 
-const server = new StellarSdk.Server('https://horizon.stellar.org');
+// ----- Assets ----- //
+const nativeAsset = new StellarSdk.Asset.native();
+const mobiAsset = new StellarSdk.Asset( 'MOBI', 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH');
+const eurtAsset = new StellarSdk.Asset( 'EURT', 'GAP5LETOV6YIE62YAM56STDANPRDO7ZFDBGSNHJQIYGGKSMOZAHOOS2S');
+const repoAsset = new StellarSdk.Asset( 'REPO', 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B');
+const cnyAsset = new StellarSdk.Asset( 'CNY', 'GAREELUB43IRHWEASCFBLKHURCGMHE5IF6XSE7EXDLACYHGRHM43RFOX');
+const futbolAsset = new StellarSdk.Asset( 'TFC', 'GDS3XDJAA4VY6MJYASIGSIMPHZ7AQNZ54RKLWT7MWCOU5YKYEVCNLVS3');
+// if we want to make our asset lol
+// const tycoin = new StellarSdk.Asset("Tycoin", "GDNZIMIWPMRQ3X3UNFF7A7XI26XILUP6QBFT6MX7B62GAKVO3ZWDWWUW");
 
+
+// ----- functions ----- //
+
+// -------------------------------------------------------------------- //
+// desc: get balances for pub key
+// inputs: publicKey: string
+// returns: Array <Asset>
+// -------------------------------------------------------------------- //
 function getStellarBalances (publicKey) {
   return server.loadAccount(publicKey)
       .then(account => account)
       .then(account => account.balances)
-      .then(balances => console.log(balances))
 }
 
+
+// -------------------------------------------------------------------- //
+// desc: create transaction given arbirary amount of arbitrary types of operations
+// inputs: senderPub: string, senderPriv: string, operations = operations: operation | Array<operation>
+// returns: transactionResult
+// -------------------------------------------------------------------- //
+function createTransaction(senderPub, senderPriv, operations) {
+    server.loadAccount(senderPub)
+        .then(function(account){
+            let builder; 
+            if (!Array.isArray(operations))
+                builder = new StellarSdk.TransactionBuilder(account)
+                    .addOperation(operations);
+            else  builder.operations = operations;
+            const transaction = builder.build();
+            transaction.sign(StellarSdk.Keypair.fromSecret(senderPriv));
+            return server.submitTransaction(transaction);
+        })
+        .then(transactionResult => transactionResult)
+        .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
+}
+
+// -------------------------------------------------------------------- //
+// desc: creates a trust line between a user and a specific asset-anchor
+// inputs: pubkey: string, privkey: string, asset: Asset
+// returns: transactionResult
+// -------------------------------------------------------------------- //
+function changeTrust(pubkey, privkey, asset) {
+    return server.loadAccount(pubkey)
+        .then(function(account){
+            const transaction = new StellarSdk.TransactionBuilder(account)
+                .addOperation(StellarSdk.Operation.changeTrust({
+                    asset: asset,
+                }))
+                .build();
+            transaction.sign(StellarSdk.Keypair.fromSecret(privkey));
+            return server.submitTransaction(transaction);
+        })
+        .then(transactionResult => transactionResult)
+        .then(err => console.log(err) )
+}
+
+
+// todo: check for trust ...
+// depends on UI when to use this but very simple look up
+// -------------------------------------------------------------------- //
+// desc: see if a seller accepts an asset
+// inputs: receiverPub: string, asset: Asset
+// returns: boolean
+// -------------------------------------------------------------------- //
+function checkForTrust(receiverPub, asset) {
+    const asset_issuer = asset.issuer;
+    return getStellarBalances(receiverPub)
+        .then(balances => balances.some(bal => bal.asset_issuer === asset_issuer))
+}
+
+// TODO: need to figure out how to determine best path option
+// might be lowest source_amount
+// -------------------------------------------------------------------- //
+// desc: finds the first path given the necessary inputs
+// inputs: sender: string, receiver: string, sendAsset: Asset, destAsset: Asset, destAmount: string | num, 
+// returns: PathPaymentResult | transactionResult
+// -------------------------------------------------------------------- //
+function findFirstPath(sender, receiver, sendAsset, destAsset, destAmount) {
+    return server.paths(sender, receiver, destAsset, destAmount)
+        .call()
+        .then(paths => {
+            const _paths = JSON.parse(JSON.stringify(paths)).records;
+            const source_asset_code = sendAsset.getCode();
+            const source_asset_issuer = sendAsset.getIssuer();
+            // TODO: JUST GETS FIRST NOT NECESSARILY BEST
+            const firstPath = _paths.find(path => (path.source_asset_code == source_asset_code && 
+                                                    path.source_asset_issuer == source_asset_issuer))
+            // console.log(firstPath);
+            if (firstPath) return firstPath;
+            throw Error('err: No path exists between the corresponding assets')
+        })
+        .catch(err => console.log(err))
+}
+
+// -------------------------------------------------------------------- //
+// desc: creates a pathPaymentOperation given all the necessary inputs from the transaction and the results of the found path
+// inputs: sender: string, receiver: string, sendAsset: Asset, destAsset: Asset, destAmount: string | num, 
+//          pathPaymentResult: PathPaymentResult, buffer: float (percentage)
+// returns: transactionResult
+// -------------------------------------------------------------------- //
+function createPath(sender, receiver, sendAsset, destAsset, destAmount, pathPaymentResult, buffer = 0.015) {
+    const _path = pathPaymentResult.path.map(asset => {
+        if (asset.asset_type === 'native') return nativeAsset;
+        else return new Asset(asset.asset_code, asset.asset_issuer);
+    });
+    const paddedAmtWithBuffer = ((1 + buffer) * pathPaymentResult.source_amount).toFixed(7);
+    const res = {
+        source: sender,
+        sendAsset: sendAsset,
+        sendMax: new String(paddedAmtWithBuffer),
+        destination: receiver,
+        destAsset: destAsset,
+        destAmount: '1',
+        path: _path,
+    };
+    console.log(res)
+    return StellarSdk.Operation.pathPayment(res);
+}
+
+
+// ----- Test Data ----- //
+
+
+// sample op-like data object
 const ops = [
     {
         destination: pubKey2,
@@ -34,6 +159,8 @@ const ops = [
     }
 ];
 
+// sample operations after converting ops to proper StellarSdk operations
+// can include type in object to resolve to specific operation 
 const operations = ops.map(op => {
     return StellarSdk.Operation.payment({
         destination: op.destination,
@@ -42,79 +169,7 @@ const operations = ops.map(op => {
     });
 });
 
-// abstract # of ops
-// operations = 
-    // operations: operation |
-    // operations: Array<operation>
-function createTransaction(senderPub, senderPriv, operations) {
-    server.loadAccount(senderPub)
-        .then(function(account){
-            let builder; 
-            if (!Array.isArray(operations)) {
-                builder = new StellarSdk.TransactionBuilder(account)
-                    .addOperation(operations);
-            }
-            else {
-                builder.operations = operations;
-            } 
-            const transaction = builder.build();
-            transaction.sign(StellarSdk.Keypair.fromSecret(senderPriv));
-            return server.submitTransaction(transaction);
-        })
-        .then(transactionResult => console.log(transactionResult) )
-        .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
-}
-
-// set op type to be created
-function createPmtTxAndCheckForTrust(receiverPub, senderPub, senderPriv, pmtObj, opType) {
-    // for abstraction of op type
-    // pull out op type
-        // this can be improved with TS type checks on op type
-    // const asset = new String(operation._attributes.body._arm).valueOf(); 
-    // if (asset == "paymentOp") {
-    // if (asset == "payment") {
-    const asset_issuer = pmtObj.asset.issuer;
-    
-    // TODO: check to see if seller trusts ... if not: do we FORCE THEM?
-    getStellarBalances(receiverPub).then(balances => {
-        console.log(balances.some(bal => bal.asset_issuer === asset_issuer))
-    })
-
-    // server.loadAccount(senderPub)
-    //     .then(function(account){
-    //         const builder = new StellarSdk.TransactionBuilder(account)
-    //             .addOperation(operation)
-    //             .build();
-    //         transaction.sign(StellarSdk.Keypair.fromSecret(senderPriv));
-    //         return server.submitTransaction(transaction);
-    //     })
-    //     .then(transactionResult => console.log(transactionResult) )
-    //     .then(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
-}
-
-const nativeAsset = new StellarSdk.Asset.native();
-const mobiAsset = new StellarSdk.Asset( 'MOBI', 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH');
-const eurtAsset = new StellarSdk.Asset( 'EURT', 'GAP5LETOV6YIE62YAM56STDANPRDO7ZFDBGSNHJQIYGGKSMOZAHOOS2S');
-const repoAsset = new StellarSdk.Asset( 'REPO', 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B');
-
-function changeTrust(pubkey, privkey, asset) {
-    server.loadAccount(pubkey)
-        .then(function(account){
-            const transaction = new StellarSdk.TransactionBuilder(account)
-                .addOperation(StellarSdk.Operation.changeTrust({
-                    asset: asset,
-                }))
-                .build();
-            transaction.sign(StellarSdk.Keypair.fromSecret(privkey));
-            return server.submitTransaction(transaction);
-        })
-        .then(transactionResult => console.log(transactionResult) )
-        .then(err => console.log(err) )
-}
-
-// changeTrust(pubKey2, privKey2, mobiAsset);
-// getStellarBalances(pubKey2)
-
+// --- Sample ops ---- //
 const mobiAssetOffer = StellarSdk.Operation.manageOffer({
     selling: nativeAsset,
     buying: mobiAsset,
@@ -122,13 +177,12 @@ const mobiAssetOffer = StellarSdk.Operation.manageOffer({
     price: `${(3/5)}`,
     source: pubKey
 });
-// createTransaction(pubKey, privKey, mobiAssetOffer);
 
 const mobiAssetPmtOpt = StellarSdk.Operation.payment({
     destination: pubKey2,
     asset: mobiAsset,
     amount: "1",
-    source: pubKey
+    // source: pubKey
 });
 
 const mobiAssetPmtObj = {
@@ -142,68 +196,59 @@ const eurtAssetOffer = StellarSdk.Operation.manageOffer({
     selling: nativeAsset,
     buying: eurtAsset,
     amount: '2',
-    price: `${(2/3)}`,
-    source: pubKey3
+    price: `${(2/3)}`, // need to understand this better
+    // source: pubKey3
 });
 
-// createTransaction(pubKey3, privKey3, eurtAssetOffer);
+
+// ----- Sample Paths ----- //
+// Path: Array <Asset>
+const nativePath = [
+    nativeAsset
+];
+const nonNativePath = [
+    cnyAsset,
+    nativeAsset
+];
+
+const mobiAssetPath = StellarSdk.Operation.pathPayment({    
+    sendAsset: mobiAsset,
+    sendMax: '5', // same as source_amount that you are willing to send -> you should send the max expected to equalize current market value
+    destination: pubKey3,
+    destAsset: repoAsset,
+    destAmount: '1',
+    path: nonNativePath,
+    source: pubKey,
+});
+
+//  ---- ---------------- //
+//  ---- sample runs ---- //
+//  ---- ---------------- //
+
+// getStellarBalances(pubKey)
+// getStellarBalances(pubKey2)
 // getStellarBalances(pubKey3)
 
-// need to check for type to know if nee to check for trust
-// console.log(typeof mobiAssetPmt);
+// createTransaction(pubKey, privKey, operations);
+// createTransaction(pubKey, privKey, mobiAssetPmtOpt);
+// createTransaction(pubKey3, privKey3, eurtAssetOffer);
 
-// createPmtTxAndCheckForTrust(pubKey2, pubKey, privKey, mobiAssetPmtObj, 'payment');
+// checkForTrust(pubKey, mobiAsset).then(res => console.log(res)) // true
+// checkForTrust(pubKey2, mobiAsset).then(res => console.log(res)) // true
+// checkForTrust(pubKey2, repoAsset).then(res => console.log(res)) // true
+// checkForTrust(pubKey2, futbolAsset).then(res => console.log(res)) // false
+// checkForTrust(pubKey2, repoAsset).then(res => console.log(res)) // false
+// checkForTrust(pubKey3, eurtAsset).then(res => console.log(res)) // true
 
-console.log(server.paths(pubKey, pubKey3, repoAsset, 1));
+// ------ TEST THAT WONT WORK INTENTIONALLY ------ ///
+// this will not work because no paths exists for: futbolAsset 
+// findFirstPath(pubKey, pubKey3, mobiAsset, futbolAsset, 1)
 
+// ------ TEST THAT WORKS INTENTIONALLY ------ ///
+// findFirstPath(pubKey, pubKey3, mobiAsset, repoAsset, 1)
+//     .catch(err => console.log(err))
+//     .then(foundPath => createPath(pubKey, pubKey3, mobiAsset, repoAsset, 1, foundPath))
+//     .then(pathPayment => createTransaction(pubKey, privKey, pathPayment))
+//     .catch(err => console.log(err))
+        
 
-// const mobiAssetPath = StellarSdk.PathCallBuilder({
-//     sendAsset: Asset,
-//     sendMax: string,
-//     destination: string,
-//     destAsset: Asset,
-//     destAmount: string,
-//     path: Asset[],
-//     source?: string,
-//     destination: pubKey2,
-//     asset: mobiAsset,
-//     amount: "1",
-//     source: pubKey
-// });
-
-
-
-
-// const tycoin = new StellarSdk.Asset("Tycoin", "GDNZIMIWPMRQ3X3UNFF7A7XI26XILUP6QBFT6MX7B62GAKVO3ZWDWWUW");
-// // server.loadAccount(pub)
-// //  .then(function(receiver) {
-// //    const transaction = new StellarSdk.TransactionBuilder(receiver)
-// //      .addOperation(StellarSdk.Operation.changeTrust({
-// //        asset: tycoin,
-// //        limit: '1000'
-// //      }))
-// //      .build();
-// //    transaction.sign(pair);
-// //    return server.submitTransaction(transaction);
-// //  })
-// //  .then(function() {
-// //    return server.loadAccount(pub)
-// //  })
-// // //   .then(function(issuer) {
-// // //     const transaction = new StellarSdk.TransactionBuilder(issuer)
-// // //       .addOperation(StellarSdk.Operation.payment({
-// // //         destination: pub2,
-// // //         asset: tycoin,
-// // //         amount: '10'
-// // //       }))
-// // //       .build();
-// // //     transaction.sign(pair);
-// // //     return server.submitTransaction(transaction);
-// // //   })
-// // //   .catch(function(error) {
-// // //     console.error('Error!', error);
-// // //   });
-// // // source: string,
-// // // destination: string,
-// // // destinationAsset: Asset,
-// // // destinationAmount: string,

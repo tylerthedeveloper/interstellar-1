@@ -1,29 +1,37 @@
 tests 
 
 √ - 0. Check balances for account
-    server.loadAccount(pubKey3).then(function(account) {
-        account.balances.forEach(function(balance) {
-            console.log(JSON.stringify(balance));
-        });
+    function getStellarBalances (publicKey) {
+        return server.loadAccount(publicKey)
+            .then(account => account)
+            .then(account => account.balances)
+    }
+
+√ - 1. Send lumens to lumens account 
+    const op = StellarSdk.Operation.payment({
+        destination: 'some-pub-key',
+        asset: StellarSdk.Asset.native(),
+        amount: "1"
     });
 
-√ - 1. Send lumens to lumens account
-    server.loadAccount(pubKey)
-        .then(function(account){
-            var builder = new StellarSdk.TransactionBuilder(account)
-                .addOperation(StellarSdk.Operation.payment({
-                    destination: destinationId,
-                    asset: StellarSdk.Asset.native(),
-                    amount: "10"
-                }))
-              .build();
-        transaction.sign(sourceKeys);
-        return server.submitTransaction(transaction);
-      })
+    // given single already created operation
+    function createTransactionFromOp(senderPub, senderPriv, operation) {
+        server.loadAccount(senderPub)
+            .then(function(account){
+                const transaction = new StellarSdk.TransactionBuilder(account)
+                    .addOperation(operation)
+                    .build();
+                transaction.sign(StellarSdk.Keypair.fromSecret(senderPriv));
+                return server.submitTransaction(transaction);
+            })
+            .then(transactionResult => console.log(transactionResult) )
+            .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
+    }
 
 X - 1.1 Send lumens to new lumens account
 
-√ - 2. Send multiple (lumens) operations in a single transaction 
+√ - 2. Send multiple (lumens) operations in a single transaction if created before function
+    // see 2.1 for abstract receiving list of ops
     server.loadAccount(pubKey)
         .then(function(account){
             var builder = new StellarSdk.TransactionBuilder(account)
@@ -45,67 +53,86 @@ X - 1.1 Send lumens to new lumens account
 
 √ - 2.1 abstract - Send multiple operations in a single transaction 
 
-        // where ops is passed in to a function or created 
-        // as an array of operation-like objects
-            // can create the actual operations before or during transaction building time
+        // where ops is passed in to a function as an array of already created operation-like objects.
+        // one array can have up to 100 operations of multiple operation type
         var ops = [
-            {
+            StellarSdk.Operation.payment({
                 destination: pubKey2,
                 asset: StellarSdk.Asset.native(),
                 amount: "1"
-            },
-            {
+            }),
+            StellarSdk.Operation.{AnyOpType}({
                 destination: pubKey3,
                 asset: StellarSdk.Asset.native(),
                 amount: "1"
-            }
+            })
         ];
 
-        server.loadAccount(pubKey)
-            .then(function(account){
-                var builder = new StellarSdk.TransactionBuilder(account);
-                let operations = ops.map(op => {
-                    return StellarSdk.Operation.payment({
-                        destination: op.destination,
-                        asset: op.asset,
-                        amount: op.amount
-                    });
-                });
-            builder.operations = operations;
-            let transaction = builder.build();
-            transaction.sign(StellarSdk.Keypair.fromSecret(privKey));
-            return server.submitTransaction(transaction);
-
-        ── ────────────────────────────────────────────────────────────────────────────────
-
-
-        var builder = new StellarSdk.TransactionBuilder(account)
-        var op1 = {
-            destination: pubKey2,
-            asset: StellarSdk.Asset.native(),
-            amount: "1"
-        };
-        var op2 = {
-            destination: pubKey3,
-            asset: StellarSdk.Asset.native(),
-            amount: "1"
-        };
-        var ops = [ op1, op2 ];
-        let operations = ops.map(op => {
-            return StellarSdk.Operation.payment({
-                destination: op.destination,
-                asset: op.asset,
-                amount: op.amount
-            });
-        });
-        builder.operations = operations;
-        let transaction = builder.build();
-        transaction.sign(StellarSdk.Keypair.fromSecret(privKey));
-        return server.submitTransaction(transaction);
+        function createTransactionFromOp(senderPub, senderPriv, operations) {
+            server.loadAccount(pubKey)
+                .then(function(account){
+                    const builder = new StellarSdk.TransactionBuilder(account);
+                    builder.operations = operations;
+                    let transaction = builder.build();
+                    transaction.sign(StellarSdk.Keypair.fromSecret(privKey));
+                    return server.submitTransaction(transaction);
+                }
+        }
 
 √ - 3. payment with one asset to same asset 
+    const mobiAsset = new StellarSdk.Asset( 'MOBI', 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH');
+    const mobiAssetPmtOpt = StellarSdk.Operation.payment({
+        destination: pubKey2,
+        asset: mobiAsset,
+        amount: "1",
+        source: pubKey
+    });
+    // using func from above
+    createTransaction(pubKey, privKey, mobiAssetPmtOpt);
 
-4. pathfinding: A -> B (with trust)
+
+// THIS JUST FINDS THE PATH AND RETURNS THE PATHFINDING_RESULT
+√ - 4. pathfinding: A -> B (with trust)
+function findFirstPath(sender, receiver, sendAsset, destAsset, destAmount) {
+    return server.paths(sender, receiver, destAsset, destAmount)
+        .call()
+        .then(paths => {
+            const _paths = JSON.parse(JSON.stringify(paths)).records;
+            const source_asset_code = sendAsset.getCode();
+            const source_asset_issuer = sendAsset.getIssuer();
+            // TODO: JUST GETS FIRST NOT NECESSARILY BEST
+            return _paths.find(path => (path.source_asset_code == source_asset_code && 
+                                        path.source_asset_issuer == source_asset_issuer))
+    })
+}
+
+√ - 4.1 create path payment obj
+    function createPath(sender, receiver, sendAsset, destAsset, destAmount, pathPaymentResult, buffer = 0.015) {
+        const _path = pathPaymentResult.path.map(asset => {
+            if (asset.asset_type === 'native') return nativeAsset;
+            else return new Asset(asset.asset_code, asset.asset_issuer);
+        });
+        const paddedAmtWithBuffer = ((1 + buffer) * pathPaymentResult.source_amount).toFixed(7);
+        const res = {
+            source: sender,
+            sendAsset: sendAsset,
+            sendMax: new String(paddedAmtWithBuffer),
+            destination: receiver,
+            destAsset: destAsset,
+            destAmount: '1',
+            path: _path,
+        };
+        console.log(res)
+        return StellarSdk.Operation.pathPayment(res);
+    }
+
+
+√ - 4.2 send path payment operation
+    // findFirstPath(pubKey, pubKey3, mobiAsset, repoAsset, 1)
+    //     .catch(err => console.log(err))
+    //     .then(foundPath => createPath(pubKey, pubKey3, mobiAsset, repoAsset, 1, foundPath))
+    //     .then(pathPayment => createTransaction(pubKey, privKey, pathPayment))
+    //     .catch(err => console.log(err))
 
 5. mutli asset to multi asset
 
