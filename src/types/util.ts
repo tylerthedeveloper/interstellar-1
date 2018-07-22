@@ -43,13 +43,12 @@ export function generateTypeGuards<T>(requiredProps: Array<keyof T>) {
     return {
         is,
         retainOnly,
-    }
+    };
 }
 
 export function concatTypeGuards<T>(originalGuards: ReturnType<typeof generateTypeGuards>,
                                     prop: keyof T,
-                                    extraGuards: ReturnType<typeof generateTypeGuards>)
-{
+                                    extraGuards: ReturnType<typeof generateTypeGuards>) {
     for (const field in originalGuards) {
         if (originalGuards.hasOwnProperty(field)) {
             (originalGuards as any)[field] = () => (extraGuards as any)[field].call(arguments)

@@ -7,7 +7,7 @@ import {
     Toolbar,
     Typography,
     WithStyles,
-    withStyles
+    withStyles,
 } from "@material-ui/core";
 import { inject, observer } from "mobx-react";
 import * as React from "react";
@@ -20,7 +20,7 @@ import NavButton from "./NavButtonComponent";
 
 interface IComponentProps extends WithStyles<typeof styles> {
     logout: () => void;
-    loggedIn: boolean;
+    currentUserID: string | null;
     ui: UIStore;
 }
 
@@ -28,7 +28,7 @@ interface IComponentProps extends WithStyles<typeof styles> {
 @observer
 class NavBar extends React.Component<IComponentProps> {
     public render() {
-        const { classes, ui, loggedIn, logout } = this.props;
+        const { classes, ui, currentUserID, logout } = this.props;
         return (
             <AppBar position="static" key={"app-bar"}>
                 <Toolbar>
@@ -41,14 +41,18 @@ class NavBar extends React.Component<IComponentProps> {
                         <NavButton to="/people">Sellers</NavButton>
                     </div>
                     <div>
-                        {loggedIn ? (
+                        {currentUserID ? (
                             <div className={classes.userNavSection}>
 
-                                <Avatar
+                                <Button
+                                    component={(props: any) => <NavLink to={"/people/" + currentUserID} {...props}/>}
                                     className={classes.userNavSectionItem}
                                 >
-                                    OP
-                                </Avatar>
+                                    <Avatar
+                                    >
+                                        OP
+                                    </Avatar>
+                                </Button>
                                 <Button
                                     className={classes.userNavSectionItem}
                                     variant={"raised"}
@@ -76,7 +80,6 @@ class NavBar extends React.Component<IComponentProps> {
                             </Button>
                         )}
 
-
                     </div>
                 </Toolbar>
             </AppBar>
@@ -97,11 +100,12 @@ const styles = createStyles({
 
     userNavSectionItem: {
         margin: "0 10px",
+        padding: "0 8px",
     },
 
     userNavSection: {
         display: "flex",
-    }
+    },
 });
 
 /****  EXPORT ******/

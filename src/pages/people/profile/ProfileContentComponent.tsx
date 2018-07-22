@@ -2,7 +2,7 @@ import { AppBar, Button, createStyles, Tab, Tabs, withStyles, WithStyles } from 
 import * as React from "react";
 import { Route } from "react-router";
 import { NavLink } from "react-router-dom";
-import InfoSection from "./InfoSectionComponent";
+import InfoSection from "./info_section/Container";
 import ProductList from "./ProductListContainer";
 
 interface IComponentProps extends WithStyles<typeof mainContentStyles> {
@@ -29,7 +29,7 @@ class MainContent extends React.PureComponent<IComponentProps> {
                             innerComponent = <Filler/>;
                             break;
                         case "info":
-                            innerComponent = <InfoSection/>;
+                            innerComponent = <InfoSection userID={id}/>;
                     }
 
                     return (

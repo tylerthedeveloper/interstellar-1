@@ -18,7 +18,6 @@ interface IComponentProps extends WithStyles<typeof styles> {
 /****  COMPONENT ******/
 class ProductListItem extends React.PureComponent<IComponentProps> {
 
-
     public render() {
         const { classes, product, ActionComponent } = this.props;
         const rating = null;

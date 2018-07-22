@@ -37,7 +37,7 @@ class UIStore {
         this.notificationMessage = notification;
     }
 
-    @action.bound public closeNotification(){
+    @action.bound public closeNotification() {
         this.notificationOpen = false;
         this.notificationMessage = null;
     }

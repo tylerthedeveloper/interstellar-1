@@ -35,9 +35,9 @@ const TestUpload =  graphql(gql`
     <input
         type="file"
         required={true}
-        onChange={(event)=> {
-            if(event.target.files && event.target.files[0]){
-                mutate!({variables: {file: event.target.files[0]}})
+        onChange={(event) => {
+            if (event.target.files && event.target.files[0]) {
+                mutate!({variables: {file: event.target.files[0]}});
             }
         }}
     />

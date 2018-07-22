@@ -39,7 +39,7 @@ class NavBar extends React.PureComponent<IComponentProps> {
                         >
                             {(logoutFn) => (
                                 <NavBarComponent
-                                    loggedIn={Boolean(data.currentUser)}
+                                    currentUserID={data.currentUser ? data.currentUser.id : null}
                                     logout={logoutFn}
                                 />
                             )}
