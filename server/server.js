@@ -5,9 +5,11 @@ import session from 'express-session';
 import { postgraphile} from 'postgraphile';
 import cors from 'cors';
 import {Pool} from 'pg';
+import { apolloUploadExpress } from 'apollo-upload-server';
 
 import config from '../config.json';
 import {currentUserPlugin, resolveFromSourceFirst} from './lib/graphql/authPlugin';
+import {uploadFilePlugin} from './lib/graphql/uploadPlugin';
 
 const app = express();
 const pool = new Pool({
@@ -27,7 +29,8 @@ app.use("/gql",
         cookie : {
             maxAge: 1000 * 60
         }
-    })
+    }),
+    apolloUploadExpress()
 );
 app.use(postgraphile(pool, 'public', {
     graphiql: true,
@@ -41,7 +44,7 @@ app.use(postgraphile(pool, 'public', {
         }
     },
     jwtSecret: "jack",
-    appendPlugins: [resolveFromSourceFirst, currentUserPlugin],
+    appendPlugins: [resolveFromSourceFirst, currentUserPlugin, uploadFilePlugin],
     watchPg: true
 }));
 

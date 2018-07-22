@@ -6,6 +6,7 @@ import { setContext } from "apollo-link-context";
 import {onError} from "apollo-link-error";
 import { HttpLink } from "apollo-link-http";
 const cache = new InMemoryCache();
+import { createUploadLink } from "apollo-upload-client";
 
 const authLink = new ApolloLink((operation, forward) => {
 
@@ -46,6 +47,7 @@ const client = new ApolloClient({
 
     // TODO need to move this to separate file
     link: ApolloLink.from([
+        createUploadLink({uri: "http://localhost:3002/gql"}),
         authLink,
         onError(
             ({ operation, response, graphQLErrors, networkError, forward }) => {
