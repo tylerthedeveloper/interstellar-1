@@ -9,6 +9,7 @@ import { withApollo, WithApolloClient } from "react-apollo";
 
 interface IComponentProps {
     userID: string;
+    editable: boolean;
 }
 type IComponentPropsWithApollo = WithApolloClient<IComponentProps>;
 interface IUser {
@@ -24,7 +25,6 @@ interface IUser {
 class InfoSection extends React.PureComponent<IComponentPropsWithApollo> {
 
     private infoQuery: ObservableQuery<any>;
-    private currentUserQuery: ObservableQuery<any>;
     public state: {
         user?: IUser,
         currentUserID?: string;
@@ -40,10 +40,6 @@ class InfoSection extends React.PureComponent<IComponentPropsWithApollo> {
             variables: {userID},
         });
 
-        this.currentUserQuery = client.watchQuery({
-            query: currentUserQuery,
-        });
-
         this.state = {};
     }
 
@@ -57,17 +53,6 @@ class InfoSection extends React.PureComponent<IComponentPropsWithApollo> {
                         }
                     },
                 }),
-
-            this.currentUserQuery
-                .subscribe({
-                    next: (res) => {
-                        if (res.data && res.data.currentUser && res.data.currentUser.id) {
-                            this.setState({currentUserID: res.data.currentUser.id});
-                        }else{
-                            this.setState({currentUserID: null});
-                        }
-                    },
-                }),
         ];
     }
 
@@ -76,24 +61,17 @@ class InfoSection extends React.PureComponent<IComponentPropsWithApollo> {
     }
 
     public render() {
-        const {user, currentUserID} = this.state;
+        const {editable} = this.props;
+        const {user} = this.state;
         if (!user) {
             return <LinearProgress />;
         }
 
         return (
-            <InfoSectionComponent user={user} editable={Boolean(currentUserID && user.id === currentUserID)}/>
+            <InfoSectionComponent user={user} editable={editable}/>
         );
     }
 }
-
-const currentUserQuery = gql`
-    query {
-        currentUser {
-            id
-        }
-    }
-`;
 
 const query = gql`
     query GetUserProfileDetails($userID: UUID!) {

@@ -7,12 +7,13 @@ import ProductList from "./ProductListContainer";
 
 interface IComponentProps extends WithStyles<typeof mainContentStyles> {
     id: string;
+    editable: boolean;
 }
 
 class MainContent extends React.PureComponent<IComponentProps> {
 
     public render() {
-        const { classes, id } = this.props;
+        const { classes, id, editable } = this.props;
         return (
             <Route
                 path={"/people/:id/:section?"}
@@ -29,7 +30,7 @@ class MainContent extends React.PureComponent<IComponentProps> {
                             innerComponent = <Filler/>;
                             break;
                         case "info":
-                            innerComponent = <InfoSection userID={id}/>;
+                            innerComponent = <InfoSection userID={id} editable={editable}/>;
                     }
 
                     return (

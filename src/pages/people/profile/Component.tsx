@@ -7,56 +7,45 @@ import {
     Tabs, Typography, WithStyles, withStyles,
 } from "@material-ui/core";
 import * as React from "react";
-import { NavLink, Route, Switch, withRouter } from "react-router-dom";
-
+import ActionBar from "./action_bar/Component";
 import MainContent from "./ProfileContentComponent";
 
 /****  TYPES ******/
-import { ButtonProps } from "@material-ui/core/Button";
 interface IComponentProps extends WithStyles<typeof styles> {
-    id: string;
+    userID: string;
+    editable: boolean;
 }
 
 /****  COMPONENT ******/
 class Component extends React.PureComponent<IComponentProps> {
     public render() {
 
-        const {id, classes} = this.props;
-        const name = "Jack Langston";
+        const {userID, classes, editable} = this.props;
 
         return (
             <div className={classes.container}>
                 <div className={classes.header}>
-                    <Avatar className={classes.avatar}>OP</Avatar>
+                    <Avatar className={classes.avatar}>{editable ? "Edit!" : "NO"}</Avatar>
                     <div>
                         <Typography variant={"display2"}>
-                            Name {id}
+                            Name {userID}
                         </Typography>
-                        <div className={classes.actionRow}>
-                            <LocalButton className={classes.action}>
-                                Contact
-                            </LocalButton>
-                            <LocalButton className={classes.action}>
-                                Website
-                            </LocalButton>
-                            <LocalButton
-                                className={classes.action}
-                                color={"secondary"}
-                            >
-                                Report
-                            </LocalButton>
-                        </div>
+                        {editable ?
+                            <ActionBar/>
+                            :
+                            <ActionBar
+                                website={true}
+                                report={true}
+                                contact={true}
+                            />
+                        }
                     </div>
                 </div>
-                <MainContent id={id}/>
+                <MainContent id={userID} editable={editable}/>
             </div>
         );
     }
 }
-
-const LocalButton = (props: ButtonProps) => {
-    return <Button variant={"raised"} {...props} />;
-};
 
 /****  STYLES ******/
 const styles = createStyles({
@@ -64,15 +53,6 @@ const styles = createStyles({
         display: "flex",
         marginBottom: "30px",
     },
-
-    actionRow: {
-        paddingTop: "20px",
-        display: "flex",
-    },
-    action: {
-        marginRight: "20px",
-    },
-
     avatar: {
         width: "150px",
         height: "150px",

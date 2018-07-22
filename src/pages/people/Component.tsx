@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Route, Switch } from "react-router-dom";
 
-import Profile from "./profile/Component";
+import Profile from "./profile/Container";
 import PeopleAll from "./sellers/Container";
 
 /**** Component ******/
@@ -13,7 +13,7 @@ class CategoryComponent extends React.PureComponent<{}> {
                 <Route
                     path={"/people/:id/"}
                     render={(props) => (
-                        <Profile id={props.match.params.id}/>
+                        <Profile userID={props.match.params.id}/>
                     )}
                 />
             </Switch>
