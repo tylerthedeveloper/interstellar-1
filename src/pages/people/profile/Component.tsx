@@ -87,8 +87,19 @@ const CustomAvatarUnstyled = (props: any) => {
         return (
             <Avatar
                 className={classes.avatar}
-                srcSet={profilePicture ? `https://silentshop.s3.amazonaws.com/${profilePicture}` : ""}
-            />
+            >
+                <picture>
+                    <source
+                        srcSet={`https://silentshop.s3.amazonaws.com/${profilePicture}-med.webp`}
+                        type="image/webp"
+                    />
+                    <img
+                        className={classes.avatarImage}
+                        src={`https://silentshop.s3.amazonaws.com/${profilePicture}-med.jpeg`}
+                        alt={`${displayName}'s profile picture`}
+                    />
+                </picture>
+            </Avatar>
         );
     } else {
         return (
@@ -112,6 +123,12 @@ const styles = (theme: Theme) => (createStyles({
         width: "150px",
         height: "150px",
         marginRight: "30px",
+    },
+    avatarImage: {
+        height: "100%",
+        width: "100%",
+        objectFit: "cover",
+        textAlign: "center",
     },
     nameContainer: {
         display: "flex",
