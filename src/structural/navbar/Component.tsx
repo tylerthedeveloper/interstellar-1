@@ -1,6 +1,5 @@
 import {
     AppBar,
-    Avatar,
     Button,
     createStyles,
     Icon,
@@ -13,6 +12,7 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import { NavLink } from "react-router-dom";
 import UIStore from "Stores/ui";
+import Avatar from "Structural/avatar/Component";
 import { injectWithTypes } from "TypeUtil";
 import NavButton from "./NavButtonComponent";
 
@@ -20,7 +20,11 @@ import NavButton from "./NavButtonComponent";
 
 interface IComponentProps extends WithStyles<typeof styles> {
     logout: () => void;
-    currentUserID: string | null;
+    currentUser: {
+        id?: string | null;
+        profilePicture?: string | null;
+        displayName?: string | null;
+    };
     ui: UIStore;
 }
 
@@ -28,7 +32,8 @@ interface IComponentProps extends WithStyles<typeof styles> {
 @observer
 class NavBar extends React.Component<IComponentProps> {
     public render() {
-        const { classes, ui, currentUserID, logout } = this.props;
+        const { classes, ui, currentUser: {id, profilePicture, displayName}, logout } = this.props;
+
         return (
             <AppBar position="static" key={"app-bar"}>
                 <Toolbar>
@@ -41,14 +46,17 @@ class NavBar extends React.Component<IComponentProps> {
                         <NavButton to="/people">Sellers</NavButton>
                     </div>
                     <div>
-                        {currentUserID ? (
+                        {id ? (
                             <div className={classes.userNavSection}>
 
                                 <Button
-                                    component={(props: any) => <NavLink to={"/people/" + currentUserID} {...props}/>}
+                                    component={(props: any) => <NavLink to={"/people/" + id} {...props}/>}
                                     className={classes.userNavSectionItem}
                                 >
                                     <Avatar
+                                        displayName={displayName}
+                                        profilePicture={profilePicture}
+                                        imageSize={"sm"}
                                     >
                                         OP
                                     </Avatar>

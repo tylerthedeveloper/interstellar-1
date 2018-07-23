@@ -1,7 +1,8 @@
-import { Avatar, Button, createStyles, Grid, Typography, withStyles, WithStyles } from "@material-ui/core";
+import { Button, createStyles, Grid, Typography, withStyles, WithStyles } from "@material-ui/core";
 import * as React from "react";
 import { NavLink } from "react-router-dom";
 import StarRatingComponent from "react-star-rating-component";
+import Avatar from "Structural/avatar/Component";
 
 /****  TYPES ******/
 import { ButtonProps } from "@material-ui/core/Button";
@@ -14,7 +15,7 @@ interface IComponentProps extends WithStyles<typeof styles> {
 /****  COMPONENT ******/
 class Component extends React.PureComponent<IComponentProps> {
     public render() {
-        const { seller: {id, username, displayName}, classes } = this.props;
+        const { seller: {id, username, displayName, profilePicture}, classes } = this.props;
         return (
             <Grid item={true} xl={2} lg={4} md={6} xs={12}>
                 <Button
@@ -49,7 +50,12 @@ class Component extends React.PureComponent<IComponentProps> {
                         </Typography>
                     }
 
-                    <Avatar className={classes.avatar}>OP</Avatar>
+                    <Avatar
+                        className={classes.avatar}
+                        displayName={displayName}
+                        profilePicture={profilePicture}
+                        imageSize={"sm"}
+                    />
                     <div className={classes.starsContainer}>
                         <StarRatingComponent
                             name={id}

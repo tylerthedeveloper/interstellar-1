@@ -4,8 +4,9 @@ import { Mutation, Query } from "react-apollo";
 import {injectWithTypes} from "TypeUtil";
 
 import AccountStore from "Stores/stellar-account";
-import { getCurrentUser, logout } from "../../api/gql/auth";
+import { logout } from "../../api/gql/auth";
 import NavBarComponent from "./Component";
+import gql from "graphql-tag";
 
 /****  TYPES ******/
 interface IComponentProps {
@@ -39,7 +40,7 @@ class NavBar extends React.PureComponent<IComponentProps> {
                         >
                             {(logoutFn) => (
                                 <NavBarComponent
-                                    currentUserID={data.currentUser ? data.currentUser.id : null}
+                                    currentUser={data.currentUser ? data.currentUser : {}}
                                     logout={logoutFn}
                                 />
                             )}
@@ -50,5 +51,15 @@ class NavBar extends React.PureComponent<IComponentProps> {
         );
     }
 }
+
+export const getCurrentUser =  gql`
+    query getCurrentUser{
+        currentUser{
+            id
+            profilePicture
+            displayName
+        }
+    }
+`;
 
 export default injectWithTypes("account", NavBar);

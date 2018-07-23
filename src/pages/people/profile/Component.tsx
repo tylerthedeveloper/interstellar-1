@@ -1,13 +1,11 @@
 import {
-    AppBar,
-    Avatar,
-    Button,
     createStyles, Icon,
     Tab,
     Tabs, Theme, Typography, WithStyles, withStyles,
 } from "@material-ui/core";
 import * as React from "react";
 import Dropzone from "react-dropzone";
+import Avatar from "Structural/avatar/Component";
 import ActionBar from "./action_bar/Component";
 import MainContent from "./ProfileContentComponent";
 
@@ -23,7 +21,6 @@ class Component extends React.PureComponent<IComponentProps> {
     public render() {
 
         const {user: {id: userID, website, profilePicture, displayName, username}, classes, editable, profilePicUploadHandler} = this.props;
-        console.log(`https://silentshop.s3.amazonaws.com/${profilePicture}`);
 
         return (
             <div className={classes.container}>
@@ -31,24 +28,25 @@ class Component extends React.PureComponent<IComponentProps> {
                     {editable ?
                         <Dropzone
                             accept={["image/jpeg", "image/png"] as any}
-                            className={classes.avatar}
+                            className={classes.avatarChanger}
                             onDrop={(acceptedFiles, rejectedFiles) => {
                                 profilePicUploadHandler(userID, acceptedFiles[0]);
                             }}
                         >
-                            <CustomAvatar
+                            <Avatar
                                 profilePicture={profilePicture}
                                 displayName={displayName}
-
+                                className={classes.avatar}
                             />
                             <Icon className={"material-icons"} classes={{root: classes.edit}}>
                                 edit
                             </Icon>
                         </Dropzone>
                         :
-                        <CustomAvatar
+                        <Avatar
                             profilePicture={profilePicture}
                             displayName={displayName}
+                            className={classes.avatar}
 
                         />}
                     <div>
@@ -78,41 +76,6 @@ class Component extends React.PureComponent<IComponentProps> {
     }
 }
 
-//Todo move to be a structural component
-const CustomAvatarUnstyled = (props: any) => {
-
-    const {profilePicture, displayName, classes} = props;
-
-    if (profilePicture) {
-        return (
-            <Avatar
-                className={classes.avatar}
-            >
-                <picture>
-                    <source
-                        srcSet={`https://silentshop.s3.amazonaws.com/${profilePicture}-med.webp`}
-                        type="image/webp"
-                    />
-                    <img
-                        className={classes.avatarImage}
-                        src={`https://silentshop.s3.amazonaws.com/${profilePicture}-med.jpeg`}
-                        alt={`${displayName}'s profile picture`}
-                    />
-                </picture>
-            </Avatar>
-        );
-    } else {
-        return (
-            <Avatar
-                className={classes.avatar}
-            >
-                {displayName ? displayName.substring(0, 2) : "NA"}
-            </Avatar>
-        );
-    }
-
-};
-
 /****  STYLES ******/
 const styles = (theme: Theme) => (createStyles({
     header: {
@@ -124,11 +87,11 @@ const styles = (theme: Theme) => (createStyles({
         height: "150px",
         marginRight: "30px",
     },
-    avatarImage: {
-        height: "100%",
-        width: "100%",
-        objectFit: "cover",
-        textAlign: "center",
+    avatarChanger: {
+        width: "150px",
+        height: "150px",
+        marginRight: "30px",
+        cursor: "pointer",
     },
     nameContainer: {
         display: "flex",
@@ -152,8 +115,6 @@ const styles = (theme: Theme) => (createStyles({
         padding: "10px",
     },
 }));
-
-const CustomAvatar = withStyles(styles)(CustomAvatarUnstyled);
 
 /****  EXPORT ******/
 export default withStyles(styles)(Component);

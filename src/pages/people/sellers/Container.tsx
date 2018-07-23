@@ -40,6 +40,7 @@ const query = gql`
                 id
                 username
                 displayName
+                profilePicture
             }
         }
     }

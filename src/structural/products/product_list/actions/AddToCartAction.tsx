@@ -34,6 +34,7 @@ class ProductListItemAddToCart extends React.PureComponent<IComponentProps> {
 
     public render() {
         const { classes, product: {id, name, usdCost}, ui, quantity: defaultQuantity} = this.props;
+
         return (
 
             <Query

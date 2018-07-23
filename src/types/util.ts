@@ -26,7 +26,7 @@ type Omit<T, K extends keyof T> = T extends any
 export type OnlyForce<O, T extends keyof O> = Required<{[k in T]: NonNullable<O[k]>}> & PartialInput<O>;
 
 type Nullable2<T> = { [P in keyof T]: Partial<T[P]> | null};
-type Nullable<T> = { [P in keyof T]: Partial<Nullable2<T[P]>> | null | {}};
+type Nullable<T> = { [P in keyof T]: Partial<Nullable2<T[P]>> | any};
 type PartialInput<T> = Partial<Nullable<T>> | null;
 
 export function generateTypeGuards<T>(requiredProps: Array<keyof T>) {

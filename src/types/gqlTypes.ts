@@ -17,6 +17,12 @@ export type UUID = any;
 
 /** A floating point number that requires more precision than IEEE 754 binary 64 */
 export type BigFloat = any;
+
+/** A point in time as described by the [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) standard. May or may not include a timezone. */
+export type Datetime = any;
+
+/** The `Upload` scalar type represents a file upload promise that resolves an object containing `stream`, `filename`, `mimetype` and `encoding`. */
+export type Upload = any;
 /** An object with a globally unique `ID`. */
 export interface Node {
   nodeId: string; /** A globally unique identifier. Can be used in various places throughout the system to identify this single value. */
@@ -75,11 +81,17 @@ export interface Product extends Node {
 export interface User extends Node {
   nodeId: string; /** A globally unique identifier. Can be used in various places throughout the system to identify this single value. */
   id: UUID; /** This is a cool thing. */
-  username?: string | null; 
+  username: string; 
   stellarPublicKey: string; 
   displayName?: string | null; 
-  productsBySellerId: ProductsConnection; /** Reads and enables pagination through a set of `Product`. */
+  website?: string | null; 
+  email?: string | null; 
+  accountCreatedTimestamp: Datetime; 
+  lastLoginTimestamp: Datetime; 
+  isNew: boolean; 
+  profilePicture?: string | null; 
   cart: CartsConnection; /** Reads and enables pagination through a set of `Cart`. */
+  productsBySellerId: ProductsConnection; /** Reads and enables pagination through a set of `Product`. */
 }
 /** A connection to a list of `Product` values. */
 export interface ProductsConnection {
@@ -138,6 +150,7 @@ export interface Seller {
   username?: string | null; 
   stellarPublicKey?: string | null; 
   displayName?: string | null; 
+  profilePicture?: string | null; 
 }
 /** A `Seller` edge in the connection. */
 export interface SellersEdge {
@@ -324,6 +337,7 @@ export interface SellerCondition {
   username?: string | null; /** Checks for equality with the object’s `username` field. */
   stellarPublicKey?: string | null; /** Checks for equality with the object’s `stellarPublicKey` field. */
   displayName?: string | null; /** Checks for equality with the object’s `displayName` field. */
+  profilePicture?: string | null; /** Checks for equality with the object’s `profilePicture` field. */
 }
 /** A condition to be used against `User` object types. All fields are tested for equality and combined with a logical ‘and.’ */
 export interface UserCondition {
@@ -331,6 +345,12 @@ export interface UserCondition {
   username?: string | null; /** Checks for equality with the object’s `username` field. */
   stellarPublicKey?: string | null; /** Checks for equality with the object’s `stellarPublicKey` field. */
   displayName?: string | null; /** Checks for equality with the object’s `displayName` field. */
+  website?: string | null; /** Checks for equality with the object’s `website` field. */
+  email?: string | null; /** Checks for equality with the object’s `email` field. */
+  accountCreatedTimestamp?: Datetime | null; /** Checks for equality with the object’s `accountCreatedTimestamp` field. */
+  lastLoginTimestamp?: Datetime | null; /** Checks for equality with the object’s `lastLoginTimestamp` field. */
+  isNew?: boolean | null; /** Checks for equality with the object’s `isNew` field. */
+  profilePicture?: Upload | null; /** Checks for equality with the object’s `profilePicture` field. */
 }
 /** All input for the create `Cart` mutation. */
 export interface CreateCartInput {
@@ -379,6 +399,12 @@ export interface UserInput {
   username?: string | null; 
   stellarPublicKey: string; 
   displayName?: string | null; 
+  website?: string | null; 
+  email?: string | null; 
+  accountCreatedTimestamp?: Datetime | null; 
+  lastLoginTimestamp?: Datetime | null; 
+  isNew?: boolean | null; 
+  profilePicture?: Upload | null; 
 }
 /** All input for the `updateCart` mutation. */
 export interface UpdateCartInput {
@@ -456,6 +482,12 @@ export interface UserPatch {
   username?: string | null; 
   stellarPublicKey?: string | null; 
   displayName?: string | null; 
+  website?: string | null; 
+  email?: string | null; 
+  accountCreatedTimestamp?: Datetime | null; 
+  lastLoginTimestamp?: Datetime | null; 
+  isNew?: boolean | null; 
+  profilePicture?: Upload | null; 
 }
 /** All input for the `updateUserById` mutation. */
 export interface UpdateUserByIdInput {
@@ -606,15 +638,6 @@ export interface CartsProductArgs {
   orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
   condition?: CartCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
 }
-export interface ProductsBySellerIdUserArgs {
-  first?: number | null; /** Only read the first `n` values of the set. */
-  last?: number | null; /** Only read the last `n` values of the set. */
-  offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
-  before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
-  after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
-  orderBy?: ProductsOrderBy[] | null; /** The method to use when ordering `Product`. */
-  condition?: ProductCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
-}
 export interface CartUserArgs {
   first?: number | null; /** Only read the first `n` values of the set. */
   last?: number | null; /** Only read the last `n` values of the set. */
@@ -623,6 +646,15 @@ export interface CartUserArgs {
   after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
   orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
   condition?: CartCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
+}
+export interface ProductsBySellerIdUserArgs {
+  first?: number | null; /** Only read the first `n` values of the set. */
+  last?: number | null; /** Only read the last `n` values of the set. */
+  offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
+  before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
+  after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
+  orderBy?: ProductsOrderBy[] | null; /** The method to use when ordering `Product`. */
+  condition?: ProductCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
 }
 export interface ProductsByCategoryProductCategoryArgs {
   first?: number | null; /** Only read the first `n` values of the set. */
@@ -802,6 +834,8 @@ export enum SellersOrderBy {
   STELLAR_PUBLIC_KEY_DESC = "STELLAR_PUBLIC_KEY_DESC",
   DISPLAY_NAME_ASC = "DISPLAY_NAME_ASC",
   DISPLAY_NAME_DESC = "DISPLAY_NAME_DESC",
+  PROFILE_PICTURE_ASC = "PROFILE_PICTURE_ASC",
+  PROFILE_PICTURE_DESC = "PROFILE_PICTURE_DESC",
 }
 /** Methods to use when ordering `User`. */
 export enum UsersOrderBy {
@@ -814,6 +848,18 @@ export enum UsersOrderBy {
   STELLAR_PUBLIC_KEY_DESC = "STELLAR_PUBLIC_KEY_DESC",
   DISPLAY_NAME_ASC = "DISPLAY_NAME_ASC",
   DISPLAY_NAME_DESC = "DISPLAY_NAME_DESC",
+  WEBSITE_ASC = "WEBSITE_ASC",
+  WEBSITE_DESC = "WEBSITE_DESC",
+  EMAIL_ASC = "EMAIL_ASC",
+  EMAIL_DESC = "EMAIL_DESC",
+  ACCOUNT_CREATED_TIMESTAMP_ASC = "ACCOUNT_CREATED_TIMESTAMP_ASC",
+  ACCOUNT_CREATED_TIMESTAMP_DESC = "ACCOUNT_CREATED_TIMESTAMP_DESC",
+  LAST_LOGIN_TIMESTAMP_ASC = "LAST_LOGIN_TIMESTAMP_ASC",
+  LAST_LOGIN_TIMESTAMP_DESC = "LAST_LOGIN_TIMESTAMP_DESC",
+  IS_NEW_ASC = "IS_NEW_ASC",
+  IS_NEW_DESC = "IS_NEW_DESC",
+  PROFILE_PICTURE_ASC = "PROFILE_PICTURE_ASC",
+  PROFILE_PICTURE_DESC = "PROFILE_PICTURE_DESC",
   PRIMARY_KEY_ASC = "PRIMARY_KEY_ASC",
   PRIMARY_KEY_DESC = "PRIMARY_KEY_DESC",
 }
@@ -1005,22 +1051,17 @@ export namespace UserResolvers {
     username?: UsernameResolver; 
     stellarPublicKey?: StellarPublicKeyResolver; 
     displayName?: DisplayNameResolver; 
-    productsBySellerId?: ProductsBySellerIdResolver; /** Reads and enables pagination through a set of `Product`. */
+    website?: WebsiteResolver; 
+    email?: EmailResolver; 
+    accountCreatedTimestamp?: AccountCreatedTimestampResolver; 
+    lastLoginTimestamp?: LastLoginTimestampResolver; 
+    isNew?: IsNewResolver; 
+    profilePicture?: ProfilePictureResolver; 
     cart?: CartResolver; /** Reads and enables pagination through a set of `Cart`. */
+    productsBySellerId?: ProductsBySellerIdResolver; /** Reads and enables pagination through a set of `Product`. */
   }
 
-  export type NodeIdResolver = Resolver<string>;  export type IdResolver = Resolver<UUID>;  export type UsernameResolver = Resolver<string | null>;  export type StellarPublicKeyResolver = Resolver<string>;  export type DisplayNameResolver = Resolver<string | null>;  export type ProductsBySellerIdResolver = Resolver<ProductsConnection, ProductsBySellerIdArgs>;
-  export interface ProductsBySellerIdArgs {
-    first?: number | null; /** Only read the first `n` values of the set. */
-    last?: number | null; /** Only read the last `n` values of the set. */
-    offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
-    before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
-    after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
-    orderBy?: ProductsOrderBy[] | null; /** The method to use when ordering `Product`. */
-    condition?: ProductCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
-  }
-
-  export type CartResolver = Resolver<CartsConnection, CartArgs>;
+  export type NodeIdResolver = Resolver<string>;  export type IdResolver = Resolver<UUID>;  export type UsernameResolver = Resolver<string>;  export type StellarPublicKeyResolver = Resolver<string>;  export type DisplayNameResolver = Resolver<string | null>;  export type WebsiteResolver = Resolver<string | null>;  export type EmailResolver = Resolver<string | null>;  export type AccountCreatedTimestampResolver = Resolver<Datetime>;  export type LastLoginTimestampResolver = Resolver<Datetime>;  export type IsNewResolver = Resolver<boolean>;  export type ProfilePictureResolver = Resolver<string | null>;  export type CartResolver = Resolver<CartsConnection, CartArgs>;
   export interface CartArgs {
     first?: number | null; /** Only read the first `n` values of the set. */
     last?: number | null; /** Only read the last `n` values of the set. */
@@ -1029,6 +1070,17 @@ export namespace UserResolvers {
     after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
     orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
     condition?: CartCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
+  }
+
+  export type ProductsBySellerIdResolver = Resolver<ProductsConnection, ProductsBySellerIdArgs>;
+  export interface ProductsBySellerIdArgs {
+    first?: number | null; /** Only read the first `n` values of the set. */
+    last?: number | null; /** Only read the last `n` values of the set. */
+    offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
+    before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
+    after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
+    orderBy?: ProductsOrderBy[] | null; /** The method to use when ordering `Product`. */
+    condition?: ProductCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
   }
 
   
@@ -1125,9 +1177,10 @@ export namespace SellerResolvers {
     username?: UsernameResolver; 
     stellarPublicKey?: StellarPublicKeyResolver; 
     displayName?: DisplayNameResolver; 
+    profilePicture?: ProfilePictureResolver; 
   }
 
-  export type IdResolver = Resolver<UUID | null>;  export type UsernameResolver = Resolver<string | null>;  export type StellarPublicKeyResolver = Resolver<string | null>;  export type DisplayNameResolver = Resolver<string | null>;  
+  export type IdResolver = Resolver<UUID | null>;  export type UsernameResolver = Resolver<string | null>;  export type StellarPublicKeyResolver = Resolver<string | null>;  export type DisplayNameResolver = Resolver<string | null>;  export type ProfilePictureResolver = Resolver<string | null>;  
 }/** A `Seller` edge in the connection. */
 export namespace SellersEdgeResolvers {
   export interface Resolvers {
@@ -1649,6 +1702,104 @@ export namespace AllProductsByCategoryId {
     description?: string | null; 
   }
 }
+export namespace UpdateProfilePic {
+  export type Variables = {
+    userID: UUID;
+    file: Upload;
+  }
+
+  export type Mutation = {
+    __typename?: "Mutation";
+    updateUserById?: UpdateUserById | null; 
+  }
+
+  export type UpdateUserById = {
+    __typename?: "UpdateUserPayload";
+    user?: User | null; 
+  }
+
+  export type User = {
+    __typename?: "User";
+    id: UUID; 
+    profilePicture?: string | null; 
+  }
+}
+export namespace AnonymousQuery_1 {
+  export type Variables = {
+  }
+
+  export type Query = {
+    __typename?: "Query";
+    currentUser?: CurrentUser | null; 
+  }
+
+  export type CurrentUser = {
+    __typename?: "User";
+    id: UUID; 
+  }
+}
+export namespace GetUserInfo {
+  export type Variables = {
+    userID: UUID;
+  }
+
+  export type Query = {
+    __typename?: "Query";
+    userById?: UserById | null; 
+  }
+
+  export type UserById = {
+    __typename?: "User";
+    id: UUID; 
+    website?: string | null; 
+    profilePicture?: string | null; 
+    displayName?: string | null; 
+    username: string; 
+  }
+}
+export namespace GetUserProfileDetails {
+  export type Variables = {
+    userID: UUID;
+  }
+
+  export type Query = {
+    __typename?: "Query";
+    userById?: UserById | null; 
+  }
+
+  export type UserById = {
+    __typename?: "User";
+    id: UUID; 
+    username: string; 
+    stellarPublicKey: string; 
+    displayName?: string | null; 
+    website?: string | null; 
+    email?: string | null; 
+    accountCreatedTimestamp: Datetime; 
+    lastLoginTimestamp: Datetime; 
+  }
+}
+export namespace EditUserInfo {
+  export type Variables = {
+    userID: UUID;
+    patch: UserPatch;
+  }
+
+  export type Mutation = {
+    __typename?: "Mutation";
+    updateUserById?: UpdateUserById | null; 
+  }
+
+  export type UpdateUserById = {
+    __typename?: "UpdateUserPayload";
+    user?: User | null; 
+  }
+
+  export type User = {
+    __typename?: "User";
+    id: UUID; 
+  } & Fragment.Fragment
+}
 export namespace AllSellerProducts {
   export type Variables = {
     sellerID: UUID;
@@ -1661,6 +1812,7 @@ export namespace AllSellerProducts {
 
   export type UserById = {
     __typename?: "User";
+    id: UUID; 
     productsBySellerId: ProductsBySellerId; 
   }
 
@@ -1696,6 +1848,7 @@ export namespace GetAllSellers {
     id?: UUID | null; 
     username?: string | null; 
     displayName?: string | null; 
+    profilePicture?: string | null; 
   }
 }
 export namespace Login {
@@ -1713,7 +1866,54 @@ export namespace Login {
   export type Login = {
     __typename?: "User";
     id: UUID; 
-    username?: string | null; 
+    username: string; 
+  }
+}
+export namespace GetCurrentUser {
+  export type Variables = {
+  }
+
+  export type Query = {
+    __typename?: "Query";
+    currentUser?: CurrentUser | null; 
+  }
+
+  export type CurrentUser = {
+    __typename?: "User";
+    id: UUID; 
+    profilePicture?: string | null; 
+    displayName?: string | null; 
+  }
+}
+export namespace GetCurrentCartStatus {
+  export type Variables = {
+  }
+
+  export type Query = {
+    __typename?: "Query";
+    currentUser?: CurrentUser | null; 
+  }
+
+  export type CurrentUser = {
+    __typename?: "User";
+    id: UUID; 
+    cart: Cart; 
+  }
+
+  export type Cart = {
+    __typename?: "CartsConnection";
+    nodes: (Nodes | null)[]; 
+  }
+
+  export type Nodes = {
+    __typename?: "Cart";
+    quantity: number; 
+    product?: Product | null; 
+  }
+
+  export type Product = {
+    __typename?: "Product";
+    id: UUID; 
   }
 }
 export namespace AddItemToCart {
@@ -1816,5 +2016,33 @@ export namespace RemoveFromCart {
   export type DeleteCartByItemIdAndUserId = {
     __typename?: "DeleteCartPayload";
     clientMutationId?: string | null; 
+  }
+}
+
+export namespace Fragment {
+  export type Fragment = {
+    __typename?: "User";
+    username: string; 
+  }
+}
+
+export namespace Fragment {
+  export type Fragment = {
+    __typename?: "User";
+    displayName?: string | null; 
+  }
+}
+
+export namespace Fragment {
+  export type Fragment = {
+    __typename?: "User";
+    email?: string | null; 
+  }
+}
+
+export namespace Fragment {
+  export type Fragment = {
+    __typename?: "User";
+    website?: string | null; 
   }
 }
