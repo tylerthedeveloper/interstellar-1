@@ -1,4 +1,10 @@
-const tickerIDs = {
+const CMC_TickerIDs = {
+    XLM: {
+        id: 512, 
+        name: "Stellar", 
+        symbol: "XLM", 
+        website_slug: "stellar"
+    },     
     RMT: {
         id: 2527, 
         name: "SureRemit", 
@@ -17,48 +23,40 @@ const tickerIDs = {
         symbol: "REPO", 
         website_slug: "repo"
     }, 
-
     // CNY...
-    
     SLT: {
         id: 2471, 
         name: "Smartlands", 
         symbol: "SLT", 
         website_slug: "smartlands"
     }, 
-
     // NGNT...
 
     // EURT ...
-
     ETH: {
         id: 1027, 
         name: "Ethereum", 
         symbol: "ETH", 
         website_slug: "ethereum"
     }, 
-
     BTC : {
         id: 1, 
         name: "Bitcoin", 
         symbol: "BTC", 
         website_slug: "bitcoin"
     },
-
     KIN: {
         id: 1993, 
         name: "Kin", 
         symbol: "KIN", 
         website_slug: "kin"
     },
-
     LTC: {
         id: 2, 
         name: "Litecoin", 
         symbol: "LTC", 
         website_slug: "litecoin"
     }, 
-
     XRP: {
         id: 52, 
         name: "XRP", 
@@ -79,6 +77,4 @@ const tickerIDs = {
     }, 
 };
 
-console.log(tickerIDs.BTC)
-
-module.exports = tickerIDs;
+module.exports = CMC_TickerIDs;
