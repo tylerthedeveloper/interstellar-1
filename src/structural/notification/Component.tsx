@@ -31,7 +31,6 @@ class NavBar extends React.Component<IComponentProps> {
                 ContentProps={{
                     "aria-describedby": "message-id",
                 }}
-                autoHideDuration={2000}
                 message={<span id="message-id">{ui.notificationMessage}</span>}
             />
         );

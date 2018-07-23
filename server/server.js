@@ -6,13 +6,14 @@ import { postgraphile} from 'postgraphile';
 import cors from 'cors';
 import {Pool} from 'pg';
 import { apolloUploadExpress } from 'apollo-upload-server';
+import PostGraphileUploadFieldPlugin from 'postgraphile-plugin-upload-field';
 
 import config from '../config.json';
 import {currentUserPlugin, resolveFromSourceFirst} from './lib/graphql/authPlugin';
-import {uploadFilePlugin} from './lib/graphql/uploadPlugin';
+import {defaultUploadFieldDef} from './lib/graphql/uploadPlugin';
 
 const app = express();
-const pool = new Pool({
+export const pool = new Pool({
     user: 'postgres',
     host: 'interstellar.market',
     database: 'silent_shop',
@@ -44,8 +45,11 @@ app.use(postgraphile(pool, 'public', {
         }
     },
     jwtSecret: "jack",
-    appendPlugins: [resolveFromSourceFirst, currentUserPlugin, uploadFilePlugin],
-    watchPg: true
+    appendPlugins: [resolveFromSourceFirst, currentUserPlugin, PostGraphileUploadFieldPlugin],
+    watchPg: true,
+    graphileBuildOptions: {
+        uploadFieldDefinitions: [defaultUploadFieldDef]
+    }
 }));
 
 //set the static asset directory

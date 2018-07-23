@@ -27,7 +27,8 @@ module.exports = {
     resolve: {
         extensions: ['.mjs', '.js', '.jsx'],
         alias: {
-            graphql: path.resolve(__dirname, '../node_modules/graphql')
+            graphql: path.resolve(__dirname, '../node_modules/graphql'),
+            'graphile-build': path.resolve(__dirname, '../../graphile-build')
         }
     },
     devtool: 'source-map',
@@ -69,6 +70,11 @@ module.exports = {
                             "@babel/plugin-transform-runtime",
                             "transform-decorators-legacy",
                             "transform-class-properties",
+                            ["module-resolver", {
+                                "alias": {
+                                    "graphile_build": path.resolve(__dirname, '../../graphile-build'),
+                                }
+                            }]
                         ]
                     }
                 }

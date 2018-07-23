@@ -47,8 +47,8 @@ const client = new ApolloClient({
 
     // TODO need to move this to separate file
     link: ApolloLink.from([
-
         authLink,
+        createUploadLink({uri: "http://localhost:3002/gql"}),
         onError(
             ({ operation, response, graphQLErrors, networkError, forward }) => {
                 if (graphQLErrors) {
@@ -74,7 +74,6 @@ const client = new ApolloClient({
             uri: "http://localhost:3002/gql",
             credentials: "include",
         }),
-        createUploadLink({uri: "http://localhost:3002/gql"}),
     ]),
     cache,
 });

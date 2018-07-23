@@ -31,10 +31,15 @@ class UIStore {
 
     @observable public notificationOpen = false;
     @observable public notificationMessage: string | null = null;
+    private notificationTimeout: any;
 
-    @action.bound public displayNotification(notification: string) {
+    @action.bound public displayNotification(notification: string, keepOpen?: boolean) {
+        clearTimeout(this.notificationTimeout);
         this.notificationOpen = true;
         this.notificationMessage = notification;
+        if (!keepOpen) {
+            this.notificationTimeout = setTimeout(this.closeNotification, 2000);
+        }
     }
 
     @action.bound public closeNotification() {
