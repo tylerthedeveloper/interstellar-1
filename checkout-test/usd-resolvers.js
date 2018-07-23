@@ -8,16 +8,19 @@ function load_CoinMarketCapPrices() {
     const promises = [];
     Object.keys(CMC_TickerIDs).map(key => promises.push(axios.get(`${cmcApiUrl}/${CMC_TickerIDs[key].id}`)));
     return axios.all(promises)
-        .then(axios.spread((...results) => 
+        .then(axios.spread((...results) => {
+            const assets = {};
             results.map(element => element.data.data)
-                .map(curAsset => ({
+                .map(curAsset => (assets[curAsset.symbol] = {
                     id: curAsset.id,
                     code: curAsset.symbol, 
                     price_USD: curAsset.quotes.USD.price,
-                    slug: curAsset.website_slug
-                }))
+                    slug: curAsset.website_slug,
+                }));
+                return assets;
+            }
         ))
-        .then(assets => console.log(assets))
+        .then(assets => assets)
         .catch(err => console.log(err))
 }
 
@@ -25,27 +28,66 @@ function load_StellarTermPrices() {
     return axios.get(stApiUrl)
         .then((response) => response.data.assets)
         .then((tickers) => {
-            const assets = [];
+            const assets = {};
             tickers.map(element => {
-                const { code, issuer, domain, price_USD } = element;
+                const { id, code, issuer, domain, price_USD } = element;
                 const dupCode = new String(code + '_' + issuer);
-                const thisAsset = ST_TickerIDs[code] || ST_TickerIDs[dupCode];
-                if (thisAsset && thisAsset.issuer == issuer && thisAsset.domain == domain )
-                    assets.push({
+                let thisAsset, thisCode;
+                if (ST_TickerIDs[code]) {
+                    thisAsset = ST_TickerIDs[code];
+                    thisCode = code;
+                } else {
+                    thisAsset = ST_TickerIDs[dupCode];
+                    thisCode = dupCode;
+                }
+                if (thisAsset && thisAsset.issuer == issuer && thisAsset.domain == domain)
+                    assets[thisCode] = {
+                        id: id,
                         code: code, 
-                        issuer: issuer,
+                        price_USD: price_USD,
                         domain: domain,
-                        price_USD: price_USD
-                    });
+                        issuer: issuer
+                    };
             });
             return assets;
         })
-        .then(assets => console.log(assets))
+        .then(assets => assets)
         .catch(err => console.log(err))
 }
-
 // todo:
-function averageUsdPrices(cmcList, stList) {
+function averageUsdPrices() {
+    const cmc = load_CoinMarketCapPrices();
+    const st = load_StellarTermPrices();
+    return axios.all([cmc, st])
+        .then(axios.spread((...tickerBatches) => {
+            const assets = {};            
+            tickerBatches.map(batch => {
+                // console.log('batch');
+                // console.log(batch);
+                Object.keys(batch).map(key => {
+                    const symbol = batch[key].code;
+                    if (!assets[symbol]) assets[symbol] = batch[key];
+                    else {
+                        const savedPrice = assets[symbol].price_USD;
+                        const savedPriceArr = (!Array.isArray(savedPrice)) ? [savedPrice] : savedPrice;
+                        const curPrice = batch[key].price_USD;
+                        assets[symbol].price_USD = [...savedPriceArr, curPrice];
+                    }
+                })
+            })
+            Object.keys(assets).map(key => {
+                const savedPrice = assets[key].price_USD;
+                if (Array.isArray(savedPrice)) {
+                    const len = savedPrice.length;
+                    assets[key].price_USD = savedPrice.reduce((a, b) => (a + b)) / len;
+                }
+            })
+            // console.log(assets);
+            return assets;
+        }))
+    // console.log(cmc);
+    // console.log(dump);
+    // console.log(st);
     return; // avg of 2 when code exists in both
 }
 
@@ -54,8 +96,7 @@ function averageUsdPrices(cmcList, stList) {
 //      //
 // const assetSymbols = ["BTC", "ETH"];
 
-// load_CoinMarketCapPrices();
-// load_StellarTermPrices();
-
+averageUsdPrices().then(res => console.log(res))
+// load_CoinMarketCapPrices().then(res => console.log(res))
 module.exports = {
 }
