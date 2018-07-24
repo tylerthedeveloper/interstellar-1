@@ -134,40 +134,39 @@ function createTransactionOps(myCartItems, publicKey, myBalances, selectedAsset,
             issuer: selectedAssetIssuer 
         } = selectedAsset;
         const { balance: balanceForAsset }  = myBalances.find(bal => (
-                        bal.asset_code === selectedAssetCode && 
-                        bal.asset_issuer === selectedAssetIssuer));
+            bal.asset_code === selectedAssetCode && bal.asset_issuer === selectedAssetIssuer));
         
         // TODO: Check for stellar lumens min thresh IF Lumens
-        if (cartItemAsset_Code === selectedAssetCode && 
-            cartItemAsset_Issuer === selectedAssetIssuer) { // check if you have the asset
-                if (balanceForAsset > cartItemAsset_Price) //check if you have enough
-                    return StellarSdk.Operation.payment({ 
-                        destination: curSellerPubKey,
-                        asset: selectedAsset, 
-                        amount: cartItemAsset_Price.toFixed(7)
-                    });
+        if (cartItemAsset_Code === selectedAssetCode && cartItemAsset_Issuer === selectedAssetIssuer) { // check if you have the asset
+            if (balanceForAsset > cartItemAsset_Price) //check if you have enough
+                return StellarSdk.Operation.payment({ 
+                    destination: curSellerPubKey,
+                    asset: selectedAsset, 
+                    amount: cartItemAsset_Price.toFixed(7)
+                });
         }
         else { // user doesnt have the asset so we try to find a path
             const destAsset = new StellarSdk.Asset(cartItemAsset_Code, cartItemAsset_Issuer);
-            const cheapestPath = stellarUtils.findCheapestPath(
-                publicKey, curSellerPubKey, selectedAsset, destAsset, cartItemAsset_Price
-            ).then(res => console.log(res))
-            return cheapestPath;
-            // console.log(cheapestPath);
             // TODO: Need help here
             // Promise.resolve(cheapestPath)
-        //     return new Promise((res, rej) => (cheapestPath).then(foundPath => {
-        //         if (!foundPath) return new Error('insufficient funds or cannot find a path between yours and the desired assets');
-        //         else return foundPath;
-        //   }));
+            const cheapestPath = stellarUtils.findCheapestPath(
+                publicKey, curSellerPubKey, selectedAsset, destAsset, cartItemAsset_Price
+            );
+            console.log(cheapestPath);
+            
+            return cheapestPath.then(foundPath => {
+                if (!foundPath) return new Error('insufficient funds or cannot find a path between yours and the desired assets');
+                else return foundPath;
+          });
         }
   });
-//   return Promise.all(paymentOps);
+//   return paymentOps;
+  return Promise.all(paymentOps);
 } 
  
 createTransactionOps(myCartItems, publicKey, myBalances, stellarUtils.AssetDict.MOBI, 0.015)
     // .then(operations => stellarUtils.createTransaction(publicKey, privateKey, operations))
-    // .then(res => console.log(res))
+    .then(res => console.log(res))
 
 
 // stellarUtils.createTransaction(pubKey, privKey, ...);

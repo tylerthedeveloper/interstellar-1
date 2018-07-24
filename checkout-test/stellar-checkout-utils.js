@@ -152,8 +152,9 @@ function findCheapestPath(sender, receiver, sendAsset, destAsset, destAmount) {
         .then(paths => {
             const _paths = JSON.parse(JSON.stringify(paths)).records;
             const { code, issuer } = sendAsset; 
-            const pathList = _paths.filter(path => (path.source_asset_code === code && 
-                                                    path.source_asset_issuer === issuer))
+            const pathList = _paths.filter(path => 
+                (path.source_asset_code === code && path.source_asset_issuer === issuer))
+            console.log('paths: \n' + JSON.stringify(paths));
             const cheapestPath = pathList.reduce((prev, curr) => (prev.source_amount < curr.source_amount ? prev : curr), []);
             if (cheapestPath) return createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, cheapestPath);
             throw Error('err: No path exists between the corresponding assets')
@@ -236,19 +237,19 @@ const mobiAssetOffer = StellarSdk.Operation.manageOffer({
     source: pubKey
 });
 
-const mobiAssetPmtOpt = StellarSdk.Operation.payment({
-    destination: pubKey2,
-    asset: mobiAsset,
-    amount: "1",
-    // source: pubKey
-});
-
 const mobiAssetPmtObj = {
     destination: pubKey2,
     asset: mobiAsset,
     amount: "1",
     source: pubKey
 };
+
+const mobiAssetPmtOp = StellarSdk.Operation.payment({
+    destination: pubKey2,
+    asset: mobiAsset,
+    amount: "1",
+    // source: pubKey
+});
 
 const eurtAssetOffer = StellarSdk.Operation.manageOffer({
     selling: nativeAsset,
@@ -305,7 +306,7 @@ const repoAssetPath = StellarSdk.Operation.pathPayment({
 // getStellarBalances(pubKey3).then(res => console.log(res))
 
 // createTransaction(pubKey, privKey, operations);
-// createTransaction(pubKey, privKey, mobiAssetPmtOpt);
+// createTransaction(pubKey, privKey, mobiAssetPmtOp);
 // createTransaction(pubKey3, privKey3, eurtAssetOffer);
 
 // checkForTrust(pubKey, mobiAsset).then(res => console.log(res)) // true
@@ -330,8 +331,13 @@ const repoAssetPath = StellarSdk.Operation.pathPayment({
 //     .then(pathPayment => createTransaction(pubKey, privKey, pathPayment))
 //     .catch(err => console.log(err))
 
-findCheapestPath(pubKey, pubKey3, mobiAsset, repoAsset, 3, 0.015)
-    .then(res => console.log(res))
+// findCheapestPath(pubKey, pubKey3, mobiAsset, repoAsset, 1, 0.015)
+    // .then(res => console.log(JSON.stringify(StellarSdk.xdr.TransactionResult.fromXDR(res))))
+// console.log(StellarSdk.xdr.XDRStruct(mobiAssetPmtOp));
+
+// server.paths(pubKey, pubKey3, repoAsset, 1)
+//     .call()
+//     .then(res => console.log(res))
 module.exports = {
     AssetDict,
     getStellarBalances,

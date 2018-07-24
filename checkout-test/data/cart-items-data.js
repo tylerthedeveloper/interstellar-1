@@ -32,16 +32,16 @@ const cartItems = [ // Array<CartItem>
     //     rating: 2,
     //     seller: 'GBG5JTXIOQEP2W3XJGQPYCJ7633KLFPA4SS5MB7FVOHIOWBXKEH2ZWBJ'
     // },
-    {
-        name: "CartItem 3",
-        fixedUSDAmount: 0,
-        acceptedAsset: { balance: 5, asset_type: "alpha-numeric-4", asset_code: "MOBI",
-            asset_issuer: 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH' 
-        },
-        description: "This is a product.",
-        rating: 2,
-        seller: 'GBPL65LCOZ35N26TJEL6SIELSWX4KXJGCRDYWB6CEDOILGR6KKTRHJG3'
-    },
+    // {
+    //     name: "CartItem 3",
+    //     fixedUSDAmount: 0,
+    //     acceptedAsset: { balance: 5, asset_type: "alpha-numeric-4", asset_code: "MOBI",
+    //         asset_issuer: 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH' 
+    //     },
+    //     description: "This is a product.",
+    //     rating: 2,
+    //     seller: 'GBPL65LCOZ35N26TJEL6SIELSWX4KXJGCRDYWB6CEDOILGR6KKTRHJG3'
+    // },
 ];
 
 module.exports = cartItems;
