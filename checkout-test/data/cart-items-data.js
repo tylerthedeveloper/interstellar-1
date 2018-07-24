@@ -10,10 +10,10 @@ const cartItems = [ // Array<CartItem>
         name: "CartItem 1",
         fixedUSDAmount: 0,
         acceptedAsset: { 
-            balance: 3, 
+            balance: 1, 
             asset_type: "alpha-numeric-4", 
             asset_code: "REPO",
-            asset_issuer: 'GDEGOXPCHXWFYY234D2YZSPEJ24BX42ESJNVHY5H7TWWQSYRN5ZKZE3N'
+            asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B'
         },
         description: "This is a product.",
         rating: 2,

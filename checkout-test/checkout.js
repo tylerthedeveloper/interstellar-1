@@ -115,7 +115,7 @@ function combineLikeAssets(cartItems) {
 // 4 loop through cart and create ops
 // could be optimized if: 
     // given selected asset from balances instead of looking it up
-    //
+    // TODO: add multiple accepted assets
 function createTransactionOps(myCartItems, publicKey, myBalances, selectedAsset, pmtBuffer) {
     // operation: <StellarSdk.Operation < payment | pathpayment> >
     const paymentOps = myCartItems.map(cartItem => {
@@ -148,24 +148,21 @@ function createTransactionOps(myCartItems, publicKey, myBalances, selectedAsset,
         else { // user doesnt have the asset so we try to find a path
             const destAsset = new StellarSdk.Asset(cartItemAsset_Code, cartItemAsset_Issuer);
             // TODO: Need help here
-            // Promise.resolve(cheapestPath)
             const cheapestPath = stellarUtils.findCheapestPath(
                 publicKey, curSellerPubKey, selectedAsset, destAsset, cartItemAsset_Price
-            );
-            console.log(cheapestPath);
-            
+            );            
             return cheapestPath.then(foundPath => {
+                // console.log(foundPath._attributes.body._value._attributes); 
                 if (!foundPath) return new Error('insufficient funds or cannot find a path between yours and the desired assets');
                 else return foundPath;
           });
         }
   });
-//   return paymentOps;
   return Promise.all(paymentOps);
 } 
  
 createTransactionOps(myCartItems, publicKey, myBalances, stellarUtils.AssetDict.MOBI, 0.015)
-    // .then(operations => stellarUtils.createTransaction(publicKey, privateKey, operations))
+    .then(operations => stellarUtils.createTransaction(publicKey, privateKey, operations))
     .then(res => console.log(res))
 
 
