@@ -9,7 +9,7 @@ import gql from "graphql-tag";
 import * as React from "react";
 import { MouseEvent } from "react";
 import { Mutation, Query } from "react-apollo";
-import { getCurrentUser } from "../../../../api/gql/auth";
+import getCurrentUser from "Query/GetCurrentUserId";
 
 /****  TYPES ******/
 import { GetCurrentCartStatus, GetCurrentUser } from "GQLTypes";

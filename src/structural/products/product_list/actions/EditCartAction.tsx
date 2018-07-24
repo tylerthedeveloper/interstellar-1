@@ -9,7 +9,7 @@ import gql from "graphql-tag";
 import * as numeral from "numeral";
 import * as React from "react";
 import { Mutation, MutationFn, Query } from "react-apollo";
-import { getCurrentUser } from "../../../../api/gql/auth";
+import getCurrentUser from "Query/GetCurrentUserId";
 
 /****  TYPES ******/
 import {

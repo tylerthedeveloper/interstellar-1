@@ -4,7 +4,7 @@ import { Mutation, Query } from "react-apollo";
 import {injectWithTypes} from "TypeUtil";
 
 import AccountStore from "Stores/stellar-account";
-import { logout } from "../../api/gql/auth";
+import logout from "Mutation/Logout";
 import NavBarComponent from "./Component";
 import gql from "graphql-tag";
 
