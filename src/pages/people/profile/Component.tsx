@@ -1,13 +1,12 @@
 import {
-    createStyles, Icon,
-    Tab,
-    Tabs, Theme, Typography, WithStyles, withStyles,
+    createStyles,
+ Theme, Typography, WithStyles, withStyles
 } from "@material-ui/core";
 import * as React from "react";
-import Dropzone from "react-dropzone";
 import Avatar from "Structural/avatar/Component";
 import ActionBar from "./action_bar/Component";
 import MainContent from "./ProfileContentComponent";
+import UploaderDialog from "./UploaderDialogComponent";
 
 /****  TYPES ******/
 interface IComponentProps extends WithStyles<typeof styles> {
@@ -20,28 +19,17 @@ interface IComponentProps extends WithStyles<typeof styles> {
 class Component extends React.PureComponent<IComponentProps> {
     public render() {
 
-        const {user: {id: userID, website, profilePicture, displayName, username}, classes, editable, profilePicUploadHandler} = this.props;
+        const {
+            user: {id: userID, website, profilePicture, displayName, username},
+            classes,
+            editable,
+        } = this.props;
 
         return (
             <div className={classes.container}>
                 <div className={classes.header}>
                     {editable ?
-                        <Dropzone
-                            accept={["image/jpeg", "image/png"] as any}
-                            className={classes.avatarChanger}
-                            onDrop={(acceptedFiles, rejectedFiles) => {
-                                profilePicUploadHandler(userID, acceptedFiles[0]);
-                            }}
-                        >
-                            <Avatar
-                                profilePicture={profilePicture}
-                                displayName={displayName}
-                                className={classes.avatar}
-                            />
-                            <Icon className={"material-icons"} classes={{root: classes.edit}}>
-                                edit
-                            </Icon>
-                        </Dropzone>
+                        <UploaderDialog {...this.props}/>
                         :
                         <Avatar
                             profilePicture={profilePicture}
@@ -92,6 +80,7 @@ const styles = (theme: Theme) => (createStyles({
         height: "150px",
         marginRight: "30px",
         cursor: "pointer",
+        position: "relative",
     },
     nameContainer: {
         display: "flex",
@@ -102,18 +91,7 @@ const styles = (theme: Theme) => (createStyles({
     },
     usernameDisplay: {
         marginLeft: "20px",
-    },
-
-    edit: {
-        position: "absolute",
-        right: "0",
-        bottom: "0",
-        borderRadius: "50%",
-        fontSize: "30px",
-        color: "white",
-        background: theme.palette.primary.main,
-        padding: "10px",
-    },
+    }
 }));
 
 /****  EXPORT ******/
