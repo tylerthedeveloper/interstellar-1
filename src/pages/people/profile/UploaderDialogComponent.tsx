@@ -10,7 +10,7 @@ import Avatar from "Structural/avatar/Component";
 interface IComponentProps extends WithStyles<typeof styles> {
     user: any;
     editable: boolean;
-    profilePicUploadHandler: ({}:{userID: string, file: any}) => void;
+    profilePicUploadHandler: (variables:{userID: string, file: any}) => void;
 }
 
 class UploaderDialog extends React.PureComponent<IComponentProps> {
