@@ -58,6 +58,7 @@ export const getCurrentUser =  gql`
             id
             profilePicture
             displayName
+            username
         }
     }
 `;

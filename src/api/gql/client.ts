@@ -5,8 +5,8 @@ import { ApolloLink } from "apollo-link";
 import { setContext } from "apollo-link-context";
 import {onError} from "apollo-link-error";
 import { HttpLink } from "apollo-link-http";
-const cache = new InMemoryCache();
 import { createUploadLink } from "apollo-upload-client";
+import { toIdValue } from "apollo-utilities";
 
 const authLink = new ApolloLink((operation, forward) => {
 
@@ -43,6 +43,18 @@ const authLink = new ApolloLink((operation, forward) => {
 
 });
 
+//todo figure out why TS keeps fucking me
+const cache: InMemoryCache = new InMemoryCache({
+    cacheRedirects: {
+        Query: {
+            productCategoryById: (_, args) =>
+                toIdValue(cache!.config!.dataIdFromObject!({__typename: "ProductCategory", id: args!.id!})),
+            userById: (_, args) =>
+                toIdValue(cache!.config!.dataIdFromObject!({__typename: "User", id: args!.id!})),
+        },
+    },
+});
+
 const client = new ApolloClient({
 
     // TODO need to move this to separate file
@@ -76,6 +88,7 @@ const client = new ApolloClient({
         }),
     ]),
     cache,
+
 });
 
 export default client;
