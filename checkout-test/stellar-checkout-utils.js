@@ -19,6 +19,15 @@ const eurtAsset = new StellarSdk.Asset( 'EURT', 'GAP5LETOV6YIE62YAM56STDANPRDO7Z
 const repoAsset = new StellarSdk.Asset( 'REPO', 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B');
 const cnyAsset = new StellarSdk.Asset( 'CNY', 'GAREELUB43IRHWEASCFBLKHURCGMHE5IF6XSE7EXDLACYHGRHM43RFOX');
 const futbolAsset = new StellarSdk.Asset( 'TFC', 'GDS3XDJAA4VY6MJYASIGSIMPHZ7AQNZ54RKLWT7MWCOU5YKYEVCNLVS3');
+
+const AssetDict = {
+    MOBI: new StellarSdk.Asset( 'MOBI', 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH'),
+    EURT: new StellarSdk.Asset( 'EURT', 'GAP5LETOV6YIE62YAM56STDANPRDO7ZFDBGSNHJQIYGGKSMOZAHOOS2S'),
+    REPO: new StellarSdk.Asset( 'REPO', 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B'),
+    CNY: new StellarSdk.Asset( 'CNY', 'GAREELUB43IRHWEASCFBLKHURCGMHE5IF6XSE7EXDLACYHGRHM43RFOX'),
+    TFC: new StellarSdk.Asset( 'TFC', 'GDS3XDJAA4VY6MJYASIGSIMPHZ7AQNZ54RKLWT7MWCOU5YKYEVCNLVS3')
+};
+
 // if we want to make our asset lol
 // const tycoin = new StellarSdk.Asset("Tycoin", "GDNZIMIWPMRQ3X3UNFF7A7XI26XILUP6QBFT6MX7B62GAKVO3ZWDWWUW");
 
@@ -30,12 +39,14 @@ const futbolAsset = new StellarSdk.Asset( 'TFC', 'GDS3XDJAA4VY6MJYASIGSIMPHZ7AQN
 // inputs: publicKey: string
 // returns: Array <Asset>
 // -------------------------------------------------------------------- //
-function getStellarBalances (publicKey) {
-  return server.loadAccount(publicKey)
+async function getStellarBalances (publicKey) {
+  return await new Promise(res => res(server.loadAccount(publicKey)))
       .then(account => account)
       .then(account => account.balances)
       .catch(err => console.log(err) )
 }
+
+// create operation --> use Op.type
 
 // -------------------------------------------------------------------- //
 // desc: create transaction given arbirary amount of arbitrary types of operations
@@ -55,7 +66,8 @@ function createTransaction(senderPub, senderPriv, operations) {
             return server.submitTransaction(transaction);
         })
         .then(transactionResult => transactionResult)
-        .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
+        .catch(err => console.error(err))
+        // .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
 }
 
 // todo: check for trust ...
@@ -66,8 +78,6 @@ function createTransaction(senderPub, senderPriv, operations) {
 // returns: boolean
 // -------------------------------------------------------------------- //
 function checkForTrust(receiverPub, asset) {
-    // const asset_code = asset.getCode();
-    // const asset_issuer = asset.getIssuer();
     const { code, issuer } = asset; 
     return getStellarBalances(receiverPub)
         .then(balances => balances.some(bal => (bal.asset_code === code && 
@@ -104,6 +114,32 @@ function changeTrust(pubkey, privkey, asset, trustOpType, limit = null) {
         // .catch(err => console.error(err))
 }
 
+// -------------------------------------------------------------------- //
+// desc: creates a pathPaymentOperation given all the necessary inputs from the transaction and the results of the found path
+// inputs: sender: string, receiver: string, sendAsset: Asset, destAsset: Asset, destAmount: string | num, 
+//          pathPaymentResult: PathPaymentResult, buffer: float (percentage)
+// returns: transactionResult
+// -------------------------------------------------------------------- //
+function createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, pathFoundResult, buffer = 0.015) {    
+    const _path = (pathFoundResult.length === 0) ? pathFoundResult : pathFoundResult.path.map(asset => {
+            if (asset.asset_type === 'native') return nativeAsset;
+            else return new StellarSdk.Asset(asset.asset_code, asset.asset_issuer);
+    });
+    console.log(_path);
+    const paddedAmtWithBuffer = ((1 + buffer) * pathFoundResult.source_amount).toFixed(7);
+    const res = {
+        source: sender,
+        sendAsset: sendAsset,
+        sendMax: new String(paddedAmtWithBuffer),
+        destination: receiver,
+        destAsset: destAsset,
+        destAmount: new String(destAmount),
+        path: _path,
+    };
+    // console.log(res)
+    return StellarSdk.Operation.pathPayment(res);
+}
+
 // Cheapest = lowest source_amount
 // -------------------------------------------------------------------- //
 // desc: finds the first path given the necessary inputs
@@ -118,8 +154,8 @@ function findCheapestPath(sender, receiver, sendAsset, destAsset, destAmount) {
             const { code, issuer } = sendAsset; 
             const pathList = _paths.filter(path => (path.source_asset_code === code && 
                                                     path.source_asset_issuer === issuer))
-            const cheapestPath = pathList.reduce((prev, curr) => (prev.source_amount < curr.source_amount ? prev : curr));
-            if (cheapestPath) return cheapestPath;
+            const cheapestPath = pathList.reduce((prev, curr) => (prev.source_amount < curr.source_amount ? prev : curr), []);
+            if (cheapestPath) return createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, cheapestPath);
             throw Error('err: No path exists between the corresponding assets')
         })
         .catch(err => console.error(err))
@@ -162,31 +198,6 @@ function findCheapestPaths(sender, receiver, destAsset, destAmount) {
         })
         .catch(err => console.error(err))
         // .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
-}
-
-// -------------------------------------------------------------------- //
-// desc: creates a pathPaymentOperation given all the necessary inputs from the transaction and the results of the found path
-// inputs: sender: string, receiver: string, sendAsset: Asset, destAsset: Asset, destAmount: string | num, 
-//          pathPaymentResult: PathPaymentResult, buffer: float (percentage)
-// returns: transactionResult
-// -------------------------------------------------------------------- //
-function createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, pathFoundResult, buffer = 0.015) {
-    const _path = pathFoundResult.path.map(asset => {
-        if (asset.asset_type === 'native') return nativeAsset;
-        else return new Asset(asset.asset_code, asset.asset_issuer);
-    });
-    const paddedAmtWithBuffer = ((1 + buffer) * pathFoundResult.source_amount).toFixed(7);
-    const res = {
-        source: sender,
-        sendAsset: sendAsset,
-        sendMax: new String(paddedAmtWithBuffer),
-        destination: receiver,
-        destAsset: destAsset,
-        destAmount: '1',
-        path: _path,
-    };
-    // console.log(res)
-    return StellarSdk.Operation.pathPayment(res);
 }
 
 
@@ -282,7 +293,7 @@ const repoAssetPath = StellarSdk.Operation.pathPayment({
 //         .then(res => console.log(res))
  
 // createTransaction(pubKey, privKey, mobiAssetPath).then(res => console.log(res))
-createTransaction(pubKey3, privKey3, repoAssetPath).then(res => console.log(res))
+// createTransaction(pubKey3, privKey3, repoAssetPath).then(res => console.log(res))
 
 
 //  ---- ---------------- //
@@ -319,150 +330,12 @@ createTransaction(pubKey3, privKey3, repoAssetPath).then(res => console.log(res)
 //     .then(pathPayment => createTransaction(pubKey, privKey, pathPayment))
 //     .catch(err => console.log(err))
 
-const paths = [ 
-    { source_asset_type: 'credit_alphanum4',
-    source_asset_code: 'MOBI',
-    source_asset_issuer: 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH',
-    source_amount: '8.7042980',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object], [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '0.4509999',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [] },
-    { source_asset_type: 'native',
-    source_amount: '701.2378000',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '2.5000000',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '22.1255000',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object] ] },
-    { source_asset_type: 'credit_alphanum4',
-    source_asset_code: 'MOBI',
-    source_asset_issuer: 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH',
-    source_amount: '2.0592672',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '2.2344994',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object], [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '9385.6398562',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object], [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '0.7576798',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object], [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '0.4929754',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object], [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '0.4533487',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object], [Object] ] },
-    
-    { source_asset_type: 'native',
-    source_amount: '0.9019998',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object], [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '24267.8865417',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object], [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '0.4784634',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object], [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '0.4546222',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object], [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '0.9804345',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object], [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '2.0085623',
-    destination_asset_type: 'credit_alphanum4',
-    destination_asset_code: 'REPO',
-    destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-    destination_amount: '1.0000000',
-    path: [ [Object], [Object] ] },
-    { source_asset_type: 'native',
-    source_amount: '11.4682831',
-    destination_asset_type: 'credit_alphanum4',
-destination_asset_code: 'REPO',
-destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-destination_amount: '1.0000000',
-path: [ [Object], [Object] ] },
-{ source_asset_type: 'native',
-source_amount: '15917.8865417',
-destination_asset_type: 'credit_alphanum4',
-destination_asset_code: 'REPO',
-destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-destination_amount: '1.0000000',
-path: [ [Object], [Object] ] },
-{ source_asset_type: 'native',
-source_amount: '0.4568722',
-destination_asset_type: 'credit_alphanum4',
-destination_asset_code: 'REPO',
-destination_asset_issuer: 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B',
-destination_amount: '1.0000000',
-path: [ [Object], [Object] ] } 
-];
+findCheapestPath(pubKey, pubKey3, mobiAsset, repoAsset, 3, 0.015)
+    .then(res => console.log(res))
+module.exports = {
+    AssetDict,
+    getStellarBalances,
+    createTransaction,
+    createPathPayment,
+    findCheapestPath
+}
