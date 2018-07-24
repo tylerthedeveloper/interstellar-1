@@ -10,7 +10,7 @@ import Avatar from "Structural/avatar/Component";
 interface IComponentProps extends WithStyles<typeof styles> {
     user: any;
     editable: boolean;
-    profilePicUploadHandler: (userID: string, file: any) => void;
+    profilePicUploadHandler: ({}:{userID: string, file: any}) => void;
 }
 
 class UploaderDialog extends React.PureComponent<IComponentProps> {
@@ -74,7 +74,7 @@ class UploaderDialog extends React.PureComponent<IComponentProps> {
                             className={classes.dropzone}
                             accept={["image/jpeg", "image/png"] as any}
                             onDrop={(acceptedFiles, rejectedFiles) => {
-                                profilePicUploadHandler(userID, acceptedFiles[0]);
+                                profilePicUploadHandler({userID, file: acceptedFiles[0]});
                             }}
                         >
                             <Typography variant={"headline"} align={"center"}>

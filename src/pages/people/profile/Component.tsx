@@ -12,8 +12,9 @@ import UploaderDialog from "./UploaderDialogComponent";
 interface IComponentProps extends WithStyles<typeof styles> {
     user: any;
     editable: boolean;
-    profilePicUploadHandler: (userID: string, file: any) => void;
+    profilePicUploadHandler: ({}:{userID: string, file: any}) => void;
 }
+
 
 /****  COMPONENT ******/
 class Component extends React.PureComponent<IComponentProps> {

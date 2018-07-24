@@ -1,22 +1,35 @@
-import gql from "graphql-tag";
 import * as React from "react";
+
+import GetAllUserInfoQuery from "Query/GetAllUserInfo";
+import GetCurrentUserIdQuery from "Query/GetCurrentUserId";
+import UpdateProfilePicMutation from "Mutation/UpdateProfilePic";
 import ProfileComponent from "./Component";
 
 /***        Types       ***/
-import { ObservableQuery } from "apollo-client";
-import ApolloClient from "apollo-client/ApolloClient";
+import { ApolloClient, ObservableQuery } from "apollo-client";
 import { withApollo, WithApolloClient } from "react-apollo";
-import UIStore from "Stores/ui";
 import { injectWithTypes } from "TypeUtil";
+import UIStore from "Stores/ui";
 
-interface IComponentProps {
+interface IContainerProps {
     userID: string;
     ui: UIStore;
 }
-type IComponentPropsWithApollo = WithApolloClient<IComponentProps>;
-class Profile extends React.PureComponent<IComponentPropsWithApollo> {
+type IContainerPropsWithApollo = WithApolloClient<IContainerProps>;
 
-    private currentUserQuery: ObservableQuery<any>;
+type UpdateProfilePicMutationHandlerVars = {
+    userID: string
+    file: File
+}
+
+/***        Component       ***/
+class Container extends React.PureComponent<IContainerPropsWithApollo> {
+
+    private subscriptions: ZenObservable.Subscription[];
+    private GetAllUserInfoQuery: ObservableQuery<any>;
+    private GetCurrentUserIdQuery: ObservableQuery<any>;
+    private client: ApolloClient<any>;
+    private ui: UIStore;
     public state: {
         currentUserID?: string;
         user: {
@@ -25,61 +38,34 @@ class Profile extends React.PureComponent<IComponentPropsWithApollo> {
             profilePicture?: string | null,
         };
     };
-    private subscriptions: ZenObservable.Subscription[];
-    private client: ApolloClient<any>;
-    private userInfoQuery: ObservableQuery<any>;
-    private ui: UIStore;
 
-    constructor(props: IComponentPropsWithApollo) {
+    constructor(props: IContainerPropsWithApollo) {
         super(props);
-        const {client, userID, ui} = props;
+        const { client, userID, ui} = props;
         this.client = client;
-        this.currentUserQuery = client.watchQuery({
-            query: currentUserQuery,
+        this.ui = ui;
+
+        /*****  Set Up Subscriptions    *****/
+        this.GetAllUserInfoQuery = client.watchQuery({
+            query: GetAllUserInfoQuery,
+            variables: { userID, },
         });
-        this.userInfoQuery = client.watchQuery({
-            query: userInfoQuery,
-            variables: {userID},
+        this.GetCurrentUserIdQuery = client.watchQuery({
+            query: GetCurrentUserIdQuery,
         });
 
+        /****  Initial State    *****/
         this.state = {
             user: {id: userID},
-        };
-
-        this.ui = ui;
+        }
     }
 
-    public componentDidMount() {
-        this.subscriptions = [
-            this.currentUserQuery
-                .subscribe({
-                    next: (res) => {
-                        if (res.data && res.data.currentUser && res.data.currentUser.id) {
-                            this.setState({currentUserID: res.data.currentUser.id});
-                        } else {
-                            this.setState({currentUserID: null});
-                        }
-                    },
-                }),
+    /*****  Mutation Handlers    *****/
+    public UpdateProfilePicMutationHandler( { 
+        userID,
+        file
+    }: UpdateProfilePicMutationHandlerVars){
 
-            this.userInfoQuery
-                .subscribe({
-                    next: (res) => {
-                        if (res.data && res.data.userById) {
-                            this.setState({
-                                user: {...this.state.user, ...res.data.userById},
-                            });
-                        }
-                    },
-                }),
-        ];
-    }
-
-    public componentWillUnmount() {
-        this.subscriptions.forEach((sub) => sub.unsubscribe());
-    }
-
-    private uploadProfilePic = (userID: string, file: File) => {
         const url = URL.createObjectURL(file);
         const img = new Image();
         img.src = url;
@@ -89,70 +75,70 @@ class Profile extends React.PureComponent<IComponentPropsWithApollo> {
             const size = file.size;
 
             if (size < 50000) {
-                this.ui.displayNotification("File must be larger than 50kB!", {type: "error"});
+                this.ui.displayNotification("File must be larger than 50kB!", { type: "error" });
                 return;
             } else if (size > 2000000) {
-                this.ui.displayNotification("File must be smaller than 2MB!", {type: "error"});
+                this.ui.displayNotification("File must be smaller than 2MB!", { type: "error" });
                 return;
             } else if (width < height * .75 || width > height * 1.25) {
-                this.ui.displayNotification("File must be roughly square!", {type: "error"});
+                this.ui.displayNotification("File must be roughly square!", { type: "error" });
                 return;
             }
 
-            this.ui.displayNotification("Photo uploading...", {keepOpen: true, type: "loading"});
+            this.ui.displayNotification("Photo uploading...", { keepOpen: true, type: "loading" });
+
 
             this.client.mutate({
-                mutation: profilePicMutation,
-                variables:  {userID, file},
+                mutation: UpdateProfilePicMutation,
+                variables: { userID, file, },
             }).then(() => {
                 this.ui.displayNotification("Upload complete!");
             }).catch((err) => {
-                console.log(err);
+                //TODO What to do on mutation error?
             });
         };
     }
 
+    /*****  Lifecycle Handlers    *****/
+    public componentDidMount() {
+        this.subscriptions = [
+            this.GetAllUserInfoQuery.subscribe({
+                next: (res) => {
+                    if (res.data && res.data.currentUser && res.data.currentUser.id) {
+                        this.setState({currentUserID: res.data.currentUser.id});
+                    } else {
+                        this.setState({currentUserID: null});
+                    }
+                }
+            }),
+            this.GetCurrentUserIdQuery.subscribe({
+                next: (res) => {
+                    if (res.data && res.data.userById) {
+                        this.setState({
+                            user: {...this.state.user, ...res.data.userById},
+                        });
+                    }
+                }
+            }),
+        ];
+    }
+
+    public componentWillUnmount() {
+        this.subscriptions.forEach((sub) => sub.unsubscribe());
+    }
+
+    /*****      Render          *****/
     public render() {
         const {currentUserID, user} = this.state;
+
         return (
             <ProfileComponent
                 user={user}
                 editable={Boolean(currentUserID && user.id === currentUserID)}
-                profilePicUploadHandler={this.uploadProfilePic}
+                profilePicUploadHandler={this.UpdateProfilePicMutationHandler}
             />
         );
     }
 }
 
-const profilePicMutation = gql`
-    mutation UpdateProfilePic($userID: UUID!, $file: Upload!) {
-        updateUserById(input:{id: $userID, userPatch: {profilePicture: $file}}){
-            user {
-                id
-                profilePicture
-            }
-        }
-    }
-`;
-
-const currentUserQuery = gql`
-    query {
-        currentUser {
-            id
-        }
-    }
-`;
-
-const userInfoQuery = gql`
-    query GetUserInfo($userID: UUID!) {
-        userById(id: $userID) {
-            id
-            website
-            profilePicture
-            displayName
-            username
-        }
-    }
-`;
-
-export default injectWithTypes(["ui"], withApollo(Profile));
+export default injectWithTypes(["ui"], withApollo(Container));
