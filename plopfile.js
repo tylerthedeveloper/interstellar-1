@@ -27,7 +27,7 @@ module.exports = function (plop) {
         }],
         actions: [{
             type: 'add',
-            path: 'src/{{name}}.tsx',
+            path: process.cwd() + '/{{name}}.tsx',
             templateFile: 'plop-templates/StyledComponent.hbs'
         }]
     });
