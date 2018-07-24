@@ -1,18 +1,46 @@
-// const cartItem = {
-//     name: string,
-//     price: number,
-//     description: string,
-//     rating: number
-// }
+const CartItem = {
+    name: String,
+    price: Number,
+    description: String,
+    rating: Number
+}
 
-const cartItems = [
+const cartItems = [ // Array<CartItem>
     {
         name: "CartItem 1",
-        // price: 20,
-        fixedUSDAmount: 20,
-        acceptedAsset: { balance: 0, asset_type: "alpha-numeric-4", asset_code: "BTC" },
+        fixedUSDAmount: 0,
+        acceptedAsset: { 
+            balance: 3, 
+            asset_type: "alpha-numeric-4", 
+            asset_code: "REPO",
+            asset_issuer: 'GDEGOXPCHXWFYY234D2YZSPEJ24BX42ESJNVHY5H7TWWQSYRN5ZKZE3N'
+        },
         description: "This is a product.",
-        rating: 2
+        rating: 2,
+        seller: 'GBG5JTXIOQEP2W3XJGQPYCJ7633KLFPA4SS5MB7FVOHIOWBXKEH2ZWBJ'
+    },
+    // {
+    //     name: "CartItem 2",
+    //     fixedUSDAmount: 20,
+    //     acceptedAsset: { 
+    //         balance: 0, 
+    //         asset_type: "alpha-numeric-4", 
+    //         asset_code: "BTC",
+    //         asset_issuer: 'GATEMHCCKCY67ZUCKTROYN24ZYT5GK4EQZ65JJLDHKHRUZI3EUEKMTCH'
+    //     },
+    //     description: "This is a product.",
+    //     rating: 2,
+    //     seller: 'GBG5JTXIOQEP2W3XJGQPYCJ7633KLFPA4SS5MB7FVOHIOWBXKEH2ZWBJ'
+    // },
+    {
+        name: "CartItem 3",
+        fixedUSDAmount: 0,
+        acceptedAsset: { balance: 5, asset_type: "alpha-numeric-4", asset_code: "MOBI",
+            asset_issuer: 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH' 
+        },
+        description: "This is a product.",
+        rating: 2,
+        seller: 'GBPL65LCOZ35N26TJEL6SIELSWX4KXJGCRDYWB6CEDOILGR6KKTRHJG3'
     },
 ];
 

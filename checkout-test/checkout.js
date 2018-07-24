@@ -1,12 +1,13 @@
 // todo!!!!
 const StellarSdk = require('stellar-sdk');
 StellarSdk.Network.useTestNetwork();
-const server = new StellarSdk.Server('https://horizon-testnet.stellar.org');
-const cmcAPI = require('./testGetUsd.js').default;
-const axios = require('axios');
+const server = new StellarSdk.Server('https://horizon.stellar.org');
+const stellarUtils = require('./stellar-checkout-utils.js');
+const usdUtils = require('./usd-resolvers.js');
 
 // 1. Get items in cart: graphql cart query
-const _cartItems = require('./cart-items-data');
+// Array<CartItem>
+const _cartItems = require('./data/cart-items-data'); 
 
 function getCartItems() {
      return _cartItems; 
@@ -14,153 +15,161 @@ function getCartItems() {
 
 const myCartItems = getCartItems()
 
+
 // 2 get stellar balances
-const pubKey = "GCC4KURTZ6NAYFU6UR65G6VWAEQWRAJDHWCGEDDGZHRYCMLYNV4FCF25";
-
-// get balances from stellar
+// get balances from stellar (horizon = "https://horizon.stellar.org/accounts/")
 // Array < { asset_type: string, balance: string, limit: string, asset_code: string, asset_issuer: string } >
-// can also use horizon
-    // const horizon = "https://horizon-testnet.stellar.org/accounts/";
-async function getStellarBalances (publicKey) {
-  return await server.loadAccount(publicKey)
-      .then(account => account)
-      .then(account => account.balances)
-    // return await axios.get(horizon + publicKey)
-    //     .then((response) => response.data.balances)
-    //   .then(myBalances => console.log(myBalances));
+
+const publicKey = "GDUZVNG4E7AJTCHBNHOQRXUSED7RSVXBZ2NZRFZTZ5TKRGDG5GLV6MAF";
+const privateKey = 'SCMUH4YUWKAN3GV33T5BD32A2FULPGHC4BJ7KI625BLCJGCVKZV3BHRW';
+
+// const myBalances = stellarUtils.getStellarBalances(pubKey);
+// myBalances.then(res => console.log(res));
+
+const myBalances = [ 
+    { 
+        balance: '15.5472154',
+        limit: '922337203685.4775807',
+        asset_type: 'credit_alphanum4',
+        asset_code: 'MOBI',
+        asset_issuer: 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH' 
+    },
+    { balance: '5.2936506', asset_type: 'native' } 
+];
+
+
+// 3 handle conversions
+// 3.1, get USD current rates: this is for aggregate calculations to see if can cover entire cart based on USD total 
+
+// pull from local for testing
+const usdPriceDict = require('./data/temp-price-dict.js').usdPriceDict;
+// console.log(usdPriceDict);
+
+// const usdPriceDict = usdUtils.getAverageUsdPrices();
+
+// mock the async
+// setTimeout(() => {
+    // usdPriceDict.then(res => console.log(res));
+// }, 1500);
+
+
+// TODO: combine 3.2 and 3.3 into one iteration
+// 3.2, update cart items so every item has a { usd, asset.balance } pair
+    
+// when they DONT list usd price
+function convertToUsd(asset_code, amount, usdPriceDict) {
+    const usdPrice = usdPriceDict[asset_code].price_USD;
+    return (usdPrice * amount);
 }
 
-// const myBalances = getStellarBalances(pubKey);
-
-// 2.1 combineLikeAssets
-// 2.1.1 this is For UI
-// 2.1.2 this for aggregate calculations to see if can cover entire cart based on USD total ... 
-
-// 2.2:
-// need to sort by preference ...
-// need to decide structure: array or dict
-    // dict preferred for look up, but need to add order field on it
-
-// 3 handle usd conversions of items in cart
-//      todo: optimize, load into cache the request of listings and tickers rather than call every time
-//      todo: make a liust of most popular coins and have those ID's ready in a text file 
-
-// 3.1 get usd equivalent given current ticker price dict and item with associated asset preference
-function getUsdEquivalentOfAsset (usdPriceDict, item) {
-    const asset_type = item.acceptedAsset.asset_code;
-    const fixedUSDAmount = item.fixedUSDAmount;
-    const tickerPrice = usdPriceDict.find(ticker => ticker['symbol'] === asset_type).price;
-    if (tickerPrice) return (fixedUSDAmount / tickerPrice); // careful with precision
-    else return NaN;
+// when they DO list usd price
+function convertToAsset(asset_code, fixedUsdPrice, usdPriceDict) {
+    const usdPrice = usdPriceDict[asset_code].price_USD;
+    return (fixedUsdPrice / usdPrice);
 }
 
-// 3.2 check / set trust for asset
-function checkTrustForAsset (balances, asset_code, asset_issuer) {
-    return balances.some(balance => {
-        return (balance.asset_code === asset_code &&
-                balance.asset_issuer === asset_issuer);
-        }
-    );
-}
-getStellarBalances(pubKey).then(myBalances => 
-    console.log(checkTrustForAsset(myBalances, 'Tycoin', 'GDNZIMIWPMRQ3X3UNFF7A7XI26XILUP6QBFT6MX7B62GAKVO3ZWDWWUW')));
-
-
-// TODO: INEFFICIENT: repeat loop over items and duplicate conditional checks
-    // this is because i want to group promises together for lookup and because 
-    // dont currently have a hard-coded list of accepted assets, so need to look up every time.
-    // Will be fixed with the above.
-function  getCheckUsdValues (myCartItems) {
-    const getUsdValuesList = [];
-    for (const item of myCartItems)
-    {
-        const asset = item.acceptedAsset;
-        if (item.fixedUSDAmount && (!asset.balance || asset.balance == 0)) {
-            getUsdValuesList.push(asset.asset_code);
-        }``
-    }
-    cmcAPI.runner(getUsdValuesList).then(usdPriceDict => {
-        for (let index = 0; index < myCartItems.length; index++)
-        {
-            const item = myCartItems[index];
-            const asset = item.acceptedAsset;
-            if (item.fixedUSDAmount && (!asset.balance || asset.balance == 0)) {
-                const currentPrice = getUsdEquivalentOfAsset(usdPriceDict, item);
-                const newAsset = asset;
-                newAsset.balance = currentPrice;
-                item.acceptedAsset = newAsset;
-            }
-        }
-        console.log(myCartItems[0].acceptedAsset)
+function setPriceAmounts(usdPriceDict, cartItems) {
+    cartItems.map(cartItem => {
+        const usdValue = cartItem.fixedUSDAmount;
+        const asset_code = cartItem.acceptedAsset.asset_code;
+        const balance = cartItem.acceptedAsset.balance;
+        if (usdValue) cartItem.acceptedAsset.balance = convertToAsset(asset_code, usdValue, usdPriceDict);
+        else cartItem.fixedUSDAmount = convertToUsd(asset_code, balance, usdPriceDict);
     });
 }
+// test //
+// setPriceAmounts(usdPriceDict, myCartItems);
+// console.log(myCartItems);
 
-// getCheckUsdValues(myCartItems)
+// 3.3 get totals { usd, asset.balance }
+function combineLikeAssets(cartItems) {
+    const assetDict = {};
+    cartItems.map(cartItem => {
+        const savedUsdValue = assetDict['USD'];
+        const curUsdValue = cartItem.fixedUSDAmount;
+        if (savedUsdValue) assetDict['USD'] += curUsdValue;
+        else assetDict['USD'] = curUsdValue;
+
+        // console.log(cartItem)
+        const code = cartItem.acceptedAsset.asset_code;
+        const savedValue = assetDict[code];
+        const curValue = +cartItem.acceptedAsset.balance.toFixed(7);
+        if (savedValue) assetDict[code] += curValue;
+        else assetDict[code] = curValue;
+    });
+    return assetDict;
+}
+
+// test //
+// console.log();
+// console.log(combineLikeAssets(myCartItems));
 
 
-// // 4 loop through cart and create ops
-// // var transaction = new StellarSdk.TransactionBuilder(source)
-// createTransactionOps = (myCartItems) => {
-//   // if cant hold make each iteration of same structure OR just add on the fly ...
-//   const tb = new StellarSdk.TransactionBuilder(pub);
-//   const paymentOps = new Array(); // where operation is one of: payment, or pathpayment <StellarSdk.Operation>
-//   for (const cartItem in myCartItems)
-//   {
-//       const curSellerPubKey = cartItem.sellerPubKey;
-//       const acceptedAsset = cartItem.acceptedAsset;
-//       const cartItemAssetCode = acceptedAsset.asset_code;
-//       const cartItemAssetPrice = acceptedAsset.assetPrice;
-//       // iterate over balances to pay off item
-//       for (const asset in myBalances)
-//       {
-//           const curAssetBalance = AssetBalances[asset.asset_code].balance;
-//           // break inner for-loop if an item has been paid off
-//           if (cartItemAssetPrice == 0)
-//               break;
-//           // skip asset in inner for-loop if an asset has been depleted
-//           if (asset.balance == 0)
-//               continue;
-//           // user has the asset
-//           if (asset in AssetBalances) {
-//               cartItemAssetPrice -= curAssetBalance; // look up in dict
-//               const payOp = { //: <StellarSdk.Operation.payment> = {
-//                   destination: curSellerPubKey,
-//                   asset: asset.asset_type, // StellarSdk.Asset.native(), or check isNative...
-//                   amount: curAssetBalance
-//               };
-//               PaymentOps.add(new StellarSdk.Operation.payment(payOp));
-//               // if cant add dynamically to transactionBuilder just keep a list of ops or op-like dict objects
-//           }
-//           // user doesnt have the asset so we try to find a path
-//           // findPathPayment(cartItemAsset, assetToUse);
-//           const paymentPath = server.paths(curUserPubKey, sellerPubKey, acceptedAsset, curAssetBalance);
-//           // cant find payment path, but may be more assets to use instead
-//           if (!paymentPath) {
-//               continue;
-//           }
-//           else {
-//               const payPathOp = {
-//                   sendAsset: AssetBalances[cartItemAssetCode],
-//                   sendMax: /* calcSendMax() */ "1000", // maybe some threshold percentage
-//                   destination: curSellerPubKey,
-//                   destAsset: cartItem.acceptedAsset,
-//                   destAmount: curAssetBalance,
-//                   path: pathArray,
-//               };
-//               PaymentOps.add(new StellarSdk.Operation.pathPayment(payPathOp));
-//           }
-//       }
-//       // see error
-//       if (cartItemAssetPrice > 0) {
-//           return new Error('insufficient funds or cannot find a path between yours and the desired assets');
-//       }
-//   }
-//   return paymentOps;
-// }
-// // 5 build And Submit Transaction
-// buildAndSubmitTransaction = (/* transaction or ops list */ /* KeyPair */) => {
-//   // transaction.add(ops)
-//   // transaction.sign(KeyPair);
-//   // transaction.build();
-//   // return server.submitTransaction(transaction);
-// }
+// 3.4:
+// need to sort by preference for asset
+// need to be able to select on the fly
+// this will probably be a UI select and a simple lookup, i.e.
+// (selectedAsset) => balances.find(balance => balance.asset_code == selectedAsset.asset_code)
+
+
+// 4 loop through cart and create ops
+// could be optimized if: 
+    // given selected asset from balances instead of looking it up
+    //
+function createTransactionOps(myCartItems, publicKey, myBalances, selectedAsset, pmtBuffer) {
+    // operation: <StellarSdk.Operation < payment | pathpayment> >
+    const paymentOps = myCartItems.map(cartItem => {
+        const { 
+            seller: curSellerPubKey,
+            acceptedAsset: {
+                    asset_code: cartItemAsset_Code,
+                    balance: cartItemAsset_Price,
+                    asset_issuer: cartItemAsset_Issuer
+            }
+        } = cartItem;
+        // console.log(curSellerPubKey, acceptedAsset);
+        // console.log(cartItemAsset_Code, cartItemAsset_Price, cartItemAsset_Issuer);
+        const { 
+            code: selectedAssetCode, 
+            issuer: selectedAssetIssuer 
+        } = selectedAsset;
+        const { balance: balanceForAsset }  = myBalances.find(bal => (
+                        bal.asset_code === selectedAssetCode && 
+                        bal.asset_issuer === selectedAssetIssuer));
+        
+        // TODO: Check for stellar lumens min thresh IF Lumens
+        if (cartItemAsset_Code === selectedAssetCode && 
+            cartItemAsset_Issuer === selectedAssetIssuer) { // check if you have the asset
+                if (balanceForAsset > cartItemAsset_Price) //check if you have enough
+                    return StellarSdk.Operation.payment({ 
+                        destination: curSellerPubKey,
+                        asset: selectedAsset, 
+                        amount: cartItemAsset_Price.toFixed(7)
+                    });
+        }
+        else { // user doesnt have the asset so we try to find a path
+            const destAsset = new StellarSdk.Asset(cartItemAsset_Code, cartItemAsset_Issuer);
+            const cheapestPath = stellarUtils.findCheapestPath(
+                publicKey, curSellerPubKey, selectedAsset, destAsset, cartItemAsset_Price
+            ).then(res => console.log(res))
+            return cheapestPath;
+            // console.log(cheapestPath);
+            // TODO: Need help here
+            // Promise.resolve(cheapestPath)
+        //     return new Promise((res, rej) => (cheapestPath).then(foundPath => {
+        //         if (!foundPath) return new Error('insufficient funds or cannot find a path between yours and the desired assets');
+        //         else return foundPath;
+        //   }));
+        }
+  });
+//   return Promise.all(paymentOps);
+} 
+ 
+createTransactionOps(myCartItems, publicKey, myBalances, stellarUtils.AssetDict.MOBI, 0.015)
+    // .then(operations => stellarUtils.createTransaction(publicKey, privateKey, operations))
+    // .then(res => console.log(res))
+
+
+// stellarUtils.createTransaction(pubKey, privKey, ...);
+// 5 build And Submit Transaction
+// const tb = new StellarSdk.TransactionBuilder(publicKey);

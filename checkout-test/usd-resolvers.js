@@ -54,8 +54,8 @@ function load_StellarTermPrices() {
         .then(assets => assets)
         .catch(err => console.log(err))
 }
-// todo:
-function averageUsdPrices() {
+
+async function getAverageUsdPrices() {
     const cmc = load_CoinMarketCapPrices();
     const st = load_StellarTermPrices();
     return axios.all([cmc, st])
@@ -82,13 +82,8 @@ function averageUsdPrices() {
                     assets[key].price_USD = savedPrice.reduce((a, b) => (a + b)) / len;
                 }
             })
-            // console.log(assets);
             return assets;
         }))
-    // console.log(cmc);
-    // console.log(dump);
-    // console.log(st);
-    return; // avg of 2 when code exists in both
 }
 
 //      //
@@ -96,7 +91,10 @@ function averageUsdPrices() {
 //      //
 // const assetSymbols = ["BTC", "ETH"];
 
-averageUsdPrices().then(res => console.log(res))
 // load_CoinMarketCapPrices().then(res => console.log(res))
+// load_StellarTermPrices().then(res => console.log(res))
+// getAverageUsdPrices().then(res => console.log(res))
+
 module.exports = {
+    getAverageUsdPrices
 }
