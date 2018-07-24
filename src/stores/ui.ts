@@ -31,20 +31,37 @@ class UIStore {
 
     @observable public notificationOpen = false;
     @observable public notificationMessage: string | null = null;
+    @observable public notificationType: "error" | "loading" | "ok";
     private notificationTimeout: any;
 
-    @action.bound public displayNotification(notification: string, keepOpen?: boolean) {
+    @action.bound public displayNotification(notification: string, options: {
+        keepOpen?: boolean;
+        type?: "error" | "loading" | "ok";
+    } = {}) {
+
+        // message logic
+        this.notificationMessage = notification;
+
+        // timeout logic
         clearTimeout(this.notificationTimeout);
         this.notificationOpen = true;
-        this.notificationMessage = notification;
-        if (!keepOpen) {
+        if (!options.keepOpen) {
             this.notificationTimeout = setTimeout(this.closeNotification, 2000);
         }
+
+        // display logic
+        if (options.type) {
+            this.notificationType = options.type;
+        }else{
+            this.notificationType = "ok";
+        }
+
     }
 
     @action.bound public closeNotification() {
         this.notificationOpen = false;
         this.notificationMessage = null;
+        //this.notificationType = "ok";
     }
 
 }

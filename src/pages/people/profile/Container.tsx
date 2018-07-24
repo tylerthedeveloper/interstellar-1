@@ -89,17 +89,17 @@ class Profile extends React.PureComponent<IComponentPropsWithApollo> {
             const size = file.size;
 
             if (size < 50000) {
-                console.log("File must be larger than 50kB");
+                this.ui.displayNotification("File must be larger than 50kB!", {type: "error"});
                 return;
             } else if (size > 2000000) {
-                console.log("File must be smaller than 2MB");
+                this.ui.displayNotification("File must be smaller than 2MB!", {type: "error"});
                 return;
             } else if (width < height * .75 || width > height * 1.25) {
-                console.log("File must be roughly square");
+                this.ui.displayNotification("File must be roughly square!", {type: "error"});
                 return;
             }
 
-            this.ui.displayNotification("Photo uploading...", true);
+            this.ui.displayNotification("Photo uploading...", {keepOpen: true, type: "loading"});
 
             this.client.mutate({
                 mutation: profilePicMutation,
