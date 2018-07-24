@@ -1,0 +1,132 @@
+import * as React from "react";
+
+{{#each queries}}
+import {{name}}Query from "Query/{{name}}";
+{{/each}}
+{{#each mutations}}
+import {{name}}Mutation from "Mutation/{{name}}";
+{{/each}}
+
+
+/***        Types       ***/
+{{#if queries}}
+import { ApolloClient, ObservableQuery } from "apollo-client";
+{{else}}
+import { ApolloClient } from "apollo-client";
+{{/if}}
+import { withApollo, WithApolloClient } from "react-apollo";
+
+interface I{{name}}Props {}
+type I{{name}}PropsWithApollo = WithApolloClient<I{{name}}Props>;
+
+{{#each mutations}}
+{{#if vars}}
+type {{name}}MutationHandlerVars = {
+    {{#each vars}}
+    {{name}}{{#if required}}: {{type}}{{else}}?: {{type}} | null{{/if}}
+    {{/each}}
+}
+{{/if}}
+{{/each}}
+
+/***        Component       ***/
+class {{name}} extends React.PureComponent<I{{name}}PropsWithApollo> {
+
+   {{#if queries}}
+    private subscriptions: ZenObservable.Subscription[];
+   {{/if}}
+    {{#each queries}}
+    private {{this.name}}Query: ObservableQuery<any>;
+    {{/each}}
+    private client: ApolloClient<any>;
+    public state: {
+
+    };
+
+    constructor(props: I{{name}}PropsWithApollo) {
+        super(props);
+        const { client, } = props;
+        this.client = client;
+
+        {{#if queries}}
+        /*****  Set Up Subscriptions    *****/
+        {{/if}}
+        {{#each queries}}
+        this.{{this.name}}Query = client.watchQuery({
+            query: {{this.name}}Query,
+            {{#if vars}}
+            variables: { {{#each vars}}{{name}},{{/each}} },
+            {{/if}}
+        });
+        {{/each}}
+
+        /****  Initial State    *****/
+        this.state = {
+
+        }
+    }
+
+    {{#if mutations}}
+    /*****  Mutation Handlers    *****/
+    {{/if}}
+    {{#each mutations}}
+    public {{name}}MutationHandler({{#if vars}} { {{else}} ){ {{/if}}
+    {{#if vars}}
+        {{#each vars}}
+        {{name}},
+        {{/each}}
+    }: {{name}}MutationHandlerVars){
+    {{/if}}
+
+        //TODO Add Local Validation
+
+        this.client.mutate({
+            mutation: {{name}}Mutation,
+            {{#if vars}}
+            variables: { {{#each vars}}{{name}},{{/each}} },
+            {{/if}}
+        }).then(() => {
+            //TODO What to do on mutation succss?
+
+        }).catch((err) => {
+            //TODO What to do on mutation error?
+        });
+    }
+    {{/each}}
+
+
+
+    /*****  Lifecycle Handlers    *****/
+    public componentDidMount() {
+        {{#if queries}}
+        this.subscriptions = [
+        {{#each queries}}
+            this.{{this.name}}Query.subscribe({
+                next: (res) => {
+                    if(res.data){
+                        //TODO fill in here
+                    }
+                }
+            }),
+          {{/each}}
+        ];
+        {{/if}}
+    }
+
+    public componentWillUnmount() {
+        {{#if queries}}
+        this.subscriptions.forEach((sub) => sub.unsubscribe());
+        {{/if}}
+    }
+
+    /*****      Render          *****/
+    public render() {
+        const {} = this.state;
+
+        return (
+
+        );
+    }
+}
+
+export default withApollo({{name}});

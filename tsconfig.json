@@ -19,7 +19,9 @@
       "Structural/*": ["src/structural/*"],
       "GQLTypes": ["src/types/gqlTypes.ts"],
       "TypeUtil": ["src/types/util.ts"],
-      "Types/*": ["src/types/*"]
+      "Types/*": ["src/types/*"],
+      "Query/*": ["src/api/gql/queries/*"],
+      "Mutation/*": ["src/api/gql/mutations/*"]
     },
     "baseUrl": "./"
   },

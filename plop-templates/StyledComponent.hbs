@@ -1,0 +1,45 @@
+import { createStyles, Theme, WithStyles, withStyles } from "@material-ui/core";
+import * as React from "react";
+
+
+/****  TYPES ******/
+interface I{{name}}Props extends WithStyles<typeof styles> {}
+
+
+/****  COMPONENT ******/
+class {{name}} extends React.PureComponent<I{{name}}Props> {
+
+    {{#if state}}
+    public state: {
+
+    }
+
+
+    constructor(props: I{{name}}Props){
+        super(props);
+
+
+        this.state = {
+
+        }
+
+    }
+    {{/if}}
+
+    public render() {
+
+        const {} = this.props;
+
+        return (
+
+        );
+    }
+}
+
+/****  STYLES ******/
+const styles = (theme: Theme) => (createStyles({
+
+}));
+
+/****  EXPORT ******/
+export default withStyles(styles)({{name}});

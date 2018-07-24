@@ -34,7 +34,9 @@ module.exports = {
             Structural: path.resolve(__dirname, '../src/structural/'),
             GQLTypes: path.resolve(__dirname, '../src/types/gqlTypes'),
             Types: path.resolve(__dirname, '../src/types/'),
-            TypeUtil: path.resolve(__dirname, '../src/types/util')
+            TypeUtil: path.resolve(__dirname, '../src/types/util'),
+            Query: path.resolve(__dirname, '../src/api/gql/queries'),
+            Mutation: path.resolve(__dirname, '../src/api/gql/mutations')
         }
     },
     devtool: 'source-map',
