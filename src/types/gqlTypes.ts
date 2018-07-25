@@ -73,6 +73,7 @@ export interface Product extends Node {
   name: string; 
   usdCost: BigFloat; 
   description?: string | null; 
+  shortDescription?: string | null; 
   userBySellerId?: User | null; /** Reads a single `User` that is related to this `Product`. */
   productCategoryByCategory?: ProductCategory | null; /** Reads a single `ProductCategory` that is related to this `Product`. */
   carts: CartsConnection; /** Reads and enables pagination through a set of `Cart`. */
@@ -324,6 +325,7 @@ export interface ProductCondition {
   name?: string | null; /** Checks for equality with the object’s `name` field. */
   usdCost?: BigFloat | null; /** Checks for equality with the object’s `usdCost` field. */
   description?: string | null; /** Checks for equality with the object’s `description` field. */
+  shortDescription?: string | null; /** Checks for equality with the object’s `shortDescription` field. */
 }
 /** A condition to be used against `ProductCategory` object types. All fields are tested for equality and combined with a logical ‘and.’ */
 export interface ProductCategoryCondition {
@@ -387,6 +389,7 @@ export interface ProductInput {
   name: string; 
   usdCost: BigFloat; 
   description?: string | null; 
+  shortDescription?: string | null; 
 }
 /** All input for the create `User` mutation. */
 export interface CreateUserInput {
@@ -457,6 +460,7 @@ export interface ProductPatch {
   name?: string | null; 
   usdCost?: BigFloat | null; 
   description?: string | null; 
+  shortDescription?: string | null; 
 }
 /** All input for the `updateProductById` mutation. */
 export interface UpdateProductByIdInput {
@@ -808,6 +812,8 @@ export enum ProductsOrderBy {
   USD_COST_DESC = "USD_COST_DESC",
   DESCRIPTION_ASC = "DESCRIPTION_ASC",
   DESCRIPTION_DESC = "DESCRIPTION_DESC",
+  SHORT_DESCRIPTION_ASC = "SHORT_DESCRIPTION_ASC",
+  SHORT_DESCRIPTION_DESC = "SHORT_DESCRIPTION_DESC",
   PRIMARY_KEY_ASC = "PRIMARY_KEY_ASC",
   PRIMARY_KEY_DESC = "PRIMARY_KEY_DESC",
 }
@@ -1026,12 +1032,13 @@ export namespace ProductResolvers {
     name?: NameResolver; 
     usdCost?: UsdCostResolver; 
     description?: DescriptionResolver; 
+    shortDescription?: ShortDescriptionResolver; 
     userBySellerId?: UserBySellerIdResolver; /** Reads a single `User` that is related to this `Product`. */
     productCategoryByCategory?: ProductCategoryByCategoryResolver; /** Reads a single `ProductCategory` that is related to this `Product`. */
     carts?: CartsResolver; /** Reads and enables pagination through a set of `Cart`. */
   }
 
-  export type NodeIdResolver = Resolver<string>;  export type IdResolver = Resolver<UUID>;  export type SellerIdResolver = Resolver<UUID>;  export type CategoryResolver = Resolver<UUID | null>;  export type NameResolver = Resolver<string>;  export type UsdCostResolver = Resolver<BigFloat>;  export type DescriptionResolver = Resolver<string | null>;  export type UserBySellerIdResolver = Resolver<User | null>;  export type ProductCategoryByCategoryResolver = Resolver<ProductCategory | null>;  export type CartsResolver = Resolver<CartsConnection, CartsArgs>;
+  export type NodeIdResolver = Resolver<string>;  export type IdResolver = Resolver<UUID>;  export type SellerIdResolver = Resolver<UUID>;  export type CategoryResolver = Resolver<UUID | null>;  export type NameResolver = Resolver<string>;  export type UsdCostResolver = Resolver<BigFloat>;  export type DescriptionResolver = Resolver<string | null>;  export type ShortDescriptionResolver = Resolver<string | null>;  export type UserBySellerIdResolver = Resolver<User | null>;  export type ProductCategoryByCategoryResolver = Resolver<ProductCategory | null>;  export type CartsResolver = Resolver<CartsConnection, CartsArgs>;
   export interface CartsArgs {
     first?: number | null; /** Only read the first `n` values of the set. */
     last?: number | null; /** Only read the last `n` values of the set. */
@@ -1585,7 +1592,38 @@ export namespace CreateAndLoadUserByStellarPublicKeyPayloadResolvers {
   }
 
   
-}export namespace GetCurrentUser {
+}export namespace Logout {
+  export type Variables = {
+  }
+
+  export type Mutation = {
+    __typename?: "Mutation";
+    logout?: boolean | null; 
+  }
+}
+export namespace UpdateProfilePic {
+  export type Variables = {
+    userID: UUID;
+    file: Upload;
+  }
+
+  export type Mutation = {
+    __typename?: "Mutation";
+    updateUserById?: UpdateUserById | null; 
+  }
+
+  export type UpdateUserById = {
+    __typename?: "UpdateUserPayload";
+    user?: User | null; 
+  }
+
+  export type User = {
+    __typename?: "User";
+    id: UUID; 
+    profilePicture?: string | null; 
+  }
+}
+export namespace GetAllCurrentUserInfo {
   export type Variables = {
   }
 
@@ -1597,15 +1635,96 @@ export namespace CreateAndLoadUserByStellarPublicKeyPayloadResolvers {
   export type CurrentUser = {
     __typename?: "User";
     id: UUID; 
+    website?: string | null; 
+    profilePicture?: string | null; 
+    displayName?: string | null; 
+    username: string; 
   }
 }
-export namespace Logout {
+export namespace GetAllProductInfo {
+  export type Variables = {
+    productID: UUID;
+  }
+
+  export type Query = {
+    __typename?: "Query";
+    productById?: ProductById | null; 
+  }
+
+  export type ProductById = {
+    __typename?: "Product";
+    id: UUID; 
+    name: string; 
+    usdCost: BigFloat; 
+    shortDescription?: string | null; 
+    description?: string | null; 
+    userBySellerId?: UserBySellerId | null; 
+    productCategoryByCategory?: ProductCategoryByCategory | null; 
+  }
+
+  export type UserBySellerId = {
+    __typename?: "User";
+    id: UUID; 
+    displayName?: string | null; 
+    username: string; 
+    profilePicture?: string | null; 
+  }
+
+  export type ProductCategoryByCategory = {
+    __typename?: "ProductCategory";
+    id: UUID; 
+    name: string; 
+  }
+}
+export namespace GetUserInfo {
+  export type Variables = {
+    userID: UUID;
+  }
+
+  export type Query = {
+    __typename?: "Query";
+    userById?: UserById | null; 
+  }
+
+  export type UserById = {
+    __typename?: "User";
+    id: UUID; 
+    website?: string | null; 
+    profilePicture?: string | null; 
+    displayName?: string | null; 
+    username: string; 
+  }
+}
+export namespace GetBasicProductInfo {
+  export type Variables = {
+    productID: UUID;
+  }
+
+  export type Query = {
+    __typename?: "Query";
+    productById?: ProductById | null; 
+  }
+
+  export type ProductById = {
+    __typename?: "Product";
+    id: UUID; 
+    name: string; 
+    usdCost: BigFloat; 
+    shortDescription?: string | null; 
+  }
+}
+export namespace GetCurrentUserId {
   export type Variables = {
   }
 
-  export type Mutation = {
-    __typename?: "Mutation";
-    logout?: boolean | null; 
+  export type Query = {
+    __typename?: "Query";
+    currentUser?: CurrentUser | null; 
+  }
+
+  export type CurrentUser = {
+    __typename?: "User";
+    id: UUID; 
   }
 }
 export namespace GetUserCart {
@@ -1700,61 +1819,6 @@ export namespace AllProductsByCategoryId {
     name: string; 
     usdCost: BigFloat; 
     description?: string | null; 
-  }
-}
-export namespace UpdateProfilePic {
-  export type Variables = {
-    userID: UUID;
-    file: Upload;
-  }
-
-  export type Mutation = {
-    __typename?: "Mutation";
-    updateUserById?: UpdateUserById | null; 
-  }
-
-  export type UpdateUserById = {
-    __typename?: "UpdateUserPayload";
-    user?: User | null; 
-  }
-
-  export type User = {
-    __typename?: "User";
-    id: UUID; 
-    profilePicture?: string | null; 
-  }
-}
-export namespace AnonymousQuery_1 {
-  export type Variables = {
-  }
-
-  export type Query = {
-    __typename?: "Query";
-    currentUser?: CurrentUser | null; 
-  }
-
-  export type CurrentUser = {
-    __typename?: "User";
-    id: UUID; 
-  }
-}
-export namespace GetUserInfo {
-  export type Variables = {
-    userID: UUID;
-  }
-
-  export type Query = {
-    __typename?: "Query";
-    userById?: UserById | null; 
-  }
-
-  export type UserById = {
-    __typename?: "User";
-    id: UUID; 
-    website?: string | null; 
-    profilePicture?: string | null; 
-    displayName?: string | null; 
-    username: string; 
   }
 }
 export namespace GetUserProfileDetails {
@@ -1883,6 +1947,7 @@ export namespace GetCurrentUser {
     id: UUID; 
     profilePicture?: string | null; 
     displayName?: string | null; 
+    username: string; 
   }
 }
 export namespace GetCurrentCartStatus {

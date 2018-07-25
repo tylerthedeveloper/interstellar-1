@@ -5,9 +5,13 @@ import Header from './header/Component';
 import Content from './content/Component';
 
 
+
 /****  TYPES ******/
+import { GetAllProductInfo } from "GQLTypes";
+
 interface IComponentProps extends WithStyles<typeof styles> {
     section: string;
+    product: GetAllProductInfo.ProductById
 }
 
 
@@ -17,46 +21,9 @@ class Component extends React.PureComponent<IComponentProps> {
 
     public render() {
 
-        const { classes, section } = this.props;
+        const { classes, section, product } = this.props;
 
-        const product = {
-            id: "123",
-            name: "Super Awesome Product",
-            shortDescription: `This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!`,
-            description: `This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!
-            This is a description! This is a description! This is a description! This is a description!`,
-            usdCost: 123,
+        const productDemo = {
             rating: 3.5
         };
 
@@ -67,7 +34,7 @@ class Component extends React.PureComponent<IComponentProps> {
                     productName={product.name}
                     usdCost={product.usdCost}
                     shortDescription={product.shortDescription}
-                    rating={product.rating}
+                    rating={productDemo.rating}
                 />
                 <div className={classes.padder}/>
                 <Content

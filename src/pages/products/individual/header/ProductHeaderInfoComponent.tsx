@@ -5,7 +5,7 @@ import StarRatingComponent from "react-star-rating-component";
 /****  TYPES ******/
 interface IProductHeaderInfoComponentProps extends WithStyles<typeof styles> {
     productName: string;
-    shortDescription: string;
+    shortDescription?: string | null;
     rating: number;
 }
 

@@ -9,7 +9,7 @@ import Description from './description/Component';
 interface IComponentProps extends WithStyles<typeof styles> {
     productID: string;
     section?: string;
-    productDescription: string;
+    productDescription?: string | null;
 }
 
 
@@ -25,12 +25,12 @@ class Component extends React.PureComponent<IComponentProps> {
             productDescription,
         } = this.props;
 
-        const section = this.props.section || "description";
+        const section = this.props.section || (productDescription ? "description" : "reviews");
 
         let innerComponent;
         switch (section) {
             case "description":
-                innerComponent = <Description productDescription={productDescription}/>;
+                innerComponent = productDescription ? <Description productDescription={productDescription}/> : null;
                 break;
             case "reviews":
                 innerComponent = <div/>;
@@ -43,15 +43,16 @@ class Component extends React.PureComponent<IComponentProps> {
             <div>
                 <AppBar position={"static"} className={classes.tabs}>
                     <Tabs value={section}>
-                        <Tab
-                            value="description"
-                            label="Description"
-                            component={(buttonProps: any) => (
-                                <NavLink
-                                    to={`/product/${productID}/description`}
-                                    {...buttonProps}
-                                />)}
-                        />
+                        {productDescription ?
+                            <Tab
+                                value="description"
+                                label="Description"
+                                component={(buttonProps: any) => (
+                                    <NavLink
+                                        to={`/product/${productID}/description`}
+                                        {...buttonProps}
+                                    />)}
+                            /> : null}
                         <Tab
                             value="reviews"
                             label="Reviews"

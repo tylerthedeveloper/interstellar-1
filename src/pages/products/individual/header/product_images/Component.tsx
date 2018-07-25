@@ -29,8 +29,6 @@ class Component extends React.PureComponent<IProductImagesComponentProps> {
     }
 
     public onCloseHanler = () => {
-        console.log("close")
-        console.log(this);
         this.setState({
             ...this.state,
             open: false

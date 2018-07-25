@@ -10,7 +10,7 @@ interface IComponentProps extends WithStyles<typeof styles> {
     productID: string;
     productName: string;
     usdCost: number;
-    shortDescription: string;
+    shortDescription?: string | null;
     rating: number;
 }
 
