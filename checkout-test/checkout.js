@@ -44,7 +44,6 @@ const myBalances = [
 // pull from local for testing
 const usdPriceDict = require('./data/temp-price-dict.js').usdPriceDict;
 // console.log(usdPriceDict);
-
 // const usdPriceDict = usdUtils.getAverageUsdPrices();
 
 // mock the async
@@ -90,7 +89,6 @@ function combineLikeAssets(cartItems) {
         if (savedUsdValue) assetDict['USD'] += curUsdValue;
         else assetDict['USD'] = curUsdValue;
 
-        // console.log(cartItem)
         const code = cartItem.acceptedAsset.asset_code;
         const savedValue = assetDict[code];
         const curValue = +cartItem.acceptedAsset.balance.toFixed(7);
@@ -115,10 +113,12 @@ function combineLikeAssets(cartItems) {
 // 4 loop through cart and create ops
 // could be optimized if: 
     // given selected asset from balances instead of looking it up
+    // TODO: figure out how to logically group paths / payments
     // TODO: add multiple accepted assets
+    // TODO: Allow for multiple asset balances update them locally after each transaction is made to keep track
+        // How to determine which assets the user is willing ti buy with?
 function createTransactionOps(myCartItems, publicKey, myBalances, selectedAsset, pmtBuffer) {
-    // operation: <StellarSdk.Operation < payment | pathpayment> >
-    const paymentOps = myCartItems.map(cartItem => {
+    return Promise.all(myCartItems.map(cartItem => { // operation: <StellarSdk.Operation < payment | pathpayment> >
         const { 
             seller: curSellerPubKey,
             acceptedAsset: {
@@ -127,16 +127,21 @@ function createTransactionOps(myCartItems, publicKey, myBalances, selectedAsset,
                     asset_issuer: cartItemAsset_Issuer
             }
         } = cartItem;
-        // console.log(curSellerPubKey, acceptedAsset);
-        // console.log(cartItemAsset_Code, cartItemAsset_Price, cartItemAsset_Issuer);
         const { 
             code: selectedAssetCode, 
             issuer: selectedAssetIssuer 
         } = selectedAsset;
-        const { balance: balanceForAsset }  = myBalances.find(bal => (
-            bal.asset_code === selectedAssetCode && bal.asset_issuer === selectedAssetIssuer));
+        const { balance: balanceForAsset } = myBalances.find(bal => (
+            bal.asset_code === selectedAssetCode && bal.asset_issuer === selectedAssetIssuer)
+        );
         
         // TODO: Check for stellar lumens min thresh IF Lumens
+        // todo: If seller has multiple accepted assets, see if any of them match your selected asset
+        
+        // const sellerAcceptedAsset = acceptedAssets.find(asset => 
+        //      (asset.asset_code === selectedAssetCode && bal.asset_issuer === selectedAssetIssuer)))
+        // if (sellerAcceptedAsset)
+
         if (cartItemAsset_Code === selectedAssetCode && cartItemAsset_Issuer === selectedAssetIssuer) { // check if you have the asset
             if (balanceForAsset > cartItemAsset_Price) //check if you have enough
                 return StellarSdk.Operation.payment({ 
@@ -147,25 +152,17 @@ function createTransactionOps(myCartItems, publicKey, myBalances, selectedAsset,
         }
         else { // user doesnt have the asset so we try to find a path
             const destAsset = new StellarSdk.Asset(cartItemAsset_Code, cartItemAsset_Issuer);
-            // TODO: Need help here
             const cheapestPath = stellarUtils.findCheapestPath(
                 publicKey, curSellerPubKey, selectedAsset, destAsset, cartItemAsset_Price
             );            
             return cheapestPath.then(foundPath => {
-                // console.log(foundPath._attributes.body._value._attributes); 
                 if (!foundPath) return new Error('insufficient funds or cannot find a path between yours and the desired assets');
                 else return foundPath;
           });
         }
-  });
-  return Promise.all(paymentOps);
+    }));
 } 
  
 createTransactionOps(myCartItems, publicKey, myBalances, stellarUtils.AssetDict.MOBI, 0.015)
     .then(operations => stellarUtils.createTransaction(publicKey, privateKey, operations))
     .then(res => console.log(res))
-
-
-// stellarUtils.createTransaction(pubKey, privKey, ...);
-// 5 build And Submit Transaction
-// const tb = new StellarSdk.TransactionBuilder(publicKey);

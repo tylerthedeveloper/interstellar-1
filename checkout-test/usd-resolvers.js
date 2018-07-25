@@ -62,8 +62,6 @@ async function getAverageUsdPrices() {
         .then(axios.spread((...tickerBatches) => {
             const assets = {};            
             tickerBatches.map(batch => {
-                // console.log('batch');
-                // console.log(batch);
                 Object.keys(batch).map(key => {
                     const symbol = batch[key].code;
                     if (!assets[symbol]) assets[symbol] = batch[key];

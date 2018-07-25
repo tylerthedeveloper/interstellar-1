@@ -105,7 +105,6 @@ function changeTrust(pubkey, privkey, asset, trustOpType, limit = null) {
             }
             if (limit) op.limit = new String(limit);
             else if (trustOpType === TrustOpType.RemoveTrust) op.limit = '0';
-            // console.log(op.limit)
             const transaction = new StellarSdk.TransactionBuilder(account)
                 .addOperation(StellarSdk.Operation.changeTrust(op))
                 .build();
@@ -196,7 +195,6 @@ function findCheapestPaths(sender, receiver, destAsset, destAmount) {
                         pathDict[key] = element;
                 }
             });
-            // console.log(pathDict)
             if (pathDict) return pathDict;
             throw Error('err: No path exists between the corresponding assets')
         })
@@ -341,6 +339,7 @@ const repoAssetPath = StellarSdk.Operation.pathPayment({
 // server.paths(pubKey, pubKey3, repoAsset, 1)
 //     .call()
 //     .then(res => console.log(res))
+
 module.exports = {
     AssetDict,
     getStellarBalances,
