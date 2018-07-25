@@ -3,7 +3,7 @@ import * as React from "react";
 
 import Actions from './HeaderActionComponent';
 import Info from './ProductHeaderInfoComponent';
-import Images from './ProductImagesComponent';
+import Images from './product_images/Component';
 
 /****  TYPES ******/
 interface IComponentProps extends WithStyles<typeof styles> {
