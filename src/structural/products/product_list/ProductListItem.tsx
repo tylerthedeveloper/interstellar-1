@@ -10,6 +10,7 @@ import StarRatingComponent from "react-star-rating-component";
 
 /****  TYPES ******/
 import { IPresentableProduct } from "Types/local/PresentableProductType";
+import { NavLink } from "react-router-dom";
 interface IComponentProps extends WithStyles<typeof styles> {
    product: IPresentableProduct;
    ActionComponent: React.ComponentType<{product?: IPresentableProduct, quantity?: number}>;
@@ -21,37 +22,39 @@ class ProductListItem extends React.PureComponent<IComponentProps> {
     public render() {
         const { classes, product, ActionComponent } = this.props;
         const rating = null;
-        const {name, description} = product;
+        const {name, shortDescription} = product;
 
         return(
-            <ListItem divider={true} button={true}>
-                <Grid container={true}>
-                    <Grid item={true} xs={2} className={classes.image}>
-                        Image Here
-                    </Grid>
-                    <Grid item={true} xs={7} className={classes.descriptionBox}>
-                        <div className={classes.headerBox}>
-                            <Typography variant={"title"}>{name}</Typography>
-                            <div className={classes.ratingContainer}>
-                                <StarRatingComponent
-                                    name={name}
-                                    editing={false}
-                                    className={classes.stars}
-                                    starCount={5}
-                                    value={rating ? rating : 0}
-                                />
-                                <Typography variant={"caption"}>
-                                    ({rating ? rating : "N/A"})
-                                </Typography>
+            <NavLink to={`/product/${product.id}`}>
+                <ListItem divider={true} button={true} >
+                    <Grid container={true}>
+                        <Grid item={true} xs={2} className={classes.image}>
+                            Image Here
+                        </Grid>
+                        <Grid item={true} xs={7} className={classes.descriptionBox}>
+                            <div className={classes.headerBox}>
+                                <Typography variant={"title"}>{name}</Typography>
+                                <div className={classes.ratingContainer}>
+                                    <StarRatingComponent
+                                        name={name}
+                                        editing={false}
+                                        className={classes.stars}
+                                        starCount={5}
+                                        value={rating ? rating : 0}
+                                    />
+                                    <Typography variant={"caption"}>
+                                        ({rating ? rating : "N/A"})
+                                    </Typography>
+                                </div>
                             </div>
-                        </div>
-                        <Typography variant={"body1"}>{description}</Typography>
+                            <Typography variant={"body1"}>{shortDescription}</Typography>
+                        </Grid>
+                        <Grid item={true} xs={3}>
+                            <ActionComponent product={product}/>
+                        </Grid>
                     </Grid>
-                    <Grid item={true} xs={3}>
-                        <ActionComponent product={product}/>
-                    </Grid>
-                </Grid>
-            </ListItem>
+                </ListItem>
+            </NavLink>
         );
     }
 }

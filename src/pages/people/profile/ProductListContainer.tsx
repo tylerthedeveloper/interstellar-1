@@ -52,7 +52,7 @@ const query = gql`
                     id
                     name
                     usdCost
-                    description
+                    shortDescription
                 }
             }
         }
