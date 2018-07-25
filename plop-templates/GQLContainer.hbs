@@ -70,12 +70,12 @@ class {{name}} extends React.PureComponent<I{{name}}PropsWithApollo> {
     /*****  Mutation Handlers    *****/
     {{/if}}
     {{#each mutations}}
-    public {{name}}MutationHandler({{#if vars}} { {{else}} ){ {{/if}}
+    public {{name}}MutationHandler = ({{#if vars}} { {{else}} ) => { {{/if}}
     {{#if vars}}
         {{#each vars}}
         {{name}},
         {{/each}}
-    }: {{name}}MutationHandlerVars){
+    }: {{name}}MutationHandlerVars) => {
     {{/if}}
 
         //TODO Add Local Validation
