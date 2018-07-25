@@ -104,19 +104,19 @@ class Container extends React.PureComponent<IContainerPropsWithApollo> {
         this.subscriptions = [
             this.GetAllUserInfoQuery.subscribe({
                 next: (res) => {
-                    if (res.data && res.data.currentUser && res.data.currentUser.id) {
-                        this.setState({currentUserID: res.data.currentUser.id});
-                    } else {
-                        this.setState({currentUserID: null});
+                    if (res.data && res.data.userById) {
+                        this.setState({
+                            user: {...this.state.user, ...res.data.userById},
+                        });
                     }
                 }
             }),
             this.GetCurrentUserIdQuery.subscribe({
                 next: (res) => {
-                    if (res.data && res.data.userById) {
-                        this.setState({
-                            user: {...this.state.user, ...res.data.userById},
-                        });
+                    if (res.data && res.data.currentUser && res.data.currentUser.id) {
+                        this.setState({currentUserID: res.data.currentUser.id});
+                    } else {
+                        this.setState({currentUserID: null});
                     }
                 }
             }),
@@ -130,7 +130,6 @@ class Container extends React.PureComponent<IContainerPropsWithApollo> {
     /*****      Render          *****/
     public render() {
         const {currentUserID, user} = this.state;
-
         return (
             <ProfileComponent
                 user={user}
