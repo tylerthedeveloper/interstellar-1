@@ -37,7 +37,8 @@ module.exports = {
             TypeUtil: path.resolve(__dirname, '../src/types/util'),
             Query: path.resolve(__dirname, '../src/api/gql/queries'),
             Mutation: path.resolve(__dirname, '../src/api/gql/mutations')
-        }
+        },
+        symlinks: false
     },
     devtool: 'source-map',
     mode: 'development',
