@@ -75,6 +75,7 @@ class Component extends React.Component<IProductImagesComponentProps> {
 const styles = (theme: Theme) => (createStyles({
     image: {
         height: "100%",
+        width: "100%",
         maxHeight: "400px",
         objectFit: "contain",
         borderRadius: "15px"

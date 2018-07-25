@@ -62,6 +62,7 @@ const styles = (theme: Theme) => (createStyles({
     },
     imagesContainer: {
         minWidth: "300px",
+        maxWidth: "25%",
         "flexShrink": 1
     },
     infoContainer: {
@@ -69,7 +70,7 @@ const styles = (theme: Theme) => (createStyles({
         margin: "0 20px"
     },
     actionsContainer: {
-        width: "300px"
+        width: "200px"
     }
 }));
 
