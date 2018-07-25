@@ -49,6 +49,11 @@ const query = gql`
                 name
                 usdCost
                 shortDescription
+                productImagesByProductId @connection(key: "product_images") {
+                    nodes {
+                        imageKey
+                    }
+                }
             }
         }
     }

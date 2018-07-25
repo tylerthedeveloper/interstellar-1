@@ -31,6 +31,8 @@ class Container extends React.PureComponent<IContainerPropsWithApollo> {
         super(props);
         const { client, productID} = props;
         this.client = client;
+        console.log("constructor!");
+        console.log(productID);
 
         /*****  Set Up Subscriptions    *****/
         this.GetAllProductInfoQuery = client.watchQuery({
@@ -44,6 +46,7 @@ class Container extends React.PureComponent<IContainerPropsWithApollo> {
             variables: { productID, },
             fetchPolicy: "cache-only"
         }).then(res => {
+            console.log("early", res.data);
             const {productById} = res.data as GetAllProductInfo.Query;
             if(productById) {
                 this.setState({
@@ -78,13 +81,13 @@ class Container extends React.PureComponent<IContainerPropsWithApollo> {
 
     public componentWillUnmount() {
         this.subscriptions.forEach((sub) => sub.unsubscribe());
+        console.log("Unmount!");
     }
 
     /*****      Render          *****/
     public render() {
         const {product} = this.state;
         const {section} = this.props;
-        console.log("product:", product);
         if(!product) return <div/>;
 
         return (

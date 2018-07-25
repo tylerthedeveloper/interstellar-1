@@ -125,5 +125,11 @@
   "resolutions": {
     "graphql": "0.12.3",
     "crc": "3.5.0"
+  },
+  "babel": {
+    "presets": [
+      "@babel/typescript",
+      "@babel/react"
+    ]
   }
 }

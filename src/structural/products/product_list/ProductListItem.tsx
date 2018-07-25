@@ -24,12 +24,29 @@ class ProductListItem extends React.PureComponent<IComponentProps> {
         const rating = null;
         const {name, shortDescription} = product;
 
+        let imageKey: string;
+        if( product.productImagesByProductId &&
+            product.productImagesByProductId.nodes &&
+            product.productImagesByProductId.nodes.length > 0){
+            imageKey = product.productImagesByProductId.nodes[0].imageKey;
+        }
+
         return(
             <Route render={(routeProps) => (
                 <ListItem divider={true} button={true} onClick={() => routeProps.history.push(`/product/${product.id}`)}>
                     <Grid container={true}>
-                        <Grid item={true} xs={2} className={classes.image}>
-                            Image Here
+                        <Grid item={true} xs={2} className={classes.imageContainer}>
+                            {imageKey ?
+                                <picture >
+                                    <source
+                                        srcSet={`https://silentshop.s3.amazonaws.com/${imageKey}-med.webp`}
+                                        type="image/webp"
+                                    />
+                                    <img
+                                        className={classes.image}
+                                        src={`https://silentshop.s3.amazonaws.com/${imageKey}-med.jpeg`}
+                                    />
+                                </picture> : null}
                         </Grid>
                         <Grid item={true} xs={7} className={classes.descriptionBox}>
                             <div className={classes.headerBox}>
@@ -65,10 +82,13 @@ const styles = createStyles({
     container: {
         display: "flex",
     },
+    imageContainer: {
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+    },
     image: {
-        display: "inline-block",
-        height: "100px",
-        background: "lightgrey",
+        height: "100px"
     },
     descriptionBox: {
         paddingLeft: "20px",

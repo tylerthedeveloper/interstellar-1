@@ -3,29 +3,68 @@ import {
     Dialog,
     DialogContent,
     DialogContentText,
-    DialogTitle,
+    DialogTitle, Icon, Tab, Tabs,
     Theme, Typography,
     WithStyles,
     withStyles
 } from "@material-ui/core";
 import * as React from "react";
 import Dropzone from "react-dropzone";
+import { CreateProductPicMutationHandlerVars, UpdateProductPicMutationHandlerVars } from "./ImageUploadDialogContainer";
 
 
 /****  TYPES ******/
 interface IImageUploadDialogComponentProps extends WithStyles<typeof styles> {
     open: boolean;
     handleClose: () => void;
+    images: {productId: string; imageKey: string, imageNum: number}[];
+    newProductImageHandler: (variables:CreateProductPicMutationHandlerVars) => void;
+    updateProductImageHandler: (variables:UpdateProductPicMutationHandlerVars) => void;
 }
 
 
 /****  COMPONENT ******/
-class ImageUploadDialogComponent extends React.PureComponent<IImageUploadDialogComponentProps> {
+class ImageUploadDialogComponent extends React.Component<IImageUploadDialogComponentProps> {
+
+    public state: {
+        imageNum: number;
+        currentImage: {productId: string; imageKey: string, imageNum: number} | null;
+    };
+
+    public constructor(props: IImageUploadDialogComponentProps){
+        super(props);
+
+        this.state = {
+            imageNum: 0,
+            currentImage: props.images[0]
+        };
+    }
+
+    public static getDerivedStateFromProps(props:IImageUploadDialogComponentProps, state: ImageUploadDialogComponent["state"]){
+        let currentImage;
+        if(state.imageNum < props.images.length){
+            currentImage = props.images[state.imageNum];
+        }else{
+            currentImage = null;
+        }
+        state.currentImage = currentImage;
+        return state;
+    }
 
 
     public render() {
 
-        const { classes, open, handleClose } = this.props;
+        const { classes, open, handleClose, images, newProductImageHandler, updateProductImageHandler } = this.props;
+        const {currentImage} = this.state;
+
+
+        //get the tabs right
+        const tabs = images.map(({imageKey, imageNum}, i) => {
+            return <Tab key={imageKey} label={i == 0 ? "Main Image" : `Image ${imageNum}`} className={classes.imageSelector}/>;
+        });
+        if(tabs.length < 5){
+            tabs.push(<Tab key={"new-image"} label="Add a New Image" className={classes.imageSelector}/>)
+        }
 
         return (
             <Dialog
@@ -38,7 +77,7 @@ class ImageUploadDialogComponent extends React.PureComponent<IImageUploadDialogC
                 <DialogContent>
                     <ul>
                         <li><Typography>Must be roughly square</Typography></li>
-                        <li><Typography>{"Must be <= 5MB and >= 200kB"}</Typography></li>
+                        <li><Typography>{"Must be <= 5MB and >= 100kB"}</Typography></li>
                     </ul>
                 </DialogContent>
                 <div className={classes.dropzoneContainer}>
@@ -46,14 +85,57 @@ class ImageUploadDialogComponent extends React.PureComponent<IImageUploadDialogC
                         className={classes.dropzone}
                         accept={["image/jpeg", "image/png"] as any}
                         onDrop={(acceptedFiles, rejectedFiles) => {
-                            console.log("DROP!")
+
+                            if(this.state.imageNum + 1 === tabs.length){
+                                newProductImageHandler({
+                                    file: acceptedFiles[0],
+                                    num: this.state.imageNum
+                                })
+                            }else{
+                                updateProductImageHandler({
+                                    file: acceptedFiles[0],
+                                    num: this.state.imageNum
+                                })
+                            }
                         }}
                     >
-                        <Typography variant={"headline"} align={"center"}>
-                            Click or Drop Here
-                        </Typography>
+                        {currentImage ?
+                            <picture>
+                                <source
+                                    srcSet={`https://silentshop.s3.amazonaws.com/${currentImage.imageKey}-lg.webp`}
+                                    type="image/webp"
+                                />
+                                <img
+                                    className={classes.image}
+                                    src={`https://silentshop.s3.amazonaws.com/${currentImage.imageKey}-lg.jpeg`}
+                                />
+                            </picture>
+                            :
+                            <div className={classes.newImageBox}>
+                                <Typography variant={"subheading"} align={"center"}>
+                                    Click or Drop Here
+                                </Typography>
+                            </div>
+                        }
+                        <Icon className={"material-icons"} classes={{ root: classes.edit }}>
+                            edit
+                        </Icon>
                     </Dropzone>
                 </div>
+                <DialogContent className={classes.tabContainer}>
+                    <Tabs
+                        value={this.state.imageNum}
+                        onChange={(_, val)=>{
+                            this.setState({imageNum: val})
+                        }}
+                        indicatorColor="primary"
+                        textColor="primary"
+                        centered
+                    >
+                        {tabs}
+                    </Tabs>
+                </DialogContent>
+
             </Dialog>
         );
     }
@@ -65,27 +147,50 @@ const styles = (theme: Theme) => (createStyles({
         width: "100%",
         boxSizing: "border-box",
         padding: "20px",
-    },
-
-    dropzoneButton: {
-
+        display: "flex",
+        justifyContent: "center"
     },
     dialog: {
-        width: "600px",
+        minWidth: "600px",
+        maxWidth: "850px"
+    },
+    imageSelector: {
+        minWidth: "50px"
     },
 
     dropzone: {
-        "width": "100%",
-        "height": "300px",
-        "border": "2px dotted " + theme.palette.grey.A100,
         "borderRadius": "10px",
         "cursor": "pointer",
-        "&:hover": {
-            background: theme.palette.grey.A100,
-        },
-        "display": "flex",
-        "alignItems": "center",
-        "justifyContent": "center",
+        display: "inline"
+    },
+    image: {
+        objectFit: "contain",
+        maxHeight: "500px",
+        borderRadius: "10px",
+        border: "2px dotted" + theme.palette.grey.A100,
+
+    },
+    edit: {
+        position: "absolute",
+        right: "-15px",
+        bottom: "-15px",
+        borderRadius: "50%",
+        fontSize: "30px",
+        color: "white",
+        background: theme.palette.primary.main,
+        padding: "10px",
+    },
+    newImageBox:  {
+        minHeight: "300px",
+        width: "300px",
+        border: "2px dotted" + theme.palette.grey.A100,
+        borderRadius: "10px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    tabContainer: {
+        marginTop: "15px"
     }
 }));
 

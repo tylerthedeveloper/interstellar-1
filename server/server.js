@@ -10,7 +10,7 @@ import PostGraphileUploadFieldPlugin from 'postgraphile-plugin-upload-field';
 
 import config from '../config.json';
 import {currentUserPlugin, resolveFromSourceFirst} from './lib/graphql/authPlugin';
-import {ProfilePicPluginConfig} from './lib/graphql/uploadPlugin';
+import {ProfilePicPluginConfig, ProductPicPluginConfig} from './lib/graphql/uploadPlugin';
 
 const app = express();
 export const pool = new Pool({
@@ -48,7 +48,7 @@ app.use(postgraphile(pool, 'public', {
     appendPlugins: [resolveFromSourceFirst, currentUserPlugin, PostGraphileUploadFieldPlugin],
     watchPg: true,
     graphileBuildOptions: {
-        uploadFieldDefinitions: [ProfilePicPluginConfig]
+        uploadFieldDefinitions: [ProfilePicPluginConfig, ProductPicPluginConfig]
     }
 }));
 

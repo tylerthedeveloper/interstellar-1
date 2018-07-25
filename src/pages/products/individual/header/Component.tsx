@@ -12,6 +12,7 @@ interface IComponentProps extends WithStyles<typeof styles> {
     usdCost: number;
     shortDescription?: string | null;
     rating: number;
+    images: {productId?: string; imageKey?: string, imageNum: number}[];
 }
 
 
@@ -26,13 +27,15 @@ class Component extends React.PureComponent<IComponentProps> {
             productName,
             usdCost,
             shortDescription,
-            rating
+            rating,
+            images,
+            productID
         } = this.props;
 
         return (
             <div className={classes.container}>
                 <div className={classes.imagesContainer}>
-                    <Images/>
+                    <Images productID={productID} images={images}/>
                 </div>
                 <div className={classes.infoContainer}>
                     <Info
@@ -55,9 +58,11 @@ class Component extends React.PureComponent<IComponentProps> {
 const styles = (theme: Theme) => (createStyles({
     container: {
         display: "flex",
+        justifyContent: "space-between"
     },
     imagesContainer: {
-        width: "500px"
+        minWidth: "300px",
+        "flexShrink": 1
     },
     infoContainer: {
         "flexGrow": 1,

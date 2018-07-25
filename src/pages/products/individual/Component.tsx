@@ -16,7 +16,7 @@ interface IComponentProps extends WithStyles<typeof styles> {
 
 
 /****  COMPONENT ******/
-class Component extends React.PureComponent<IComponentProps> {
+class Component extends React.Component<IComponentProps> {
 
 
     public render() {
@@ -27,6 +27,13 @@ class Component extends React.PureComponent<IComponentProps> {
             rating: 3.5
         };
 
+        let images: any;
+        if(product.productImagesByProductId){
+            images = product.productImagesByProductId.nodes;
+        }else{
+            images = [];
+        }
+
         return (
             <div className={classes.container}>
                 <Header
@@ -35,6 +42,7 @@ class Component extends React.PureComponent<IComponentProps> {
                     usdCost={product.usdCost}
                     shortDescription={product.shortDescription}
                     rating={productDemo.rating}
+                    images={images}
                 />
                 <div className={classes.padder}/>
                 <Content

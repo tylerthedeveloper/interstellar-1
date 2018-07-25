@@ -34,16 +34,19 @@ export interface Query extends Node {
   node?: Node | null; /** Fetches an object given its globally unique `ID`. */
   allCarts?: CartsConnection | null; /** Reads and enables pagination through a set of `Cart`. */
   allProductCategories?: ProductCategoriesConnection | null; /** Reads and enables pagination through a set of `ProductCategory`. */
+  allProductImages?: ProductImagesConnection | null; /** Reads and enables pagination through a set of `ProductImage`. */
   allProducts?: ProductsConnection | null; /** Reads and enables pagination through a set of `Product`. */
   allSellers?: SellersConnection | null; /** Reads and enables pagination through a set of `Seller`. */
   allUsers?: UsersConnection | null; /** Reads and enables pagination through a set of `User`. */
   cartByItemIdAndUserId?: Cart | null; 
   productCategoryById?: ProductCategory | null; 
+  productImageByProductIdAndImageNum?: ProductImage | null; 
   productById?: Product | null; 
   productByName?: Product | null; 
   userById?: User | null; 
   cart?: Cart | null; /** Reads a single `Cart` using its globally unique `ID`. */
   productCategory?: ProductCategory | null; /** Reads a single `ProductCategory` using its globally unique `ID`. */
+  productImage?: ProductImage | null; /** Reads a single `ProductImage` using its globally unique `ID`. */
   product?: Product | null; /** Reads a single `Product` using its globally unique `ID`. */
   user?: User | null; /** Reads a single `User` using its globally unique `ID`. */
   currentUser?: User | null; /** The currently logged in User. Returns 'null' if noone is logged in. */
@@ -77,6 +80,7 @@ export interface Product extends Node {
   userBySellerId?: User | null; /** Reads a single `User` that is related to this `Product`. */
   productCategoryByCategory?: ProductCategory | null; /** Reads a single `ProductCategory` that is related to this `Product`. */
   carts: CartsConnection; /** Reads and enables pagination through a set of `Cart`. */
+  productImagesByProductId: ProductImagesConnection; /** Reads and enables pagination through a set of `ProductImage`. */
 }
 
 export interface User extends Node {
@@ -120,6 +124,26 @@ export interface ProductCategory extends Node {
   name: string; 
   description?: string | null; 
   productsByCategory: ProductsConnection; /** Reads and enables pagination through a set of `Product`. */
+}
+/** A connection to a list of `ProductImage` values. */
+export interface ProductImagesConnection {
+  nodes: (ProductImage | null)[]; /** A list of `ProductImage` objects. */
+  edges: ProductImagesEdge[]; /** A list of edges which contains the `ProductImage` and cursor to aid in pagination. */
+  pageInfo: PageInfo; /** Information to aid in pagination. */
+  totalCount?: number | null; /** The count of *all* `ProductImage` you could get from the connection. */
+}
+
+export interface ProductImage extends Node {
+  nodeId: string; /** A globally unique identifier. Can be used in various places throughout the system to identify this single value. */
+  productId: UUID; 
+  imageKey: UUID; 
+  imageNum: number; 
+  productByProductId?: Product | null; /** Reads a single `Product` that is related to this `ProductImage`. */
+}
+/** A `ProductImage` edge in the connection. */
+export interface ProductImagesEdge {
+  cursor?: Cursor | null; /** A cursor for use in pagination. */
+  node?: ProductImage | null; /** The `ProductImage` at the end of the edge. */
 }
 /** A `Cart` edge in the connection. */
 export interface CartsEdge {
@@ -174,12 +198,15 @@ export interface UsersEdge {
 export interface Mutation {
   createCart?: CreateCartPayload | null; /** Creates a single `Cart`. */
   createProductCategory?: CreateProductCategoryPayload | null; /** Creates a single `ProductCategory`. */
+  createProductImage?: CreateProductImagePayload | null; /** Creates a single `ProductImage`. */
   createProduct?: CreateProductPayload | null; /** Creates a single `Product`. */
   createUser?: CreateUserPayload | null; /** Creates a single `User`. */
   updateCart?: UpdateCartPayload | null; /** Updates a single `Cart` using its globally unique id and a patch. */
   updateCartByItemIdAndUserId?: UpdateCartPayload | null; /** Updates a single `Cart` using a unique key and a patch. */
   updateProductCategory?: UpdateProductCategoryPayload | null; /** Updates a single `ProductCategory` using its globally unique id and a patch. */
   updateProductCategoryById?: UpdateProductCategoryPayload | null; /** Updates a single `ProductCategory` using a unique key and a patch. */
+  updateProductImage?: UpdateProductImagePayload | null; /** Updates a single `ProductImage` using its globally unique id and a patch. */
+  updateProductImageByProductIdAndImageNum?: UpdateProductImagePayload | null; /** Updates a single `ProductImage` using a unique key and a patch. */
   updateProduct?: UpdateProductPayload | null; /** Updates a single `Product` using its globally unique id and a patch. */
   updateProductById?: UpdateProductPayload | null; /** Updates a single `Product` using a unique key and a patch. */
   updateProductByName?: UpdateProductPayload | null; /** Updates a single `Product` using a unique key and a patch. */
@@ -189,6 +216,8 @@ export interface Mutation {
   deleteCartByItemIdAndUserId?: DeleteCartPayload | null; /** Deletes a single `Cart` using a unique key. */
   deleteProductCategory?: DeleteProductCategoryPayload | null; /** Deletes a single `ProductCategory` using its globally unique id. */
   deleteProductCategoryById?: DeleteProductCategoryPayload | null; /** Deletes a single `ProductCategory` using a unique key. */
+  deleteProductImage?: DeleteProductImagePayload | null; /** Deletes a single `ProductImage` using its globally unique id. */
+  deleteProductImageByProductIdAndImageNum?: DeleteProductImagePayload | null; /** Deletes a single `ProductImage` using a unique key. */
   deleteProduct?: DeleteProductPayload | null; /** Deletes a single `Product` using its globally unique id. */
   deleteProductById?: DeleteProductPayload | null; /** Deletes a single `Product` using a unique key. */
   deleteProductByName?: DeleteProductPayload | null; /** Deletes a single `Product` using a unique key. */
@@ -214,6 +243,14 @@ export interface CreateProductCategoryPayload {
   productCategory?: ProductCategory | null; /** The `ProductCategory` that was created by this mutation. */
   query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
   productCategoryEdge?: ProductCategoriesEdge | null; /** An edge for our `ProductCategory`. May be used by Relay 1. */
+}
+/** The output of our create `ProductImage` mutation. */
+export interface CreateProductImagePayload {
+  clientMutationId?: string | null; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+  productImage?: ProductImage | null; /** The `ProductImage` that was created by this mutation. */
+  query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
+  productByProductId?: Product | null; /** Reads a single `Product` that is related to this `ProductImage`. */
+  productImageEdge?: ProductImagesEdge | null; /** An edge for our `ProductImage`. May be used by Relay 1. */
 }
 /** The output of our create `Product` mutation. */
 export interface CreateProductPayload {
@@ -246,6 +283,14 @@ export interface UpdateProductCategoryPayload {
   productCategory?: ProductCategory | null; /** The `ProductCategory` that was updated by this mutation. */
   query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
   productCategoryEdge?: ProductCategoriesEdge | null; /** An edge for our `ProductCategory`. May be used by Relay 1. */
+}
+/** The output of our update `ProductImage` mutation. */
+export interface UpdateProductImagePayload {
+  clientMutationId?: string | null; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+  productImage?: ProductImage | null; /** The `ProductImage` that was updated by this mutation. */
+  query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
+  productByProductId?: Product | null; /** Reads a single `Product` that is related to this `ProductImage`. */
+  productImageEdge?: ProductImagesEdge | null; /** An edge for our `ProductImage`. May be used by Relay 1. */
 }
 /** The output of our update `Product` mutation. */
 export interface UpdateProductPayload {
@@ -280,6 +325,15 @@ export interface DeleteProductCategoryPayload {
   deletedProductCategoryId?: string | null; 
   query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
   productCategoryEdge?: ProductCategoriesEdge | null; /** An edge for our `ProductCategory`. May be used by Relay 1. */
+}
+/** The output of our delete `ProductImage` mutation. */
+export interface DeleteProductImagePayload {
+  clientMutationId?: string | null; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+  productImage?: ProductImage | null; /** The `ProductImage` that was deleted by this mutation. */
+  deletedProductImageId?: string | null; 
+  query?: Query | null; /** Our root query field type. Allows us to run any query from our mutation payload. */
+  productByProductId?: Product | null; /** Reads a single `Product` that is related to this `ProductImage`. */
+  productImageEdge?: ProductImagesEdge | null; /** An edge for our `ProductImage`. May be used by Relay 1. */
 }
 /** The output of our delete `Product` mutation. */
 export interface DeleteProductPayload {
@@ -326,6 +380,12 @@ export interface ProductCondition {
   usdCost?: BigFloat | null; /** Checks for equality with the object’s `usdCost` field. */
   description?: string | null; /** Checks for equality with the object’s `description` field. */
   shortDescription?: string | null; /** Checks for equality with the object’s `shortDescription` field. */
+}
+/** A condition to be used against `ProductImage` object types. All fields are tested for equality and combined with a logical ‘and.’ */
+export interface ProductImageCondition {
+  productId?: UUID | null; /** Checks for equality with the object’s `productId` field. */
+  imageKey?: Upload | null; /** Checks for equality with the object’s `imageKey` field. */
+  imageNum?: number | null; /** Checks for equality with the object’s `imageNum` field. */
 }
 /** A condition to be used against `ProductCategory` object types. All fields are tested for equality and combined with a logical ‘and.’ */
 export interface ProductCategoryCondition {
@@ -375,6 +435,17 @@ export interface ProductCategoryInput {
   id?: UUID | null; 
   name: string; 
   description?: string | null; 
+}
+/** All input for the create `ProductImage` mutation. */
+export interface CreateProductImageInput {
+  clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
+  productImage: ProductImageInput; /** The `ProductImage` to be created by this mutation. */
+}
+/** An input for mutations affecting `ProductImage` */
+export interface ProductImageInput {
+  productId: UUID; 
+  imageKey?: Upload | null; 
+  imageNum: number; 
 }
 /** All input for the create `Product` mutation. */
 export interface CreateProductInput {
@@ -445,6 +516,25 @@ export interface UpdateProductCategoryByIdInput {
   clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
   productCategoryPatch: ProductCategoryPatch; /** An object where the defined keys will be set on the `ProductCategory` being updated. */
   id: UUID; 
+}
+/** All input for the `updateProductImage` mutation. */
+export interface UpdateProductImageInput {
+  clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
+  nodeId: string; /** The globally unique `ID` which will identify a single `ProductImage` to be updated. */
+  productImagePatch: ProductImagePatch; /** An object where the defined keys will be set on the `ProductImage` being updated. */
+}
+/** Represents an update to a `ProductImage`. Fields that are set will be updated. */
+export interface ProductImagePatch {
+  productId?: UUID | null; 
+  imageKey?: Upload | null; 
+  imageNum?: number | null; 
+}
+/** All input for the `updateProductImageByProductIdAndImageNum` mutation. */
+export interface UpdateProductImageByProductIdAndImageNumInput {
+  clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
+  productImagePatch: ProductImagePatch; /** An object where the defined keys will be set on the `ProductImage` being updated. */
+  productId: UUID; 
+  imageNum: number; 
 }
 /** All input for the `updateProduct` mutation. */
 export interface UpdateProductInput {
@@ -520,6 +610,17 @@ export interface DeleteProductCategoryByIdInput {
   clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
   id: UUID; 
 }
+/** All input for the `deleteProductImage` mutation. */
+export interface DeleteProductImageInput {
+  clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
+  nodeId: string; /** The globally unique `ID` which will identify a single `ProductImage` to be deleted. */
+}
+/** All input for the `deleteProductImageByProductIdAndImageNum` mutation. */
+export interface DeleteProductImageByProductIdAndImageNumInput {
+  clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
+  productId: UUID; 
+  imageNum: number; 
+}
 /** All input for the `deleteProduct` mutation. */
 export interface DeleteProductInput {
   clientMutationId?: string | null; /** An arbitrary string value with no semantic meaning. Will be included in the payload verbatim. May be used to track mutations by the client. */
@@ -578,6 +679,15 @@ export interface AllProductCategoriesQueryArgs {
   orderBy?: ProductCategoriesOrderBy[] | null; /** The method to use when ordering `ProductCategory`. */
   condition?: ProductCategoryCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
 }
+export interface AllProductImagesQueryArgs {
+  first?: number | null; /** Only read the first `n` values of the set. */
+  last?: number | null; /** Only read the last `n` values of the set. */
+  offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
+  before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
+  after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
+  orderBy?: ProductImagesOrderBy[] | null; /** The method to use when ordering `ProductImage`. */
+  condition?: ProductImageCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
+}
 export interface AllProductsQueryArgs {
   first?: number | null; /** Only read the first `n` values of the set. */
   last?: number | null; /** Only read the last `n` values of the set. */
@@ -612,6 +722,10 @@ export interface CartByItemIdAndUserIdQueryArgs {
 export interface ProductCategoryByIdQueryArgs {
   id: UUID; 
 }
+export interface ProductImageByProductIdAndImageNumQueryArgs {
+  productId: UUID; 
+  imageNum: number; 
+}
 export interface ProductByIdQueryArgs {
   id: UUID; 
 }
@@ -627,6 +741,9 @@ export interface CartQueryArgs {
 export interface ProductCategoryQueryArgs {
   nodeId: string; /** The globally unique `ID` to be used in selecting a single `ProductCategory`. */
 }
+export interface ProductImageQueryArgs {
+  nodeId: string; /** The globally unique `ID` to be used in selecting a single `ProductImage`. */
+}
 export interface ProductQueryArgs {
   nodeId: string; /** The globally unique `ID` to be used in selecting a single `Product`. */
 }
@@ -641,6 +758,15 @@ export interface CartsProductArgs {
   after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
   orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
   condition?: CartCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
+}
+export interface ProductImagesByProductIdProductArgs {
+  first?: number | null; /** Only read the first `n` values of the set. */
+  last?: number | null; /** Only read the last `n` values of the set. */
+  offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
+  before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
+  after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
+  orderBy?: ProductImagesOrderBy[] | null; /** The method to use when ordering `ProductImage`. */
+  condition?: ProductImageCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
 }
 export interface CartUserArgs {
   first?: number | null; /** Only read the first `n` values of the set. */
@@ -675,6 +801,9 @@ export interface CreateCartMutationArgs {
 export interface CreateProductCategoryMutationArgs {
   input: CreateProductCategoryInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
 }
+export interface CreateProductImageMutationArgs {
+  input: CreateProductImageInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+}
 export interface CreateProductMutationArgs {
   input: CreateProductInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
 }
@@ -692,6 +821,12 @@ export interface UpdateProductCategoryMutationArgs {
 }
 export interface UpdateProductCategoryByIdMutationArgs {
   input: UpdateProductCategoryByIdInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+}
+export interface UpdateProductImageMutationArgs {
+  input: UpdateProductImageInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+}
+export interface UpdateProductImageByProductIdAndImageNumMutationArgs {
+  input: UpdateProductImageByProductIdAndImageNumInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
 }
 export interface UpdateProductMutationArgs {
   input: UpdateProductInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
@@ -719,6 +854,12 @@ export interface DeleteProductCategoryMutationArgs {
 }
 export interface DeleteProductCategoryByIdMutationArgs {
   input: DeleteProductCategoryByIdInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+}
+export interface DeleteProductImageMutationArgs {
+  input: DeleteProductImageInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+}
+export interface DeleteProductImageByProductIdAndImageNumMutationArgs {
+  input: DeleteProductImageByProductIdAndImageNumInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
 }
 export interface DeleteProductMutationArgs {
   input: DeleteProductInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
@@ -752,6 +893,9 @@ export interface CartEdgeCreateCartPayloadArgs {
 export interface ProductCategoryEdgeCreateProductCategoryPayloadArgs {
   orderBy?: ProductCategoriesOrderBy[] | null; /** The method to use when ordering `ProductCategory`. */
 }
+export interface ProductImageEdgeCreateProductImagePayloadArgs {
+  orderBy?: ProductImagesOrderBy[] | null; /** The method to use when ordering `ProductImage`. */
+}
 export interface ProductEdgeCreateProductPayloadArgs {
   orderBy?: ProductsOrderBy[] | null; /** The method to use when ordering `Product`. */
 }
@@ -764,6 +908,9 @@ export interface CartEdgeUpdateCartPayloadArgs {
 export interface ProductCategoryEdgeUpdateProductCategoryPayloadArgs {
   orderBy?: ProductCategoriesOrderBy[] | null; /** The method to use when ordering `ProductCategory`. */
 }
+export interface ProductImageEdgeUpdateProductImagePayloadArgs {
+  orderBy?: ProductImagesOrderBy[] | null; /** The method to use when ordering `ProductImage`. */
+}
 export interface ProductEdgeUpdateProductPayloadArgs {
   orderBy?: ProductsOrderBy[] | null; /** The method to use when ordering `Product`. */
 }
@@ -775,6 +922,9 @@ export interface CartEdgeDeleteCartPayloadArgs {
 }
 export interface ProductCategoryEdgeDeleteProductCategoryPayloadArgs {
   orderBy?: ProductCategoriesOrderBy[] | null; /** The method to use when ordering `ProductCategory`. */
+}
+export interface ProductImageEdgeDeleteProductImagePayloadArgs {
+  orderBy?: ProductImagesOrderBy[] | null; /** The method to use when ordering `ProductImage`. */
 }
 export interface ProductEdgeDeleteProductPayloadArgs {
   orderBy?: ProductsOrderBy[] | null; /** The method to use when ordering `Product`. */
@@ -814,6 +964,18 @@ export enum ProductsOrderBy {
   DESCRIPTION_DESC = "DESCRIPTION_DESC",
   SHORT_DESCRIPTION_ASC = "SHORT_DESCRIPTION_ASC",
   SHORT_DESCRIPTION_DESC = "SHORT_DESCRIPTION_DESC",
+  PRIMARY_KEY_ASC = "PRIMARY_KEY_ASC",
+  PRIMARY_KEY_DESC = "PRIMARY_KEY_DESC",
+}
+/** Methods to use when ordering `ProductImage`. */
+export enum ProductImagesOrderBy {
+  NATURAL = "NATURAL",
+  PRODUCT_ID_ASC = "PRODUCT_ID_ASC",
+  PRODUCT_ID_DESC = "PRODUCT_ID_DESC",
+  IMAGE_KEY_ASC = "IMAGE_KEY_ASC",
+  IMAGE_KEY_DESC = "IMAGE_KEY_DESC",
+  IMAGE_NUM_ASC = "IMAGE_NUM_ASC",
+  IMAGE_NUM_DESC = "IMAGE_NUM_DESC",
   PRIMARY_KEY_ASC = "PRIMARY_KEY_ASC",
   PRIMARY_KEY_DESC = "PRIMARY_KEY_DESC",
 }
@@ -878,16 +1040,19 @@ export namespace QueryResolvers {
     node?: NodeResolver; /** Fetches an object given its globally unique `ID`. */
     allCarts?: AllCartsResolver; /** Reads and enables pagination through a set of `Cart`. */
     allProductCategories?: AllProductCategoriesResolver; /** Reads and enables pagination through a set of `ProductCategory`. */
+    allProductImages?: AllProductImagesResolver; /** Reads and enables pagination through a set of `ProductImage`. */
     allProducts?: AllProductsResolver; /** Reads and enables pagination through a set of `Product`. */
     allSellers?: AllSellersResolver; /** Reads and enables pagination through a set of `Seller`. */
     allUsers?: AllUsersResolver; /** Reads and enables pagination through a set of `User`. */
     cartByItemIdAndUserId?: CartByItemIdAndUserIdResolver; 
     productCategoryById?: ProductCategoryByIdResolver; 
+    productImageByProductIdAndImageNum?: ProductImageByProductIdAndImageNumResolver; 
     productById?: ProductByIdResolver; 
     productByName?: ProductByNameResolver; 
     userById?: UserByIdResolver; 
     cart?: CartResolver; /** Reads a single `Cart` using its globally unique `ID`. */
     productCategory?: ProductCategoryResolver; /** Reads a single `ProductCategory` using its globally unique `ID`. */
+    productImage?: ProductImageResolver; /** Reads a single `ProductImage` using its globally unique `ID`. */
     product?: ProductResolver; /** Reads a single `Product` using its globally unique `ID`. */
     user?: UserResolver; /** Reads a single `User` using its globally unique `ID`. */
     currentUser?: CurrentUserResolver; /** The currently logged in User. Returns 'null' if noone is logged in. */
@@ -918,6 +1083,17 @@ export namespace QueryResolvers {
     after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
     orderBy?: ProductCategoriesOrderBy[] | null; /** The method to use when ordering `ProductCategory`. */
     condition?: ProductCategoryCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
+  }
+
+  export type AllProductImagesResolver = Resolver<ProductImagesConnection | null, AllProductImagesArgs>;
+  export interface AllProductImagesArgs {
+    first?: number | null; /** Only read the first `n` values of the set. */
+    last?: number | null; /** Only read the last `n` values of the set. */
+    offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
+    before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
+    after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
+    orderBy?: ProductImagesOrderBy[] | null; /** The method to use when ordering `ProductImage`. */
+    condition?: ProductImageCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
   }
 
   export type AllProductsResolver = Resolver<ProductsConnection | null, AllProductsArgs>;
@@ -964,6 +1140,12 @@ export namespace QueryResolvers {
     id: UUID; 
   }
 
+  export type ProductImageByProductIdAndImageNumResolver = Resolver<ProductImage | null, ProductImageByProductIdAndImageNumArgs>;
+  export interface ProductImageByProductIdAndImageNumArgs {
+    productId: UUID; 
+    imageNum: number; 
+  }
+
   export type ProductByIdResolver = Resolver<Product | null, ProductByIdArgs>;
   export interface ProductByIdArgs {
     id: UUID; 
@@ -987,6 +1169,11 @@ export namespace QueryResolvers {
   export type ProductCategoryResolver = Resolver<ProductCategory | null, ProductCategoryArgs>;
   export interface ProductCategoryArgs {
     nodeId: string; /** The globally unique `ID` to be used in selecting a single `ProductCategory`. */
+  }
+
+  export type ProductImageResolver = Resolver<ProductImage | null, ProductImageArgs>;
+  export interface ProductImageArgs {
+    nodeId: string; /** The globally unique `ID` to be used in selecting a single `ProductImage`. */
   }
 
   export type ProductResolver = Resolver<Product | null, ProductArgs>;
@@ -1036,6 +1223,7 @@ export namespace ProductResolvers {
     userBySellerId?: UserBySellerIdResolver; /** Reads a single `User` that is related to this `Product`. */
     productCategoryByCategory?: ProductCategoryByCategoryResolver; /** Reads a single `ProductCategory` that is related to this `Product`. */
     carts?: CartsResolver; /** Reads and enables pagination through a set of `Cart`. */
+    productImagesByProductId?: ProductImagesByProductIdResolver; /** Reads and enables pagination through a set of `ProductImage`. */
   }
 
   export type NodeIdResolver = Resolver<string>;  export type IdResolver = Resolver<UUID>;  export type SellerIdResolver = Resolver<UUID>;  export type CategoryResolver = Resolver<UUID | null>;  export type NameResolver = Resolver<string>;  export type UsdCostResolver = Resolver<BigFloat>;  export type DescriptionResolver = Resolver<string | null>;  export type ShortDescriptionResolver = Resolver<string | null>;  export type UserBySellerIdResolver = Resolver<User | null>;  export type ProductCategoryByCategoryResolver = Resolver<ProductCategory | null>;  export type CartsResolver = Resolver<CartsConnection, CartsArgs>;
@@ -1047,6 +1235,17 @@ export namespace ProductResolvers {
     after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
     orderBy?: CartsOrderBy[] | null; /** The method to use when ordering `Cart`. */
     condition?: CartCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
+  }
+
+  export type ProductImagesByProductIdResolver = Resolver<ProductImagesConnection, ProductImagesByProductIdArgs>;
+  export interface ProductImagesByProductIdArgs {
+    first?: number | null; /** Only read the first `n` values of the set. */
+    last?: number | null; /** Only read the last `n` values of the set. */
+    offset?: number | null; /** Skip the first `n` values from our `after` cursor, an alternative to cursor based pagination. May not be used with `last`. */
+    before?: Cursor | null; /** Read all values in the set before (above) this cursor. */
+    after?: Cursor | null; /** Read all values in the set after (below) this cursor. */
+    orderBy?: ProductImagesOrderBy[] | null; /** The method to use when ordering `ProductImage`. */
+    condition?: ProductImageCondition | null; /** A condition to be used in determining which values should be returned by the collection. */
   }
 
   
@@ -1141,6 +1340,35 @@ export namespace ProductCategoryResolvers {
   }
 
   
+}/** A connection to a list of `ProductImage` values. */
+export namespace ProductImagesConnectionResolvers {
+  export interface Resolvers {
+    nodes?: NodesResolver; /** A list of `ProductImage` objects. */
+    edges?: EdgesResolver; /** A list of edges which contains the `ProductImage` and cursor to aid in pagination. */
+    pageInfo?: PageInfoResolver; /** Information to aid in pagination. */
+    totalCount?: TotalCountResolver; /** The count of *all* `ProductImage` you could get from the connection. */
+  }
+
+  export type NodesResolver = Resolver<(ProductImage | null)[]>;  export type EdgesResolver = Resolver<ProductImagesEdge[]>;  export type PageInfoResolver = Resolver<PageInfo>;  export type TotalCountResolver = Resolver<number | null>;  
+}
+export namespace ProductImageResolvers {
+  export interface Resolvers {
+    nodeId?: NodeIdResolver; /** A globally unique identifier. Can be used in various places throughout the system to identify this single value. */
+    productId?: ProductIdResolver; 
+    imageKey?: ImageKeyResolver; 
+    imageNum?: ImageNumResolver; 
+    productByProductId?: ProductByProductIdResolver; /** Reads a single `Product` that is related to this `ProductImage`. */
+  }
+
+  export type NodeIdResolver = Resolver<string>;  export type ProductIdResolver = Resolver<UUID>;  export type ImageKeyResolver = Resolver<UUID>;  export type ImageNumResolver = Resolver<number>;  export type ProductByProductIdResolver = Resolver<Product | null>;  
+}/** A `ProductImage` edge in the connection. */
+export namespace ProductImagesEdgeResolvers {
+  export interface Resolvers {
+    cursor?: CursorResolver; /** A cursor for use in pagination. */
+    node?: NodeResolver; /** The `ProductImage` at the end of the edge. */
+  }
+
+  export type CursorResolver = Resolver<Cursor | null>;  export type NodeResolver = Resolver<ProductImage | null>;  
 }/** A `Cart` edge in the connection. */
 export namespace CartsEdgeResolvers {
   export interface Resolvers {
@@ -1219,12 +1447,15 @@ export namespace MutationResolvers {
   export interface Resolvers {
     createCart?: CreateCartResolver; /** Creates a single `Cart`. */
     createProductCategory?: CreateProductCategoryResolver; /** Creates a single `ProductCategory`. */
+    createProductImage?: CreateProductImageResolver; /** Creates a single `ProductImage`. */
     createProduct?: CreateProductResolver; /** Creates a single `Product`. */
     createUser?: CreateUserResolver; /** Creates a single `User`. */
     updateCart?: UpdateCartResolver; /** Updates a single `Cart` using its globally unique id and a patch. */
     updateCartByItemIdAndUserId?: UpdateCartByItemIdAndUserIdResolver; /** Updates a single `Cart` using a unique key and a patch. */
     updateProductCategory?: UpdateProductCategoryResolver; /** Updates a single `ProductCategory` using its globally unique id and a patch. */
     updateProductCategoryById?: UpdateProductCategoryByIdResolver; /** Updates a single `ProductCategory` using a unique key and a patch. */
+    updateProductImage?: UpdateProductImageResolver; /** Updates a single `ProductImage` using its globally unique id and a patch. */
+    updateProductImageByProductIdAndImageNum?: UpdateProductImageByProductIdAndImageNumResolver; /** Updates a single `ProductImage` using a unique key and a patch. */
     updateProduct?: UpdateProductResolver; /** Updates a single `Product` using its globally unique id and a patch. */
     updateProductById?: UpdateProductByIdResolver; /** Updates a single `Product` using a unique key and a patch. */
     updateProductByName?: UpdateProductByNameResolver; /** Updates a single `Product` using a unique key and a patch. */
@@ -1234,6 +1465,8 @@ export namespace MutationResolvers {
     deleteCartByItemIdAndUserId?: DeleteCartByItemIdAndUserIdResolver; /** Deletes a single `Cart` using a unique key. */
     deleteProductCategory?: DeleteProductCategoryResolver; /** Deletes a single `ProductCategory` using its globally unique id. */
     deleteProductCategoryById?: DeleteProductCategoryByIdResolver; /** Deletes a single `ProductCategory` using a unique key. */
+    deleteProductImage?: DeleteProductImageResolver; /** Deletes a single `ProductImage` using its globally unique id. */
+    deleteProductImageByProductIdAndImageNum?: DeleteProductImageByProductIdAndImageNumResolver; /** Deletes a single `ProductImage` using a unique key. */
     deleteProduct?: DeleteProductResolver; /** Deletes a single `Product` using its globally unique id. */
     deleteProductById?: DeleteProductByIdResolver; /** Deletes a single `Product` using a unique key. */
     deleteProductByName?: DeleteProductByNameResolver; /** Deletes a single `Product` using a unique key. */
@@ -1253,6 +1486,11 @@ export namespace MutationResolvers {
   export type CreateProductCategoryResolver = Resolver<CreateProductCategoryPayload | null, CreateProductCategoryArgs>;
   export interface CreateProductCategoryArgs {
     input: CreateProductCategoryInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+  }
+
+  export type CreateProductImageResolver = Resolver<CreateProductImagePayload | null, CreateProductImageArgs>;
+  export interface CreateProductImageArgs {
+    input: CreateProductImageInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
   }
 
   export type CreateProductResolver = Resolver<CreateProductPayload | null, CreateProductArgs>;
@@ -1283,6 +1521,16 @@ export namespace MutationResolvers {
   export type UpdateProductCategoryByIdResolver = Resolver<UpdateProductCategoryPayload | null, UpdateProductCategoryByIdArgs>;
   export interface UpdateProductCategoryByIdArgs {
     input: UpdateProductCategoryByIdInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+  }
+
+  export type UpdateProductImageResolver = Resolver<UpdateProductImagePayload | null, UpdateProductImageArgs>;
+  export interface UpdateProductImageArgs {
+    input: UpdateProductImageInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+  }
+
+  export type UpdateProductImageByProductIdAndImageNumResolver = Resolver<UpdateProductImagePayload | null, UpdateProductImageByProductIdAndImageNumArgs>;
+  export interface UpdateProductImageByProductIdAndImageNumArgs {
+    input: UpdateProductImageByProductIdAndImageNumInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
   }
 
   export type UpdateProductResolver = Resolver<UpdateProductPayload | null, UpdateProductArgs>;
@@ -1328,6 +1576,16 @@ export namespace MutationResolvers {
   export type DeleteProductCategoryByIdResolver = Resolver<DeleteProductCategoryPayload | null, DeleteProductCategoryByIdArgs>;
   export interface DeleteProductCategoryByIdArgs {
     input: DeleteProductCategoryByIdInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+  }
+
+  export type DeleteProductImageResolver = Resolver<DeleteProductImagePayload | null, DeleteProductImageArgs>;
+  export interface DeleteProductImageArgs {
+    input: DeleteProductImageInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
+  }
+
+  export type DeleteProductImageByProductIdAndImageNumResolver = Resolver<DeleteProductImagePayload | null, DeleteProductImageByProductIdAndImageNumArgs>;
+  export interface DeleteProductImageByProductIdAndImageNumArgs {
+    input: DeleteProductImageByProductIdAndImageNumInput; /** The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields. */
   }
 
   export type DeleteProductResolver = Resolver<DeleteProductPayload | null, DeleteProductArgs>;
@@ -1405,6 +1663,22 @@ export namespace CreateProductCategoryPayloadResolvers {
   }
 
   
+}/** The output of our create `ProductImage` mutation. */
+export namespace CreateProductImagePayloadResolvers {
+  export interface Resolvers {
+    clientMutationId?: ClientMutationIdResolver; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+    productImage?: ProductImageResolver; /** The `ProductImage` that was created by this mutation. */
+    query?: QueryResolver; /** Our root query field type. Allows us to run any query from our mutation payload. */
+    productByProductId?: ProductByProductIdResolver; /** Reads a single `Product` that is related to this `ProductImage`. */
+    productImageEdge?: ProductImageEdgeResolver; /** An edge for our `ProductImage`. May be used by Relay 1. */
+  }
+
+  export type ClientMutationIdResolver = Resolver<string | null>;  export type ProductImageResolver = Resolver<ProductImage | null>;  export type QueryResolver = Resolver<Query | null>;  export type ProductByProductIdResolver = Resolver<Product | null>;  export type ProductImageEdgeResolver = Resolver<ProductImagesEdge | null, ProductImageEdgeArgs>;
+  export interface ProductImageEdgeArgs {
+    orderBy?: ProductImagesOrderBy[] | null; /** The method to use when ordering `ProductImage`. */
+  }
+
+  
 }/** The output of our create `Product` mutation. */
 export namespace CreateProductPayloadResolvers {
   export interface Resolvers {
@@ -1466,6 +1740,22 @@ export namespace UpdateProductCategoryPayloadResolvers {
   export type ClientMutationIdResolver = Resolver<string | null>;  export type ProductCategoryResolver = Resolver<ProductCategory | null>;  export type QueryResolver = Resolver<Query | null>;  export type ProductCategoryEdgeResolver = Resolver<ProductCategoriesEdge | null, ProductCategoryEdgeArgs>;
   export interface ProductCategoryEdgeArgs {
     orderBy?: ProductCategoriesOrderBy[] | null; /** The method to use when ordering `ProductCategory`. */
+  }
+
+  
+}/** The output of our update `ProductImage` mutation. */
+export namespace UpdateProductImagePayloadResolvers {
+  export interface Resolvers {
+    clientMutationId?: ClientMutationIdResolver; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+    productImage?: ProductImageResolver; /** The `ProductImage` that was updated by this mutation. */
+    query?: QueryResolver; /** Our root query field type. Allows us to run any query from our mutation payload. */
+    productByProductId?: ProductByProductIdResolver; /** Reads a single `Product` that is related to this `ProductImage`. */
+    productImageEdge?: ProductImageEdgeResolver; /** An edge for our `ProductImage`. May be used by Relay 1. */
+  }
+
+  export type ClientMutationIdResolver = Resolver<string | null>;  export type ProductImageResolver = Resolver<ProductImage | null>;  export type QueryResolver = Resolver<Query | null>;  export type ProductByProductIdResolver = Resolver<Product | null>;  export type ProductImageEdgeResolver = Resolver<ProductImagesEdge | null, ProductImageEdgeArgs>;
+  export interface ProductImageEdgeArgs {
+    orderBy?: ProductImagesOrderBy[] | null; /** The method to use when ordering `ProductImage`. */
   }
 
   
@@ -1535,6 +1825,23 @@ export namespace DeleteProductCategoryPayloadResolvers {
   }
 
   
+}/** The output of our delete `ProductImage` mutation. */
+export namespace DeleteProductImagePayloadResolvers {
+  export interface Resolvers {
+    clientMutationId?: ClientMutationIdResolver; /** The exact same `clientMutationId` that was provided in the mutation input, unchanged and unused. May be used by a client to track mutations. */
+    productImage?: ProductImageResolver; /** The `ProductImage` that was deleted by this mutation. */
+    deletedProductImageId?: DeletedProductImageIdResolver; 
+    query?: QueryResolver; /** Our root query field type. Allows us to run any query from our mutation payload. */
+    productByProductId?: ProductByProductIdResolver; /** Reads a single `Product` that is related to this `ProductImage`. */
+    productImageEdge?: ProductImageEdgeResolver; /** An edge for our `ProductImage`. May be used by Relay 1. */
+  }
+
+  export type ClientMutationIdResolver = Resolver<string | null>;  export type ProductImageResolver = Resolver<ProductImage | null>;  export type DeletedProductImageIdResolver = Resolver<string | null>;  export type QueryResolver = Resolver<Query | null>;  export type ProductByProductIdResolver = Resolver<Product | null>;  export type ProductImageEdgeResolver = Resolver<ProductImagesEdge | null, ProductImageEdgeArgs>;
+  export interface ProductImageEdgeArgs {
+    orderBy?: ProductImagesOrderBy[] | null; /** The method to use when ordering `ProductImage`. */
+  }
+
+  
 }/** The output of our delete `Product` mutation. */
 export namespace DeleteProductPayloadResolvers {
   export interface Resolvers {
@@ -1592,13 +1899,59 @@ export namespace CreateAndLoadUserByStellarPublicKeyPayloadResolvers {
   }
 
   
-}export namespace Logout {
+}export namespace CreateProductPic {
+  export type Variables = {
+    productID: UUID;
+    file: Upload;
+    num: number;
+  }
+
+  export type Mutation = {
+    __typename?: "Mutation";
+    createProductImage?: CreateProductImage | null; 
+  }
+
+  export type CreateProductImage = {
+    __typename?: "CreateProductImagePayload";
+    productImage?: ProductImage | null; 
+  }
+
+  export type ProductImage = {
+    __typename?: "ProductImage";
+    imageKey: UUID; 
+    productId: UUID; 
+    imageNum: number; 
+  }
+}
+export namespace Logout {
   export type Variables = {
   }
 
   export type Mutation = {
     __typename?: "Mutation";
     logout?: boolean | null; 
+  }
+}
+export namespace UpdateProductPic {
+  export type Variables = {
+    productID: UUID;
+    file: Upload;
+    num: number;
+  }
+
+  export type Mutation = {
+    __typename?: "Mutation";
+    updateProductImageByProductIdAndImageNum?: UpdateProductImageByProductIdAndImageNum | null; 
+  }
+
+  export type UpdateProductImageByProductIdAndImageNum = {
+    __typename?: "UpdateProductImagePayload";
+    productImage?: ProductImage | null; 
+  }
+
+  export type ProductImage = {
+    __typename?: "ProductImage";
+    imageKey: UUID; 
   }
 }
 export namespace UpdateProfilePic {
@@ -1660,6 +2013,7 @@ export namespace GetAllProductInfo {
     description?: string | null; 
     userBySellerId?: UserBySellerId | null; 
     productCategoryByCategory?: ProductCategoryByCategory | null; 
+    productImagesByProductId: ProductImagesByProductId; 
   }
 
   export type UserBySellerId = {
@@ -1674,6 +2028,18 @@ export namespace GetAllProductInfo {
     __typename?: "ProductCategory";
     id: UUID; 
     name: string; 
+  }
+
+  export type ProductImagesByProductId = {
+    __typename?: "ProductImagesConnection";
+    nodes: (Nodes | null)[]; 
+  }
+
+  export type Nodes = {
+    __typename?: "ProductImage";
+    productId: UUID; 
+    imageKey: UUID; 
+    imageNum: number; 
   }
 }
 export namespace GetUserInfo {
@@ -1818,7 +2184,7 @@ export namespace AllProductsByCategoryId {
     id: UUID; 
     name: string; 
     usdCost: BigFloat; 
-    description?: string | null; 
+    shortDescription?: string | null; 
   }
 }
 export namespace GetUserProfileDetails {
@@ -1890,7 +2256,7 @@ export namespace AllSellerProducts {
     id: UUID; 
     name: string; 
     usdCost: BigFloat; 
-    description?: string | null; 
+    shortDescription?: string | null; 
   }
 }
 export namespace GetAllSellers {

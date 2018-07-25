@@ -18,6 +18,13 @@ export default gql`
                 id
                 name
             }
+            productImagesByProductId @connection(key: "product_images"){
+                nodes {
+                    productId
+                    imageKey
+                    imageNum
+                }
+            }
         }
     }
 `;

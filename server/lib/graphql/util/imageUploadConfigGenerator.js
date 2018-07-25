@@ -45,6 +45,13 @@ export function generateUploadResolver(config){
 
         //query for the current key
         const oldKeyPromise = pool.query(sql, argExtractor(args))
+            .then((res) => {
+                if(!res.rows[0]){
+                    console.log("No previous image!");
+                    return null;
+                }
+                return res.rows[0][column];
+            })
             .catch((err) => {
                 console.log(`Could not find old key (or lack of old key) on image delete
                 for table '${table}' and column '${column}!\n`, err);
@@ -66,22 +73,20 @@ export function generateUploadResolver(config){
         const readyToMutatePromise = Promise.all([oldKeyPromise, savePromise]);
 
         //once the new images have been saved AND we have gotten the old key, DELETE the old images
-        readyToMutatePromise.then(([oldKeyQueryResults, ...rest]) => {
-            if(!oldKeyQueryResults) return null;
-            return oldKeyQueryResults.rows[0][column];
-        }).then((oldKey) => {
+        readyToMutatePromise.then(([oldKey, ...rest]) => {
+            console.log("oldkey", oldKey);
 
             //nothing to delete!
             if(!oldKey)
                 return Promise.resolve();
 
             const toDelete = Object.keys(copies).map(extension => generateFilename(oldKey, extension));
-            return deleteS3(toDelete);
-        }).catch(err => {
-            console.log(
-                `Images of key '${oldKey}' failed to delete for table '${table}' and column '${column}!\n`,
-                err
-            );
+            return deleteS3(toDelete).catch(err => {
+                console.log(
+                    `Image of key ${oldKey} failed to delete for table '${table}' and column '${column}!\n`,
+                    err
+                );
+            })
         });
 
         //no need to wait for deleting to finish
