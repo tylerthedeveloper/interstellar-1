@@ -10,7 +10,7 @@ import StarRatingComponent from "react-star-rating-component";
 
 /****  TYPES ******/
 import { IPresentableProduct } from "Types/local/PresentableProductType";
-import { NavLink } from "react-router-dom";
+import { NavLink, Route } from "react-router-dom";
 interface IComponentProps extends WithStyles<typeof styles> {
    product: IPresentableProduct;
    ActionComponent: React.ComponentType<{product?: IPresentableProduct, quantity?: number}>;
@@ -25,8 +25,8 @@ class ProductListItem extends React.PureComponent<IComponentProps> {
         const {name, shortDescription} = product;
 
         return(
-            <NavLink to={`/product/${product.id}`}>
-                <ListItem divider={true} button={true} >
+            <Route render={(routeProps) => (
+                <ListItem divider={true} button={true} onClick={() => routeProps.history.push(`/product/${product.id}`)}>
                     <Grid container={true}>
                         <Grid item={true} xs={2} className={classes.image}>
                             Image Here
@@ -54,7 +54,8 @@ class ProductListItem extends React.PureComponent<IComponentProps> {
                         </Grid>
                     </Grid>
                 </ListItem>
-            </NavLink>
+            )}/>
+
         );
     }
 }

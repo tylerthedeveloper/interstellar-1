@@ -215,6 +215,7 @@ class ProductListItemAddToCart extends React.PureComponent<IComponentProps> {
                         </Typography>
                         <form
                             onMouseDown={(event) => event.stopPropagation()}
+                            onClick={(event) => event.stopPropagation()}
                             onSubmit={(event) => {
                                 event.preventDefault();
                                 updateQuantityHandler(document.getElementById(quantitySelectorID) as HTMLInputElement);

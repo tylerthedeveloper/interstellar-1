@@ -38,7 +38,7 @@ class ProductListItemAddToCart extends React.PureComponent<IComponentProps> {
         return (
 
             <Query
-                query={getCurrentUser}
+                query={replacementQuery}
             >
 
                 {({data, loading, error }) => {
@@ -90,7 +90,7 @@ class ProductListItemAddToCart extends React.PureComponent<IComponentProps> {
                                                 cache.writeQuery({ query: replacementQuery, data: results });
                                                 ui.displayNotification(`${quantity} x ${name} added to cart!`);
                                             } catch (e) {
-                                                console.log("Invalid query!");
+                                                console.log("Invalid query!", e);
                                             }
                                         },
                                     });
@@ -115,7 +115,10 @@ class ProductListItemAddToCart extends React.PureComponent<IComponentProps> {
                                         <Typography variant={"subheading"}>
                                             Price: {usdCost}
                                         </Typography>
-                                        <form onMouseDown={(event) => event.stopPropagation()}>
+                                        <form
+                                            onMouseDown={(event) => event.stopPropagation()}
+                                            onClick={(event) => event.stopPropagation()}
+                                        >
                                             {quantitySelector}
                                             <IconButton
                                                 className={"material-icons"}
