@@ -41,12 +41,13 @@ class Container extends React.PureComponent<IContainerPropsWithApollo> {
         });
 
         /****  Initial State    *****/
+
+        //Eager load the data that is already in the cache
         client.query({
             query: GetAllProductInfoQuery,
             variables: { productID, },
             fetchPolicy: "cache-only"
         }).then(res => {
-            console.log("early", res.data);
             const {productById} = res.data as GetAllProductInfo.Query;
             if(productById) {
                 this.setState({
@@ -81,7 +82,6 @@ class Container extends React.PureComponent<IContainerPropsWithApollo> {
 
     public componentWillUnmount() {
         this.subscriptions.forEach((sub) => sub.unsubscribe());
-        console.log("Unmount!");
     }
 
     /*****      Render          *****/
