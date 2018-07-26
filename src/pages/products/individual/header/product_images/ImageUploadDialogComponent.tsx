@@ -2,7 +2,6 @@ import {
     createStyles,
     Dialog,
     DialogContent,
-    DialogContentText,
     DialogTitle, Icon, Tab, Tabs,
     Theme, Typography,
     WithStyles,
@@ -27,7 +26,6 @@ class ImageUploadDialogComponent extends React.Component<IImageUploadDialogCompo
 
     public state: {
         imageNum: number;
-        currentImage: {productId: string; imageKey: string, imageNum: number} | null;
     };
 
     public constructor(props: IImageUploadDialogComponentProps) {
@@ -35,7 +33,6 @@ class ImageUploadDialogComponent extends React.Component<IImageUploadDialogCompo
 
         this.state = {
             imageNum: 0,
-            currentImage: props.images[0],
         };
     }
 
