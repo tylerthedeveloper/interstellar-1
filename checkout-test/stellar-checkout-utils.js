@@ -147,7 +147,7 @@ function createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, p
 // inputs: sender: string, receiver: string, sendAsset: Asset, destAsset: Asset, destAmount: string | num, 
 // returns: PathPaymentResult | transactionResult
 // -------------------------------------------------------------------- //
-function findCheapestPath(sender, receiver, sendAsset, destAsset, destAmount) {
+function findCheapestPath(sender, receiver, sendAsset, currentBalance, destAsset, destAmount) {
     // console.log(arguments);
     return server.paths(sender, receiver, destAsset, destAmount)
         .call()
@@ -158,7 +158,7 @@ function findCheapestPath(sender, receiver, sendAsset, destAsset, destAmount) {
                 (path.source_asset_code === code && path.source_asset_issuer === issuer))
             const cheapestPath = pathList.reduce((prev, curr) => (prev.source_amount < curr.source_amount ? prev : curr), []);
             console.log('path: \n' + JSON.stringify(cheapestPath));
-            if (cheapestPath) return createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, cheapestPath);
+            if (cheapestPath && (Number(currentBalance) > Number(cheapestPath.source_amount))) return createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, cheapestPath);
             throw Error('err: No path exists between the corresponding assets')
         })
         .catch(err => console.error(err))
@@ -339,6 +339,15 @@ const repoAssetPath = StellarSdk.Operation.pathPayment({
 // server.paths(pubKey, pubKey3, repoAsset, 1)
 //     .call()
 //     .then(res => console.log(res))
+
+// createTransaction(pubKey,privKey, mobiAssetPath)
+//     .then(res => {
+//         console.log(res)
+//         console.log('\n')
+//         console.log(res.toEnvelope().toXDR('base64'))
+//         console.log('\n')
+//         console.log(JSON.stringify(res.toEnvelope().toXDR('base64')))
+//     });
 
 module.exports = {
     AssetDict,
