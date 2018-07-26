@@ -1,43 +1,42 @@
 import { createStyles, Icon, Theme, WithStyles, withStyles } from "@material-ui/core";
 import * as React from "react";
 
-import UploadDialog from './ImageUploadDialogContainer';
+import UploadDialog from "./ImageUploadDialogContainer";
 
 /****  TYPES ******/
+import { GetAllProductInfo } from "GQLTypes";
 interface IProductImagesComponentProps extends WithStyles<typeof styles> {
-    images: {productId?: string; imageKey?: string, imageNum: number}[];
+    images: GetAllProductInfo.Nodes[];
     productID: string;
 }
-
 
 /****  COMPONENT ******/
 class Component extends React.Component<IProductImagesComponentProps> {
 
     public state: {
         open: boolean;
-    }
+    };
 
-    constructor(props: IProductImagesComponentProps){
+    constructor(props: IProductImagesComponentProps) {
         super(props);
 
         this.state = {
-            open: false
-        }
+            open: false,
+        };
     }
 
     public onClickHandler = () => {
         this.setState({
-            open: true
-        })
+            open: true,
+        });
     }
 
     public onCloseHanler = () => {
         this.setState({
             ...this.state,
-            open: false
-        })
+            open: false,
+        });
     }
-
 
     public render() {
         const {classes, images, productID} = this.props;
@@ -78,7 +77,7 @@ const styles = (theme: Theme) => (createStyles({
         width: "100%",
         maxHeight: "400px",
         objectFit: "contain",
-        borderRadius: "15px"
+        borderRadius: "15px",
 
     },
     imageContainerFull: {
@@ -88,7 +87,7 @@ const styles = (theme: Theme) => (createStyles({
         position: "relative",
         cursor: "pointer",
         marginBottom: "10px",
-        borderRadius: "10px"
+        borderRadius: "10px",
     },
     imageContainerEmpty: {
         width: "100%",
@@ -98,7 +97,7 @@ const styles = (theme: Theme) => (createStyles({
         cursor: "pointer",
         marginBottom: "10px",
         borderRadius: "10px",
-        background: theme.palette.grey.A100
+        background: theme.palette.grey.A100,
     },
     edit: {
         position: "absolute",

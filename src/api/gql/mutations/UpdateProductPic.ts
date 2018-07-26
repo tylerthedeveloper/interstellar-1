@@ -12,7 +12,9 @@ export default gql`
             }
         ){
             productImage{
+                productId
                 imageKey
+                imageNum
             }
         }
     }

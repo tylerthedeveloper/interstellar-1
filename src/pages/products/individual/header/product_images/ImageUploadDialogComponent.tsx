@@ -6,22 +6,21 @@ import {
     DialogTitle, Icon, Tab, Tabs,
     Theme, Typography,
     WithStyles,
-    withStyles
+    withStyles,
 } from "@material-ui/core";
 import * as React from "react";
 import Dropzone from "react-dropzone";
-import { CreateProductPicMutationHandlerVars, UpdateProductPicMutationHandlerVars } from "./ImageUploadDialogContainer";
-
 
 /****  TYPES ******/
+import { GetAllProductInfo } from "GQLTypes";
+import { CreateProductPicMutationHandlerVars, UpdateProductPicMutationHandlerVars } from "./ImageUploadDialogContainer";
 interface IImageUploadDialogComponentProps extends WithStyles<typeof styles> {
     open: boolean;
     handleClose: () => void;
-    images: {productId: string; imageKey: string, imageNum: number}[];
-    newProductImageHandler: (variables:CreateProductPicMutationHandlerVars) => void;
-    updateProductImageHandler: (variables:UpdateProductPicMutationHandlerVars) => void;
+    images: GetAllProductInfo.Nodes[];
+    newProductImageHandler: (variables: CreateProductPicMutationHandlerVars) => void;
+    updateProductImageHandler: (variables: UpdateProductPicMutationHandlerVars) => void;
 }
-
 
 /****  COMPONENT ******/
 class ImageUploadDialogComponent extends React.Component<IImageUploadDialogComponentProps> {
@@ -31,39 +30,34 @@ class ImageUploadDialogComponent extends React.Component<IImageUploadDialogCompo
         currentImage: {productId: string; imageKey: string, imageNum: number} | null;
     };
 
-    public constructor(props: IImageUploadDialogComponentProps){
+    public constructor(props: IImageUploadDialogComponentProps) {
         super(props);
 
         this.state = {
             imageNum: 0,
-            currentImage: props.images[0]
+            currentImage: props.images[0],
         };
     }
-
-    public static getDerivedStateFromProps(props:IImageUploadDialogComponentProps, state: ImageUploadDialogComponent["state"]){
-        let currentImage;
-        if(state.imageNum < props.images.length){
-            currentImage = props.images[state.imageNum];
-        }else{
-            currentImage = null;
-        }
-        state.currentImage = currentImage;
-        return state;
-    }
-
 
     public render() {
 
         const { classes, open, handleClose, images, newProductImageHandler, updateProductImageHandler } = this.props;
-        const {currentImage} = this.state;
+        const {imageNum} = this.state;
 
+        // get the current image from the image array
+        let currentImage;
+        if (imageNum < images.length) {
+            currentImage = images[imageNum];
+        } else {
+            currentImage = null;
+        }
 
-        //get the tabs right
+        // create the tabs for switching between interfaces
         const tabs = images.map(({imageKey, imageNum}, i) => {
             return <Tab key={imageKey} label={i == 0 ? "Main Image" : `Image ${imageNum}`} className={classes.imageSelector}/>;
         });
-        if(tabs.length < 5){
-            tabs.push(<Tab key={"new-image"} label="Add a New Image" className={classes.imageSelector}/>)
+        if (tabs.length < 5) {
+            tabs.push(<Tab key={"new-image"} label="Add a New Image" className={classes.imageSelector}/>);
         }
 
         return (
@@ -86,16 +80,19 @@ class ImageUploadDialogComponent extends React.Component<IImageUploadDialogCompo
                         accept={["image/jpeg", "image/png"] as any}
                         onDrop={(acceptedFiles, rejectedFiles) => {
 
-                            if(this.state.imageNum + 1 === tabs.length){
+                            // new images
+                            if (this.state.imageNum + 1 === tabs.length) {
                                 newProductImageHandler({
                                     file: acceptedFiles[0],
-                                    num: this.state.imageNum
-                                })
-                            }else{
+                                    num: this.state.imageNum,
+                                });
+
+                            // replacing images
+                            } else {
                                 updateProductImageHandler({
                                     file: acceptedFiles[0],
-                                    num: this.state.imageNum
-                                })
+                                    num: this.state.imageNum,
+                                });
                             }
                         }}
                     >
@@ -125,12 +122,12 @@ class ImageUploadDialogComponent extends React.Component<IImageUploadDialogCompo
                 <DialogContent className={classes.tabContainer}>
                     <Tabs
                         value={this.state.imageNum}
-                        onChange={(_, val)=>{
-                            this.setState({imageNum: val})
+                        onChange={(_, val) => {
+                            this.setState({imageNum: val});
                         }}
                         indicatorColor="primary"
                         textColor="primary"
-                        centered
+                        centered={true}
                     >
                         {tabs}
                     </Tabs>
@@ -148,20 +145,20 @@ const styles = (theme: Theme) => (createStyles({
         boxSizing: "border-box",
         padding: "20px",
         display: "flex",
-        justifyContent: "center"
+        justifyContent: "center",
     },
     dialog: {
         minWidth: "600px",
-        maxWidth: "850px"
+        maxWidth: "850px",
     },
     imageSelector: {
-        minWidth: "50px"
+        minWidth: "50px",
     },
 
     dropzone: {
-        "borderRadius": "10px",
-        "cursor": "pointer",
-        display: "inline"
+        borderRadius: "10px",
+        cursor: "pointer",
+        display: "inline",
     },
     image: {
         objectFit: "contain",
@@ -190,8 +187,8 @@ const styles = (theme: Theme) => (createStyles({
         justifyContent: "center",
     },
     tabContainer: {
-        marginTop: "15px"
-    }
+        marginTop: "15px",
+    },
 }));
 
 /****  EXPORT ******/

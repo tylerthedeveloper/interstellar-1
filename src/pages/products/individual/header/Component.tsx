@@ -5,14 +5,16 @@ import Actions from './HeaderActionComponent';
 import Info from './ProductHeaderInfoComponent';
 import Images from './product_images/Component';
 
+
 /****  TYPES ******/
+import { GetAllProductInfo } from "GQLTypes";
 interface IComponentProps extends WithStyles<typeof styles> {
     productID: string;
     productName: string;
     usdCost: number;
     shortDescription?: string | null;
     rating: number;
-    images: {productId?: string; imageKey?: string, imageNum: number}[];
+    images: GetAllProductInfo.Nodes[];
 }
 
 

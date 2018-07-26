@@ -1951,7 +1951,9 @@ export namespace UpdateProductPic {
 
   export type ProductImage = {
     __typename?: "ProductImage";
+    productId: UUID; 
     imageKey: UUID; 
+    imageNum: number; 
   }
 }
 export namespace UpdateProfilePic {
@@ -2185,6 +2187,17 @@ export namespace AllProductsByCategoryId {
     name: string; 
     usdCost: BigFloat; 
     shortDescription?: string | null; 
+    productImagesByProductId: ProductImagesByProductId; 
+  }
+
+  export type ProductImagesByProductId = {
+    __typename?: "ProductImagesConnection";
+    nodes: (_Nodes | null)[]; 
+  }
+
+  export type _Nodes = {
+    __typename?: "ProductImage";
+    imageKey: UUID; 
   }
 }
 export namespace GetUserProfileDetails {
@@ -2257,6 +2270,17 @@ export namespace AllSellerProducts {
     name: string; 
     usdCost: BigFloat; 
     shortDescription?: string | null; 
+    productImagesByProductId: ProductImagesByProductId; 
+  }
+
+  export type ProductImagesByProductId = {
+    __typename?: "ProductImagesConnection";
+    nodes: (_Nodes | null)[]; 
+  }
+
+  export type _Nodes = {
+    __typename?: "ProductImage";
+    imageKey: UUID; 
   }
 }
 export namespace GetAllSellers {
