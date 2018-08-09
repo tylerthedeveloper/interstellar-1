@@ -3,14 +3,10 @@ StellarSdk.Network.usePublicNetwork();
 const server = new StellarSdk.Server('https://horizon.stellar.org');
 
 // ----- keys / pairs ----- //
-const pubKey = 'GDUZVNG4E7AJTCHBNHOQRXUSED7RSVXBZ2NZRFZTZ5TKRGDG5GLV6MAF';
-const privKey = 'SCMUH4YUWKAN3GV33T5BD32A2FULPGHC4BJ7KI625BLCJGCVKZV3BHRW';
-
-const pubKey2 = 'GBPL65LCOZ35N26TJEL6SIELSWX4KXJGCRDYWB6CEDOILGR6KKTRHJG3';
-const privKey2 = 'SCYY5YZ6FSYRPNF474W627BI6RCBNDBM6ODZ6MS53CC4UOBYUYZN4AGI';
-
-const pubKey3 = 'GBG5JTXIOQEP2W3XJGQPYCJ7633KLFPA4SS5MB7FVOHIOWBXKEH2ZWBJ';
-const privKey3 = 'SB2CRANE2SXYNSEW5UTTIGZLKICQKM65LLPLNAVKDVJYWBGTJLV33RU6';
+const keySet = require('./data/_keys.js');
+const { pubKey, privKey } = keySet.firstKey;
+const { pubKey: pubKey2, privKey: privKey2 } = keySet.secondKey;
+const { pubKey: pubKey3, privKey: privKey3 } = keySet.thirdKey;
 
 // ----- Assets ----- //
 const nativeAsset = new StellarSdk.Asset.native();
@@ -18,7 +14,7 @@ const mobiAsset = new StellarSdk.Asset( 'MOBI', 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFU
 const eurtAsset = new StellarSdk.Asset( 'EURT', 'GAP5LETOV6YIE62YAM56STDANPRDO7ZFDBGSNHJQIYGGKSMOZAHOOS2S');
 const repoAsset = new StellarSdk.Asset( 'REPO', 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B');
 const cnyAsset = new StellarSdk.Asset( 'CNY', 'GAREELUB43IRHWEASCFBLKHURCGMHE5IF6XSE7EXDLACYHGRHM43RFOX');
-const futbolAsset = new StellarSdk.Asset( 'TFC', 'GDS3XDJAA4VY6MJYASIGSIMPHZ7AQNZ54RKLWT7MWCOU5YKYEVCNLVS3');
+// const futbolAsset = new StellarSdk.Asset( 'TFC', 'GDS3XDJAA4VY6MJYASIGSIMPHZ7AQNZ54RKLWT7MWCOU5YKYEVCNLVS3');
 
 const AssetDict = {
     MOBI: new StellarSdk.Asset( 'MOBI', 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH'),
@@ -26,11 +22,9 @@ const AssetDict = {
     REPO: new StellarSdk.Asset( 'REPO', 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B'),
     CNY: new StellarSdk.Asset( 'CNY', 'GAREELUB43IRHWEASCFBLKHURCGMHE5IF6XSE7EXDLACYHGRHM43RFOX'),
     TFC: new StellarSdk.Asset( 'TFC', 'GDS3XDJAA4VY6MJYASIGSIMPHZ7AQNZ54RKLWT7MWCOU5YKYEVCNLVS3')
+    // if we want to make our asset lol
+    // const tycoin = new StellarSdk.Asset("Tycoin", "GDNZIMIWPMRQ3X3UNFF7A7XI26XILUP6QBFT6MX7B62GAKVO3ZWDWWUW");
 };
-
-// if we want to make our asset lol
-// const tycoin = new StellarSdk.Asset("Tycoin", "GDNZIMIWPMRQ3X3UNFF7A7XI26XILUP6QBFT6MX7B62GAKVO3ZWDWWUW");
-
 
 // ----- functions ----- //
 
@@ -39,9 +33,8 @@ const AssetDict = {
 // inputs: publicKey: string
 // returns: Array <Asset>
 // -------------------------------------------------------------------- //
-async function getStellarBalances (publicKey) {
-  return await new Promise(res => res(server.loadAccount(publicKey)))
-      .then(account => account)
+function getStellarBalances (publicKey) {
+  return server.loadAccount(publicKey)
       .then(account => account.balances)
       .catch(err => console.log(err) )
 }
@@ -148,29 +141,26 @@ function createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, p
 // returns: PathPaymentResult | transactionResult
 // -------------------------------------------------------------------- //
 function findCheapestPath(sender, receiver, sendAsset, currentBalance, destAsset, destAmount) {
-    // console.log(arguments);
     return server.paths(sender, receiver, destAsset, destAmount)
         .call()
         .then(paths => {
             const _paths = JSON.parse(JSON.stringify(paths)).records;
-            const { code, issuer } = sendAsset; 
+            const { code, issuer } = sendAsset;
+            // console.log(_paths);
             const pathList = _paths.filter(path => 
                 (path.source_asset_code === code && path.source_asset_issuer === issuer))
+            // console.log(code, issuer);
             const cheapestPath = pathList.reduce((prev, curr) => (prev.source_amount < curr.source_amount ? prev : curr), []);
-            console.log('path: \n' + JSON.stringify(cheapestPath));
-            if (cheapestPath && (Number(currentBalance) > Number(cheapestPath.source_amount))) return createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, cheapestPath);
-            throw Error('err: No path exists between the corresponding assets')
+            // console.log('chepeast path: \n' + JSON.stringify(cheapestPath));
+            if (cheapestPath && (Number(currentBalance) >= Number(cheapestPath.source_amount))) 
+                // return createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, cheapestPath);
+                return cheapestPath;
+            throw Error('err: No suitable path exists between the corresponding assets')
         })
         .catch(err => console.error(err))
         // .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
 }
 
-// helper method for  below
-function codeIssuePair(pathFoundResult) {
-    const { source_asset_code, source_asset_issuer, source_asset_type } = pathFoundResult;
-    if (source_asset_type === 'native') return 'XLM'; 
-    else return new String(source_asset_code + '-' + source_asset_issuer);
-}
 
 // Cheapest = lowest source_amount
 // -------------------------------------------------------------------- //
@@ -178,12 +168,19 @@ function codeIssuePair(pathFoundResult) {
 // inputs: sender: string, receiver: string, sendAsset: Asset, destAsset: Asset, destAmount: string | num, 
 // returns: Dict < PathPaymentResult > | transactionResult
 // -------------------------------------------------------------------- //
+// helper method for  below
+function codeIssuePair(pathFoundResult) {
+    const { source_asset_code, source_asset_issuer, source_asset_type } = pathFoundResult;
+    if (source_asset_type === 'native') return 'XLM'; 
+    else return new String(source_asset_code + '-' + source_asset_issuer);
+}
+
 function findCheapestPaths(sender, receiver, destAsset, destAmount) {
     return server.paths(sender, receiver, destAsset, destAmount)
         .call()
         .then(paths => {
             const _paths = JSON.parse(JSON.stringify(paths)).records;
-            const pathDict = {} 
+            const pathDict = {}             
             _paths.forEach(element => {
                 const key = codeIssuePair(element);
                 if (!pathDict[key])
@@ -304,7 +301,7 @@ const repoAssetPath = StellarSdk.Operation.pathPayment({
 
 // getStellarBalances(pubKey).then(res => console.log(res))
 // getStellarBalances(pubKey2).then(res => console.log(res))
-// getStellarBalances(pubKey3).then(res => console.log(res))
+// getStellarBalances(pubKey).then(res => console.log(res))
 
 // createTransaction(pubKey, privKey, operations);
 // createTransaction(pubKey, privKey, mobiAssetPmtOp);
@@ -325,18 +322,19 @@ const repoAssetPath = StellarSdk.Operation.pathPayment({
 // findFirstPath(pubKey, pubKey3, mobiAsset, futbolAsset, 1)
 
 // ------ TEST THAT WORKS INTENTIONALLY ------ ///
-// findCheapestPath(pubKey, pubKey3, mobiAsset, repoAsset, 1)
+// findCheapestPath(pubKey, pubKey3, repoAsset, 12, mobiAsset, 1)
 //     .then(res => console.log(res))
 //     .catch(err => console.log(err))
     // .then(foundPath => createPathPayment(pubKey, pubKey3, mobiAsset, repoAsset, 1, foundPath))
 //     .then(pathPayment => createTransaction(pubKey, privKey, pathPayment))
 //     .catch(err => console.log(err))
 
-// findCheapestPath(pubKey, pubKey3, mobiAsset, repoAsset, 1, 0.015)
+// findCheapestPath(pubKey, pubKey3, mobiAsset, cnyAsset, 1, 0.015)
 //     .then(res => console.log(res))
-// console.log(StellarSdk.xdr.XDRStruct(mobiAssetPmtOp));
 
-// server.paths(pubKey, pubKey3, repoAsset, 1)
+    // console.log(StellarSdk.xdr.XDRStruct(mobiAssetPmtOp));
+
+// server.paths(pubKey, pubKey3, mobiAsset, 1)
 //     .call()
 //     .then(res => console.log(res))
 

@@ -7,6 +7,14 @@ StellarSdk.Network.useTestNetwork();
 const server = new StellarSdk.Server('https://horizon.stellar.org');
 const stellarUtils = require('./stellar-checkout-utils.js');
 const usdUtils = require('./usd-resolvers.js');
+const usdMicroService = require('./microservices/ms-usd-cache');
+const pathsMicroService = require('./microservices/ms-pathfinder');
+
+//
+// data for page
+// 
+const keySet = require('./data/_keys.js');
+const { pubKey: publicKey, privKey: privateKey } = keySet.firstKey;
 
 //
 //  THIS ALREADY EXISTS 
@@ -16,55 +24,27 @@ const usdUtils = require('./usd-resolvers.js');
 const _cartItems = require('./data/cart-items-data'); 
 
 function getCartItems() {
-    // return await Promise.resolve(_cartItems); 
-    return _cartItems; 
+    return Promise.resolve(_cartItems); 
+    // return new Promise((res, rej) => res(_cartItems)); 
 }
 
 const myCartItems = getCartItems()
 
 
-// 2 get stellar balances
-// get balances from stellar (horizon = "https://horizon.stellar.org/accounts/")
-// Array < { asset_type: string, balance: string, limit: string, asset_code: string, asset_issuer: string } >
+// 2 handle conversions
+// 2.1, get USD current rates: this is for aggregate calculations to see if can 
+// TODO: cover entire cart based on USD total 
 
-const publicKey = "GDUZVNG4E7AJTCHBNHOQRXUSED7RSVXBZ2NZRFZTZ5TKRGDG5GLV6MAF";
-const privateKey = 'SCMUH4YUWKAN3GV33T5BD32A2FULPGHC4BJ7KI625BLCJGCVKZV3BHRW';
+const usdPriceDict = usdUtils.getAverageUsdPrices(); // require('./data/temp-price-dict.js').usdPriceDict;
 
-// TODO: Use this here
-function loadBalances(pubKey) {
-    return stellarUtils.getStellarBalances(pubKey);
-}
-const myBalances = /* loadBalances(publicKey) */ [ 
-    { 
-        balance: '9.5534911',
-        limit: '922337203685.4775807',
-        asset_type: 'credit_alphanum4',
-        asset_code: 'MOBI',
-        asset_issuer: 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH' },
-    { 
-      balance: '1.5034706', asset_type: 'native' 
-    } 
-];
-
-
-// 3 handle conversions
-// 3.1, get USD current rates: this is for aggregate calculations to see if can cover entire cart based on USD total 
-
-// pull from local for testing
-// const usdPriceDict = require('./data/temp-price-dict.js').usdPriceDict;
-const usdPriceDict = usdUtils.getAverageUsdPrices();
-// console.log(usdPriceDict);
-
-// TODO: combine 3.2 and 3.3 into one iteration
 // 3.2, update cart items so every item has a { usd, asset.balance } pair
-    
-// when they DONT list usd price
+// THIS IS when they DONT list usd price
 function convertToUsd(asset_code, amount, usdPriceDict) {
     const usdPrice = usdPriceDict[asset_code].price_USD;
     return (usdPrice * amount);
 }
 
-// when they DO list usd price
+// THIS IS when they DO list usd price
 function convertToAsset(asset_code, fixedUsdPrice, usdPriceDict) {
     const usdPrice = usdPriceDict[asset_code].price_USD;
     return (fixedUsdPrice / usdPrice);
@@ -79,58 +59,72 @@ function setPriceAmounts(usdPriceDict, cartItems) {
         else cartItem.fixedUSDAmount = convertToUsd(asset_code, balance, usdPriceDict);
     });
 }
-// test //
-// setPriceAmounts(usdPriceDict, myCartItems);
-// console.log(myCartItems);
-
-function onPageLoad(pubKey) { 
-    // load items right away to show to user and then update them when we know the usd prices map has loaded
-    let _cartItems;
-    getCartItems().then(cartItems => {
-        // get and set cart items
-        /* this.myCartItems = */ console.log(cartItems)
-        _cartItems = cartItems;
-    })
-
-    // this is async and we can let it happen in the background knowing we'll be pulling from a cached micro-service
-    usdUtils.getAverageUsdPrices().then(usdPriceDict => {
-        console.log(usdPriceDict) 
-        setPriceAmounts(usdPriceDict, _cartItems)
-        console.log(_cartItems)
-    })
-    
-    // this can be made async and occur in the background
-    loadBalances(pubKey).then(balances => /* this.balances = */ console.log(myBalances))
-    
-}
-
-
-// ────────────────────────────────────────────────────────────────────────────────
-// ────────────────────────────────────────────────────────────────────────────────
-// ────────────────────────────────────────────────────────────────────────────────
-
-
 
 // todo: get better clarity on use cases for this
-// 3.3 get totals { usd, asset.balance }
+// get totals { asset_code: balance }
 function combineLikeAssets(cartItems) {
     const assetDict = {};
     cartItems.map(cartItem => {
-        const savedUsdValue = assetDict['USD'];
-        const curUsdValue = cartItem.fixedUSDAmount;
-        if (savedUsdValue) assetDict['USD'] += curUsdValue;
-        else assetDict['USD'] = curUsdValue;
-        const code = cartItem.acceptedAsset.asset_code;
-        const savedValue = assetDict[code];
+
+        // TODO: do we need USD?? if so where do we use it 
+        // const curUsdValue = cartItem.fixedUSDAmount;
+        // if (assetDict['USD']) {
+        //     assetDict['USD'].total += curUsdValue;
+        // } else {
+        //     assetDict['USD'] = { total: curUsdValue };
+        // }
+
+        const { asset_code: code, asset_issuer: issuer } = cartItem.acceptedAsset;
         const curValue = +cartItem.acceptedAsset.balance.toFixed(7);
-        if (savedValue) assetDict[code] += curValue;
-        else assetDict[code] = curValue;
+        if (assetDict[code] && assetDict[code].issuer === issuer) {
+            assetDict[code].total += curValue;
+        } else {
+            assetDict[code] = { total: curValue, issuer: issuer };
+        }
     });
     return assetDict;
 }
 
-// test //
-// console.log(combineLikeAssets(myCartItems));
+function onPageLoad(pubKey) { 
+    let _cartItems;
+    let _usdPriceDict;
+    let _balances;
+    const cartItemPromise = getCartItems();
+    const usdPricePromise = usdMicroService.getCache();
+    const balancesPromise = stellarUtils.getStellarBalances(pubKey);
+// this can be made async and occur in the background ... NEED TO set to page balances
+
+    let assetSet = {};    
+    Promise.all( [ cartItemPromise, balancesPromise, usdPricePromise ] )
+        .then((res) => {
+            _cartItems = res[0];
+            _balances = res[1];
+            _usdPriceDict = res[2];
+            setPriceAmounts(_usdPriceDict, _cartItems)
+
+            // catch current bug
+            // console.log(_balances);
+            // console.log(_usdPriceDict);
+            return _cartItems;
+        })
+        // .catch(err => console.error(err))
+        .then(cartItems => combineLikeAssets(cartItems))
+        // .catch(err => console.error(err))
+        .then(assetSet => {
+            return pathsMicroService.lookupAllPaths(pubKey, _balances, assetSet);
+            // console.log(paths);
+        })
+        // .catch(err => console.error(err))
+}
+
+onPageLoad(publicKey);
+
+// ────────────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────────────────
+
+
+
 
 
 // 3.4: not sure how we're doing this yet, depends on UI

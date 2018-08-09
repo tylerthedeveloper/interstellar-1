@@ -55,7 +55,7 @@ function load_StellarTermPrices() {
         .catch(err => console.log(err))
 }
 
-async function getAverageUsdPrices() {
+function getAverageUsdPrices() {
     const cmc = load_CoinMarketCapPrices();
     const st = load_StellarTermPrices();
     return axios.all([cmc, st])
@@ -91,7 +91,7 @@ async function getAverageUsdPrices() {
 
 // load_CoinMarketCapPrices().then(res => console.log(res))
 // load_StellarTermPrices().then(res => console.log(res))
-// getAverageUsdPrices().then(res => console.log(res))
+// getAverageusUsdPrices().then(res => console.log(res))
 
 module.exports = {
     getAverageUsdPrices
