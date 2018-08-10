@@ -8,7 +8,7 @@ const CartItem = {
 const cartItems = [ // Array<CartItem>
     {
         name: "CartItem 1",
-        fixedUSDAmount: .05,
+        fixedUSDAmount: .005,
         acceptedAsset: { 
             balance: 0, 
             asset_type: "alpha-numeric-4", 
@@ -21,7 +21,7 @@ const cartItems = [ // Array<CartItem>
     },
     {
         name: "CartItem 2",
-        fixedUSDAmount: .05,
+        fixedUSDAmount: .005,
         acceptedAsset: { 
             balance: 0, 
             asset_type: "alpha-numeric-4",

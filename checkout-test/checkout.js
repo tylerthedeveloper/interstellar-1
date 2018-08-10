@@ -6,110 +6,60 @@ const StellarSdk = require('stellar-sdk');
 StellarSdk.Network.useTestNetwork();
 const server = new StellarSdk.Server('https://horizon.stellar.org');
 const stellarUtils = require('./helpers/stellar-checkout-utils.js');
-const usdUtils = require('./helpers/usd-resolvers.js');
+const checkoutUtils = require('./helpers/checkout-utils');
 const usdMicroService = require('./microservices/ms-usd-cache');
 const pathsMicroService = require('./microservices/ms-pathfinder');
+const watcherMicroService = require('./microservices/ms-horizon-watcher');
 
-//
-// data for page
-// 
-const keySet = require('./data/_keys.js');
-const { pubKey: publicKey, privKey: privateKey } = keySet.firstKey;
 
-//
 //  THIS ALREADY EXISTS 
-//
 // 1. Get items in cart: graphql cart query
 // Array<CartItem>
 const _cartItems = require('./data/cart-items-data'); 
 
 function getCartItems() {
-    return Promise.resolve(_cartItems); 
-    // return new Promise((res, rej) => res(_cartItems)); 
+    // return Promise.resolve(_cartItems); 
+    return new Promise((res, rej) => res(_cartItems)); 
 }
-
-const myCartItems = getCartItems()
+// const myCartItems = getCartItems()
 
 
 // 2 handle conversions
 // 2.1, get USD current rates: this is for aggregate calculations to see if can 
 // TODO: cover entire cart based on USD total 
+// const usdPriceDict = usdUtils.getAverageUsdPrices(); // require('./data/temp-price-dict.js').usdPriceDict;
 
-const usdPriceDict = usdUtils.getAverageUsdPrices(); // require('./data/temp-price-dict.js').usdPriceDict;
 
-// 3.2, update cart items so every item has a { usd, asset.balance } pair
-// THIS IS when they DONT list usd price
-function convertToUsd(asset_code, amount, usdPriceDict) {
-    const usdPrice = usdPriceDict[asset_code].price_USD;
-    return (usdPrice * amount);
-}
-
-// THIS IS when they DO list usd price
-function convertToAsset(asset_code, fixedUsdPrice, usdPriceDict) {
-    const usdPrice = usdPriceDict[asset_code].price_USD;
-    return (fixedUsdPrice / usdPrice);
-}
-
-// updates cart items, given the price dict
-// sets the asset prices based on the fixed USD amount or asset amount
-function setPriceAmounts(usdPriceDict, cartItems) {
-    cartItems.map(cartItem => {
-        const usdValue = cartItem.fixedUSDAmount;
-        const { asset_code, balance } = cartItem.acceptedAsset;
-        if (usdValue != 0) cartItem.acceptedAsset.balance = convertToAsset(asset_code, usdValue, usdPriceDict);
-        else cartItem.fixedUSDAmount = convertToUsd(asset_code, balance, usdPriceDict);
-    });
-}
-
-// get totals { asset_code: balance }
-function combineLikeAssets(cartItems) {
-    const assetDict = {};
-    cartItems.map(cartItem => {
-
-        // TODO: do we need USD?? if so where do we use it 
-        // this should be used to just display to user separately, otherwise it will be picked up by algo
-
-        // const curUsdValue = cartItem.fixedUSDAmount;
-        // if (assetDict['USD']) {
-        //     assetDict['USD'].total += curUsdValue;
-        // } else {
-        //     assetDict['USD'] = { total: curUsdValue };
-        // }
-
-        const { asset_code: code, asset_issuer: issuer } = cartItem.acceptedAsset;
-        const curValue = +cartItem.acceptedAsset.balance.toFixed(7);
-        if (assetDict[code] && assetDict[code].issuer === issuer) {
-            assetDict[code].total += curValue;
-        } else {
-            assetDict[code] = { total: curValue, issuer: issuer };
-        }
-    });
-    return assetDict;
-}
-
+// TODO: get cart items first !!! // make async
 // this will get called when the user navigates to the page
 function onPageLoad(pubKey) { 
     let _cartItems, _usdPriceDict, _balances;
     const cartItemPromise = getCartItems(),
             usdPricePromise = usdMicroService.getCache(),
             balancesPromise = stellarUtils.getStellarBalances(pubKey);
-    let assetSet = {};    
-    Promise.all( [ cartItemPromise, balancesPromise, usdPricePromise ] )
+    return Promise.all( [ cartItemPromise, balancesPromise, usdPricePromise ] )
         .then((res) => {
-            _cartItems = res[0];
-            _balances = res[1];
+            _cartItems = myCartItems = res[0];
+            _balances = myBalances = res[1];
             _usdPriceDict = res[2];
-            setPriceAmounts(_usdPriceDict, _cartItems)
+            checkoutUtils.setPriceAmounts(_usdPriceDict, _cartItems)
             return _cartItems;
         })
         // .catch(err => console.error(err))
-        .then(cartItems => combineLikeAssets(cartItems))
-        // .catch(err => console.error(err))
+        .then(cartItems => {
+            myCartTotals = checkoutUtils.combineLikeAssets(cartItems);
+            console.log(myCartTotals);
+            return myCartTotals;
+        })
         .then(assetSet => pathsMicroService.lookupAllPaths(pubKey, _balances, assetSet))
         // .catch(err => console.error(err))
+        .then(foundPaths => {
+            myBestPaths = foundPaths;
+            myPathPageTotals = pathsMicroService.getTotalsByPath(foundPaths);
+        });
+        // .catch(err => console.error(err))
+        // .then(res => console.log(JSON.stringify(res)))
 }
-
-onPageLoad(publicKey);
 
 // ────────────────────────────────────────────────────────────────────────────────
 // ────────────────────────────────────────────────────────────────────────────────
@@ -133,8 +83,9 @@ onPageLoad(publicKey);
     // TODO: figure out how to logically group paths / payments / transactions
     // TODO: Allow for multiple asset balances update them locally after each transaction is made to keep track
         // How to determine which assets the user is willing ti buy with?
-function createTransactionOps(myCartItems, publicKey, myBalances, selectedAsset, pmtBuffer) {
-    return Promise.all(myCartItems.map(cartItem => { // operation: <StellarSdk.Operation < payment | pathpayment> >
+function createTransactionOps(myCartItems, pmtBuffer) {
+    // console.log(myCartItems);
+    const promises = myCartItems.map(cartItem => { // operation: <StellarSdk.Operation < payment | pathpayment> >
         const { 
             seller: curSellerPubKey,
             acceptedAsset: {
@@ -143,54 +94,137 @@ function createTransactionOps(myCartItems, publicKey, myBalances, selectedAsset,
                     asset_issuer: cartItemAsset_Issuer
             }
         } = cartItem;
+        const adj_cartItemAsset_Price = cartItemAsset_Price.toFixed(7);
+        // console.log(selectedAsset);
         const { 
             code: selectedAssetCode, 
-            issuer: selectedAssetIssuer 
+            issuer: selectedAssetIssuer
         } = selectedAsset;
-        const { balance: balanceForAsset } = myBalances.find(bal => (
-            bal.asset_code === selectedAssetCode && bal.asset_issuer === selectedAssetIssuer)
-        );
         
-        // TODO: Check for stellar lumens min thresh IF Lumens
+        let balanceForAsset;
+        if (selectedAssetIssuer) {
+            balanceForAsset = myBalances.find(bal => (
+                bal.asset_code === selectedAssetCode && bal.asset_issuer === selectedAssetIssuer)
+            ).balance;
+        } else {
+            balanceForAsset = myBalances.find(bal => (bal.asset_type === 'native')).balance;
+        }
+        
+        // console.log(balanceForAsset);
+        
         // TODO: If seller has multiple accepted assets, see if any of them match your selected asset        
         // const sellerAcceptedAsset = acceptedAssets.find(asset => 
         //      (asset.asset_code === selectedAssetCode && bal.asset_issuer === selectedAssetIssuer)))
         // if (sellerAcceptedAsset)
+        
+        // TODO: Check for stellar lumens min thresh IF Lumens
         if (cartItemAsset_Code === selectedAssetCode && cartItemAsset_Issuer === selectedAssetIssuer) { // check if you have the asset
-            if (balanceForAsset > cartItemAsset_Price) //check if you have enough
-                return StellarSdk.Operation.payment({ 
+            if (balanceForAsset > adj_cartItemAsset_Price) //check if you have enough
+                return Promise.resolve(StellarSdk.Operation.payment({ 
                     destination: curSellerPubKey,
                     asset: selectedAsset, 
-                    amount: cartItemAsset_Price.toFixed(7)
-                });
+                    amount: adj_cartItemAsset_Price
+                }));
+            else throw new Error('insufficient funds or cannot find a path between yours and the desired assets');
         }
+        // TODO: need to use LRU PATH CACHE
         else { // user doesnt have the asset so we try to find a path
             const destAsset = new StellarSdk.Asset(cartItemAsset_Code, cartItemAsset_Issuer);
             // TODO: test added check of not going over balance
-            const cheapestPath = stellarUtils.findCheapestPath(
-                publicKey, curSellerPubKey, selectedAsset, balanceForAsset, destAsset, cartItemAsset_Price
+            // const cheapestPath = stellarUtils.findCheapestPath(
+            //     pagePubKey, curSellerPubKey, selectedAsset, balanceForAsset, destAsset, adj_cartItemAsset_Price
+            // );
+            const cheapestPath = pathsMicroService.pathLookUp(
+                pagePubKey, curSellerPubKey, selectedAsset, balanceForAsset, destAsset, adj_cartItemAsset_Price
             );
             return cheapestPath.then(foundPath => {
                 if (!foundPath) return new Error('insufficient funds or cannot find a path between yours and the desired assets');
                 // TODO: Not sure how to handle this from a user experience perspective
-                else return foundPath;
-          });
+                else {
+                    // console.log(foundPath);
+                    return Promise.resolve(
+                        stellarUtils.createPathPayment(pagePubKey, curSellerPubKey, foundPath)
+                    );
+                }
+            });
         }
-    }));
-} 
-
-function checkout(myCartItems, publicKey, myBalances, stellarAssetEnum, pathFinderBuffer) {
-    createTransactionOps(myCartItems, publicKey, myBalances, stellarAssetEnum, pathFinderBuffer)
-        .then(operations => stellarUtils.createTransaction(publicKey, privateKey, operations))
-        .catch(err => console.error(err))
-        .then(res => console.log(res)) // go to order confirmation
-        .catch(err => console.error(err))
+    });
+    return Promise.all(promises);
 }
 
 
-// tests
-// 1. this works fine, only changes will be around separation of functions + async
-// onPageLoad(publicKey);
+function checkout(myCartItems, stellarAssetEnum, pathFinderBuffer) {
+    createTransactionOps(myCartItems, stellarAssetEnum, pathFinderBuffer)
+        // .then(ops => {
+        //     return ops;
+        // })
+        .then(operations => stellarUtils.createTransaction(pagePubKey, pagePrivKey, operations))
+        // .catch(err => console.error(err))
+        
+        .then(res => {
+            console.log(res.hash)
+            // console.log( JSON.stringify(StellarSdk.xdr.TransactionEnvelope.fromXDR(res.envelope_xdr, 'base64')) );
+            // console.log("\n \n")
+            // console.log( JSON.stringify(StellarSdk.xdr.TransactionResult.fromXDR(res.result_xdr, 'base64')) );
+            // console.log("\n \n")
+            // console.log( JSON.stringify(StellarSdk.xdr.TransactionMeta.fromXDR(res.result_meta_xdr, 'base64')) );
+            // console.log("\n \n")
+            return res.hash;
+        }) 
+        // .catch(err => console.error(err))
 
-// 2. A full checkout on the network for path finding
-// checkout(myCartItems, publicKey, myBalances, stellarUtils.AssetDict.MOBI, 0.015)
+// TODO: NEED TO WAIT FOR CONFIRMATION .... 4 seconds????
+
+        .then(hash => watcherMicroService.lookupTransaction(pagePubKey, hash))
+        .then(res => console.log(res))
+        // TODO: go to order confirmation
+        // .catch(err => console.error(err))
+
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
+
+
+// data for page
+const keySet = require('./data/_keys.js');
+const { pubKey: publicKey, privKey: privateKey } = keySet.firstKey;
+
+let pagePubKey = publicKey;
+let pagePrivKey = privateKey;
+let myCartItems = [];
+let myBalances = [];
+let myCartTotals = {};
+let myPathPageTotals = {};
+let selectedAsset = null;
+let selectedBuffer;
+let myBestPaths = [];
+
+
+// tests in order of algo
+// 1. this works fine, only changes will be around separation of functions + async
+onPageLoad(pagePubKey)
+    // .then((res) => {
+    //     console.log(res)
+    //     console.log(myBestPaths)
+    //     console.log(myPathPageTotals)
+    // });
+    
+
+// mock user selections
+function onSelectAsset(asset) {
+    // this.state.selectedAsset({asset: asset});
+    selectedAsset = asset;
+}
+onSelectAsset(stellarUtils.AssetDict.REPO);
+
+function onSelectBuffer(buffer) {
+    // this.state.selectedBuffer({buffer: buffer});
+    selectedBuffer = buffer;
+}
+onSelectBuffer(0.015);
+// end mock user selections
+//
+
+// // 2. A full checkout on the network for path finding
+setTimeout(() => 
+    checkout(myCartItems, pagePubKey, myBalances, selectedAsset, selectedBuffer), 3000);

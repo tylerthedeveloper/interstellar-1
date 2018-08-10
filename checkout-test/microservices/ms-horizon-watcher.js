@@ -23,12 +23,26 @@ function lookupTransaction(pubKey, transactionID) {
     return server.transactions()
         .transaction(transactionID)
         .call()
-        .then(res => res.source_account === pubKey)
-        .catch(err => false)
+        .then(res => {
+            console.log(res);
+            console.log(res.source_account);
+            console.log(pubKey);
+            console.log(res.source_account === pubKey);
+            return res.source_account === pubKey;
+        })
+        .catch(err => {
+            console.log('this is an err');
+            console.error(err);
+            return false;
+        });
 }
 
 //
 // test //
 //
-// lookupTransaction(_keys.firstKey.pubKey, 'a2441965f5f126c67bc0163ecd38776209cb2631fb698c41da3c050fddff2312')
+// lookupTransaction(_keys.firstKey.pubKey, 'da5f01a6eaf5454748b20a5619c91cc5a14df9dcbfe120bb62270f9a6da593b1')
 //     .then(res => console.log(res))
+
+module.exports = {
+    lookupTransaction
+}

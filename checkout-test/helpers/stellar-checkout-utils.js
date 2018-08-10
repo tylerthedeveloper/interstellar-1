@@ -114,20 +114,40 @@ function changeTrust(pubkey, privkey, asset, trustOpType, limit = null) {
 //          pathPaymentResult: PathPaymentResult, buffer: float (percentage)
 // returns: transactionResult
 // -------------------------------------------------------------------- //
-function createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, pathFoundResult, buffer = 0.015) {    
-    const _path = (pathFoundResult.length === 0) ? pathFoundResult : pathFoundResult.path.map(asset => {
-            if (asset.asset_type === 'native') return nativeAsset;
-            else return new StellarSdk.Asset(asset.asset_code, asset.asset_issuer);
+// function createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, pathFoundResult, buffer = 0.015) {    
+function createPathPayment(sender, receiver, pathFoundResult, buffer = 0.015) {
+    const { 
+        source_asset_type,
+        source_asset_code,
+        source_asset_issuer,
+        source_amount,
+        destination_asset_type,
+        destination_asset_code,
+        destination_asset_issuer,
+        destination_amount,
+        path
+    } = pathFoundResult;
+
+    const sendAsset = (source_asset_type === 'native') ?
+        new StellarSdk.Asset.native() : 
+        new StellarSdk.Asset(source_asset_code, source_asset_issuer);
+    const destAsset = (destination_asset_type === 'native') ?
+        new StellarSdk.Asset.native() :
+        new StellarSdk.Asset(destination_asset_code, destination_asset_issuer);
+    const _path = (path.length === 0) ? path : path.map(asset => {
+        if (asset.asset_type === 'native') return nativeAsset;
+        else return new StellarSdk.Asset(asset.asset_code, asset.asset_issuer);
     });
-    console.log(_path);
-    const paddedAmtWithBuffer = ((1 + buffer) * pathFoundResult.source_amount).toFixed(7);
+    // console.log(_path);
+    
+    const paddedAmtWithBuffer = ((1 + buffer) * parseFloat(source_amount)).toFixed(7);
     const res = {
         source: sender,
         sendAsset: sendAsset,
         sendMax: new String(paddedAmtWithBuffer),
         destination: receiver,
         destAsset: destAsset,
-        destAmount: new String(destAmount),
+        destAmount: new String(destination_amount),
         path: _path,
     };
     return StellarSdk.Operation.pathPayment(res);
