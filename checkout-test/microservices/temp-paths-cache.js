@@ -1,7 +1,7 @@
 const TEMP_pathsDict = {
     MOBI: {
         'REPO': {
-            destinationAmount: 5,
+            destination_amount: 5,
             path: [ 
                     { 
                         asset_type: 'credit_alphanum4',
@@ -18,7 +18,7 @@ const TEMP_pathsDict = {
     },
     REPO: {
         'MOBI': {
-            destinationAmount: 3,
+            destination_amount: 3,
             path: [
                 {
                     "asset_type": "native"

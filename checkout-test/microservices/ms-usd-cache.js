@@ -1,10 +1,11 @@
-const usdResolvers = require('../usd-resolvers.js') // USD util functions
+const usdResolvers = require('../helpers/usd-resolvers.js') // USD util functions
 
 const intervalTimer = 300000; // 5 minutes
 
 // this represents the cache
 let _usdCache = {};
 
+// uses heelpers to get averages of all selected asssets
 function getAverageUsdPrices() {
     usdResolvers.getAverageUsdPrices()
         .then(res => 
@@ -31,6 +32,7 @@ function onIntervalUpdateCache() {
     setInterval(() => getAverageUsdPrices(), intervalTimer)
 }
 
+// test
 // onIntervalUpdateCache();
 
 

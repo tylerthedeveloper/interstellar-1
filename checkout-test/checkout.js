@@ -5,8 +5,8 @@
 const StellarSdk = require('stellar-sdk');
 StellarSdk.Network.useTestNetwork();
 const server = new StellarSdk.Server('https://horizon.stellar.org');
-const stellarUtils = require('./stellar-checkout-utils.js');
-const usdUtils = require('./usd-resolvers.js');
+const stellarUtils = require('./helpers/stellar-checkout-utils.js');
+const usdUtils = require('./helpers/usd-resolvers.js');
 const usdMicroService = require('./microservices/ms-usd-cache');
 const pathsMicroService = require('./microservices/ms-pathfinder');
 
@@ -50,23 +50,25 @@ function convertToAsset(asset_code, fixedUsdPrice, usdPriceDict) {
     return (fixedUsdPrice / usdPrice);
 }
 
+// updates cart items, given the price dict
+// sets the asset prices based on the fixed USD amount or asset amount
 function setPriceAmounts(usdPriceDict, cartItems) {
     cartItems.map(cartItem => {
         const usdValue = cartItem.fixedUSDAmount;
-        const asset_code = cartItem.acceptedAsset.asset_code;
-        const balance = cartItem.acceptedAsset.balance;
+        const { asset_code, balance } = cartItem.acceptedAsset;
         if (usdValue != 0) cartItem.acceptedAsset.balance = convertToAsset(asset_code, usdValue, usdPriceDict);
         else cartItem.fixedUSDAmount = convertToUsd(asset_code, balance, usdPriceDict);
     });
 }
 
-// todo: get better clarity on use cases for this
 // get totals { asset_code: balance }
 function combineLikeAssets(cartItems) {
     const assetDict = {};
     cartItems.map(cartItem => {
 
         // TODO: do we need USD?? if so where do we use it 
+        // this should be used to just display to user separately, otherwise it will be picked up by algo
+
         // const curUsdValue = cartItem.fixedUSDAmount;
         // if (assetDict['USD']) {
         //     assetDict['USD'].total += curUsdValue;
@@ -85,15 +87,12 @@ function combineLikeAssets(cartItems) {
     return assetDict;
 }
 
+// this will get called when the user navigates to the page
 function onPageLoad(pubKey) { 
-    let _cartItems;
-    let _usdPriceDict;
-    let _balances;
-    const cartItemPromise = getCartItems();
-    const usdPricePromise = usdMicroService.getCache();
-    const balancesPromise = stellarUtils.getStellarBalances(pubKey);
-// this can be made async and occur in the background ... NEED TO set to page balances
-
+    let _cartItems, _usdPriceDict, _balances;
+    const cartItemPromise = getCartItems(),
+            usdPricePromise = usdMicroService.getCache(),
+            balancesPromise = stellarUtils.getStellarBalances(pubKey);
     let assetSet = {};    
     Promise.all( [ cartItemPromise, balancesPromise, usdPricePromise ] )
         .then((res) => {
@@ -101,19 +100,12 @@ function onPageLoad(pubKey) {
             _balances = res[1];
             _usdPriceDict = res[2];
             setPriceAmounts(_usdPriceDict, _cartItems)
-
-            // catch current bug
-            // console.log(_balances);
-            // console.log(_usdPriceDict);
             return _cartItems;
         })
         // .catch(err => console.error(err))
         .then(cartItems => combineLikeAssets(cartItems))
         // .catch(err => console.error(err))
-        .then(assetSet => {
-            return pathsMicroService.lookupAllPaths(pubKey, _balances, assetSet);
-            // console.log(paths);
-        })
+        .then(assetSet => pathsMicroService.lookupAllPaths(pubKey, _balances, assetSet))
         // .catch(err => console.error(err))
 }
 

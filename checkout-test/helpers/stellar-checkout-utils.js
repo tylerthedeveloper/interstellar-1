@@ -3,7 +3,7 @@ StellarSdk.Network.usePublicNetwork();
 const server = new StellarSdk.Server('https://horizon.stellar.org');
 
 // ----- keys / pairs ----- //
-const keySet = require('./data/_keys.js');
+const keySet = require('../data/_keys.js');
 const { pubKey, privKey } = keySet.firstKey;
 const { pubKey: pubKey2, privKey: privKey2 } = keySet.secondKey;
 const { pubKey: pubKey3, privKey: privKey3 } = keySet.thirdKey;
@@ -39,12 +39,11 @@ function getStellarBalances (publicKey) {
       .catch(err => console.log(err) )
 }
 
-// create operation --> use Op.type
-
+// create operation --> use Op.type from xdr
 // -------------------------------------------------------------------- //
-// desc: create transaction given arbirary amount of arbitrary types of operations
+// desc: create transaction given arbirary amount of arbitrary types of operations and then submits it
 // inputs: senderPub: string, senderPriv: string, operations = operations: operation | Array<operation>
-// returns: transactionResult
+// returns: transactionResult 
 // -------------------------------------------------------------------- //
 function createTransaction(senderPub, senderPriv, operations) {
     return server.loadAccount(senderPub)
@@ -66,7 +65,6 @@ function createTransaction(senderPub, senderPriv, operations) {
         .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
 }
 
-// todo: check for trust ...
 // depends on UI when to use this but very simple look up
 // -------------------------------------------------------------------- //
 // desc: see if a seller accepts an asset
@@ -89,6 +87,7 @@ const TrustOpType = {
     UpdateTrust: 'update',
     RemoveTrust: 'remove'
 }
+
 function changeTrust(pubkey, privkey, asset, trustOpType, limit = null) {
     return server.loadAccount(pubkey)
         .then(function(account) {
@@ -143,18 +142,17 @@ function createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, p
 function findCheapestPath(sender, receiver, sendAsset, currentBalance, destAsset, destAmount) {
     return server.paths(sender, receiver, destAsset, destAmount)
         .call()
+        .then(paths => JSON.parse(JSON.stringify(paths)).records)
+        .catch(err => console.log(err))
         .then(paths => {
-            const _paths = JSON.parse(JSON.stringify(paths)).records;
             const { code, issuer } = sendAsset;
-            // console.log(_paths);
-            const pathList = _paths.filter(path => 
-                (path.source_asset_code === code && path.source_asset_issuer === issuer))
-            // console.log(code, issuer);
+            let pathList;
+            if (issuer) pathList = paths.filter(path => (path.source_asset_code === code && path.source_asset_issuer === issuer))
+            else pathList = paths.filter(path => (path.source_asset_type === 'native'))
             const cheapestPath = pathList.reduce((prev, curr) => (prev.source_amount < curr.source_amount ? prev : curr), []);
             // console.log('chepeast path: \n' + JSON.stringify(cheapestPath));
-            if (cheapestPath && (Number(currentBalance) >= Number(cheapestPath.source_amount))) 
-                // return createPathPayment(sender, receiver, sendAsset, destAsset, destAmount, cheapestPath);
-                return cheapestPath;
+            // && (Number(currentBalance) >= Number(cheapestPath.source_amount)
+            if (cheapestPath) return cheapestPath;
             throw Error('err: No suitable path exists between the corresponding assets')
         })
         .catch(err => console.error(err))
@@ -168,6 +166,7 @@ function findCheapestPath(sender, receiver, sendAsset, currentBalance, destAsset
 // inputs: sender: string, receiver: string, sendAsset: Asset, destAsset: Asset, destAmount: string | num, 
 // returns: Dict < PathPaymentResult > | transactionResult
 // -------------------------------------------------------------------- //
+
 // helper method for  below
 function codeIssuePair(pathFoundResult) {
     const { source_asset_code, source_asset_issuer, source_asset_type } = pathFoundResult;
@@ -178,10 +177,12 @@ function codeIssuePair(pathFoundResult) {
 function findCheapestPaths(sender, receiver, destAsset, destAmount) {
     return server.paths(sender, receiver, destAsset, destAmount)
         .call()
+        .then(paths => JSON.parse(JSON.stringify(paths)).records)
+        .catch(err => console.log(err))
         .then(paths => {
-            const _paths = JSON.parse(JSON.stringify(paths)).records;
+            // const _paths = JSON.parse(JSON.stringify(paths)).records;
             const pathDict = {}             
-            _paths.forEach(element => {
+            paths.forEach(element => {
                 const key = codeIssuePair(element);
                 if (!pathDict[key])
                     pathDict[key] = element;

@@ -1,9 +1,10 @@
 const axios = require('axios');
-const CMC_TickerIDs = require('./data/cmc-ticker-data');
-const ST_TickerIDs = require('./data/st-ticker-data');
+const CMC_TickerIDs = require('../data/cmc-ticker-data');
+const ST_TickerIDs = require('../data/st-ticker-data');
 const cmcApiUrl = 'https://api.coinmarketcap.com/v2/ticker';
 const stApiUrl = 'https://api.stellarterm.com/v1/ticker.json';
 
+// uses CMC API to get prices for selected assets
 function load_CoinMarketCapPrices() {
     const promises = [];
     Object.keys(CMC_TickerIDs).map(key => promises.push(axios.get(`${cmcApiUrl}/${CMC_TickerIDs[key].id}`)));
@@ -24,6 +25,7 @@ function load_CoinMarketCapPrices() {
         .catch(err => console.log(err))
 }
 
+// uses ST API to get prices for selected assets
 function load_StellarTermPrices() {
     return axios.get(stApiUrl)
         .then((response) => response.data.assets)
@@ -55,6 +57,7 @@ function load_StellarTermPrices() {
         .catch(err => console.log(err))
 }
 
+// Averages both sets of prices
 function getAverageUsdPrices() {
     const cmc = load_CoinMarketCapPrices();
     const st = load_StellarTermPrices();
@@ -88,7 +91,6 @@ function getAverageUsdPrices() {
 // test //
 //      //
 // const assetSymbols = ["BTC", "ETH"];
-
 // load_CoinMarketCapPrices().then(res => console.log(res))
 // load_StellarTermPrices().then(res => console.log(res))
 // getAverageusUsdPrices().then(res => console.log(res))
