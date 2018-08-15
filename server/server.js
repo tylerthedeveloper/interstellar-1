@@ -54,6 +54,7 @@ app.use(postgraphile(pool, 'public', {
 
 //set the static asset directory
 const publicDir = path.resolve(__dirname, "../dist");
+console.log("Serving from ", publicDir);
 app.use(express.static(publicDir));
 app.use(fallback(path.resolve(publicDir, "./index.html")));
 

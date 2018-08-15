@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "front:dev": "./node_modules/.bin/webpack-dev-server --config webpack/webpack.frontend.js",
+    "front:prod": "./node_modules/.bin/webpack --config webpack/webpack.frontend.prod.js --progress",
     "back:dev": "./node_modules/.bin/webpack --config webpack/webpack.backend.js --progress",
+    "back:prod": "./node_modules/.bin/webpack --config webpack/webpack.backend.prod.js --progress",
     "flow": "./node_modules/.bin/flow",
     "pretty": "./node_modules/.bin/prettier --write src/**/*.jsx server/**/*.js",
     "gql:dev": "nodemon ./server/lib/server.js",

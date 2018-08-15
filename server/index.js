@@ -1,8 +1,8 @@
 import http from "http";
 import app from "./server";
 
-const PORT = 3002;
-const HOST = "localhost";
+const PORT = process.env.BUILD_TARGET === "production" ? 80 : 3002;
+const HOST = "0.0.0.0";
 
 const server = http.createServer(app);
 let currentApp = app;
