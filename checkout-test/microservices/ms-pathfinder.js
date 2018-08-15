@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 
 const StellarSdk = require('stellar-sdk'); 
 const server = new StellarSdk.Server('https://horizon.stellar.org');
+const stellarAssetDict = require('../data/stellar-asset-dict')
 
 // just for testing other than siteKey
 const _keys = require('../data/_keys')
@@ -20,6 +21,15 @@ const TEMP_pathsDict = require('./temp-paths-cache')
 // inputs: sender: string, receiver: string, sendAsset: Asset, destAsset: Asset, destAmount: string | num, 
 // returns: PathPaymentResult | transactionResult
 // -------------------------------------------------------------------- //
+const exchangeAndPathTupler = (pathFoundResult) => {
+    const { destination_amount, source_amount, path } = pathFoundResult;
+    const exchangeRate = calcExchangeRate(destination_amount, source_amount);
+    return { 
+        "exchangeRate": exchangeRate, 
+        "path": path 
+    };
+}
+
 const findCheapestPath = (sender, receiver, sendAsset, currentBalance, destAsset, destAmount) => {
     return server.paths(sender, receiver, destAsset, destAmount)
         .call()
@@ -31,9 +41,9 @@ const findCheapestPath = (sender, receiver, sendAsset, currentBalance, destAsset
             if (issuer) pathList = paths.filter(path => (path.source_asset_code === code && path.source_asset_issuer === issuer))
             else pathList = paths.filter(path => (path.source_asset_type === 'native'))
             const cheapestPath = pathList.reduce((prev, curr) => (prev.source_amount < curr.source_amount ? prev : curr), []);
-            // console.log('chepeast path: \n' + JSON.stringify(cheapestPath));
-            // && (Number(currentBalance) >= Number(cheapestPath.source_amount)
-            if (cheapestPath) return cheapestPath;
+            const triple = exchangeAndPathTupler(cheapestPath);
+            // console.log(triple);
+            if (cheapestPath) return triple;
             throw Error('err: No suitable path exists between the corresponding assets')
         })
         .catch(err => console.error(err))
@@ -65,12 +75,6 @@ const calcExchangeRate = (destination_amount, source_amount) => {
     return (destination_amount / source_amount);
 }
 
-const exchangeAndPathTupler = (pathFoundResult) => {
-    const { destination_amount, source_amount, path } = pathFoundResult;
-    const exchangeRate = calcExchangeRate(destination_amount, source_amount);
-    return [source_amount, exchangeRate, path];
-}
-
 // TODO: Should this be changed to site sender to get all assets ???
 const findCheapestPaths = (sender, receiver, destAsset, destAmount) => {
     return server.paths(sender, receiver, destAsset, destAmount)
@@ -89,7 +93,7 @@ const findCheapestPaths = (sender, receiver, destAsset, destAmount) => {
                 } else {
                     const { source_amount } = pathResult;
                     const dict_source_amount = destInDict[key][0];
-                    console.log(source_amount, dict_source_amount);
+                    // console.log(source_amount, dict_source_amount);
                     if (source_amount < dict_source_amount) {
                         destInDict[key] = exchangeAndPathTupler(pathResult);
                     }
@@ -108,7 +112,7 @@ const findCheapestPaths = (sender, receiver, destAsset, destAmount) => {
 
 // checks to see if there exists a path in the cache from a->b that is at or below the destination amount
 const pathLookUp = (sender, receiver, fromAsset, currentBalance, toAsset, destAmount) => {
-    const fromAssetLookup = TEMP_pathsDict[fromAsset.getCode()];
+    const fromAssetLookup = TEMP_pathsDict[toAsset.getCode()];
     if (!fromAssetLookup) {
         return findCheapestPath(sender, receiver, fromAsset, currentBalance, toAsset, destAmount)
             .then(foundPath => {
@@ -144,9 +148,7 @@ function fillCache(newPath) {
 }
 
 
-//
 // TODO: make sure the source amount is <= source_amount
-//
 // this iterates over balances and the asset-totals to return the paths 
 // from all balances to all owed assets
 const lookupAllPaths = (pubKey, balances, assetDict) => {
@@ -174,8 +176,8 @@ const lookupAllPaths = (pubKey, balances, assetDict) => {
 // test //
 //      //
 // const stellarAssetDict = require('../data/stellar-asset-dict')
-// findCheapestPaths(_keys.firstKey.pubKey, _keys.thirdKey.pubKey, stellarAssetDict.MOBI, .1)
-//     .then(res => console.log(res))
+findCheapestPath(_keys.firstKey.pubKey, _keys.thirdKey.pubKey, stellarAssetDict.REPO, .2, stellarAssetDict.MOBI, .05)
+    .then(res => console.log(res))
 
 // pathLookUp(_keys.firstKey.pubKey, stellarAssetDict.REPO, 10, stellarAssetDict.MOBI, .1)
 //     .then(res => console.log(res))
@@ -206,7 +208,6 @@ const balances = [ { "balance": "0.2373078",
   { "balance": "3.8393040", "asset_type": "native" } 
 ]
 
-
 app.use(bodyParser.json());
 
 app.post('/cheapestPath/:pubkey', function (req, res) {
@@ -227,57 +228,55 @@ app.post('/possiblePaths/:pubkey', function (req, res) {
 })
 
 /* 
+    Sample curls
 
-Sample curls
+    PATHLOOKUP === CHEAPEST PATH
 
-
-PATHLOOKUP === CHEAPEST PATH
-
-curl -X POST http://localhost:3008/cheapestPath/GADL2SDMD7XA3SQYBAMBZIWDFZAHHXI2AFESSQZLQVX66T573GGQP5W5 \
-    -H "Content-Type: application/json" \
-    --data \
-    '{ 
-        "sellerPubKey": "GDS7EAM5W5H5SIN7UN6XCIVJKYOBDEGFSZHRAE2JDEXNC7LKYDLBRGLY",
-        "selectedAsset": {
-            "asset_code": "REPO",
-            "asset_issuer": "GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B"
-        },
-        "balanceForAsset": ".23",
-        "destAsset": {
-            "asset_code": "MOBI",
-            "asset_issuer": "GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH"
-        },
-        "cartItemAsset_Price": ".05"
-    }'
-
-
-
-ALL PATHS FOR CART + BALANCES 
-
-curl -X POST http://localhost:3008/possiblePaths/GADL2SDMD7XA3SQYBAMBZIWDFZAHHXI2AFESSQZLQVX66T573GGQP5W5 \
-    -H "Content-Type: application/json" \
-    --data \
-    '{ 
-        "assetDictTotals": 
-        {
-            "CNY": { "total": 0.0344187, "issuer": "GAREELUB43IRHWEASCFBLKHURCGMHE5IF6XSE7EXDLACYHGRHM43RFOX"  }, 
-            "MOBI": { "total": 0.087848, "issuer": "GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH" }
-        },
-        "balances":
-        [ 
-            { 
-                "balance": "0.2373078",
-                "limit": "922337203685.4775807",
-                "asset_type": "credit_alphanum4",
+    curl -X POST http://localhost:3008/cheapestPath/GADL2SDMD7XA3SQYBAMBZIWDFZAHHXI2AFESSQZLQVX66T573GGQP5W5 \
+        -H "Content-Type: application/json" \
+        --data \
+        '{ 
+            "sellerPubKey": "GDS7EAM5W5H5SIN7UN6XCIVJKYOBDEGFSZHRAE2JDEXNC7LKYDLBRGLY",
+            "selectedAsset": {
                 "asset_code": "REPO",
-                "asset_issuer": "GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B" 
+                "asset_issuer": "GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B"
             },
-            { "balance": "3.8393040", "asset_type": "native" } 
-        ]
-    }'
+            "balanceForAsset": ".23",
+            "destAsset": {
+                "asset_code": "MOBI",
+                "asset_issuer": "GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH"
+            },
+            "cartItemAsset_Price": ".05"
+        }'
+
+
+
+    ALL PATHS FOR CART + BALANCES 
+
+    curl -X POST http://localhost:3008/possiblePaths/GADL2SDMD7XA3SQYBAMBZIWDFZAHHXI2AFESSQZLQVX66T573GGQP5W5 \
+        -H "Content-Type: application/json" \
+        --data \
+        '{ 
+            "assetDictTotals": 
+            {
+                "CNY": { "total": 0.0344187, "issuer": "GAREELUB43IRHWEASCFBLKHURCGMHE5IF6XSE7EXDLACYHGRHM43RFOX"  }, 
+                "MOBI": { "total": 0.087848, "issuer": "GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH" }
+            },
+            "balances":
+            [ 
+                { 
+                    "balance": "0.2373078",
+                    "limit": "922337203685.4775807",
+                    "asset_type": "credit_alphanum4",
+                    "asset_code": "REPO",
+                    "asset_issuer": "GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B" 
+                },
+                { "balance": "3.8393040", "asset_type": "native" } 
+            ]
+        }'
 */
 
-app.listen(pathFinderPort, () => console.log(`Example app listening on port ${pathFinderPort}`))
+// app.listen(pathFinderPort, () => console.log(`Example app listening on port ${pathFinderPort}`))
 
 module.exports = {
     pathLookUp,

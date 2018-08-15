@@ -6,12 +6,11 @@ const usdResolvers = require('../helpers/usd-resolvers.js')
 const intervalTimer = 300000; // 5 minutes
 const usdCacherPort = require('./ms-ports').usdCacherPort;
 
-
 // uses helpers to get averages of all selected asssets
 const getAverageUsdPrices = () => {
     return usdResolvers.getAverageUsdPrices()
         .then(res => {
-            fillCache(res);
+            // fillCache(res);
             return res;
         });
 }
@@ -19,8 +18,7 @@ const getAverageUsdPrices = () => {
 // this will handle the return result of getAverageUsdPrices() and fill the cache accordingly
 const fillCache = (usdDict) => {
     // fill redis cache with dict
-    console.log('filled cache');
-    
+    // console.log('filled cache');
 }
 
 // this will simply return (json?) representation of the current cache 
@@ -33,19 +31,15 @@ const getCache = () => {
 const onIntervalUpdateCache = () => {
     setInterval(() => getAverageUsdPrices(), intervalTimer)
 }
-    
-app.get('/cache', function (req, res) {
-    getCache()
-        .then(cache => res.send(cache));
-})
 
+// TODO: ONLY RETURN REQUESTED ASSETS
 app.get('/averages', function (req, res) {
     getAverageUsdPrices()
         .then(averages => res.send(averages));
 })
 
-// app.listen(usdCacherPort, () => console.log('Example app listening on port 3000!'))
+app.listen(usdCacherPort, () => console.log(`Example app listening on port ${usdCacherPort}`))
 
 module.exports = {
-    getCache    
+    getCache
 }

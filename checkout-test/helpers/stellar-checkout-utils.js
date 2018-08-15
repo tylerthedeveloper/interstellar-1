@@ -185,6 +185,14 @@ function findCheapestPaths(sender, receiver, destAsset, destAmount) {
 }
 
 
+// sign and submit transaction
+function signAndSubmitTransaction(transactionBytes) {
+    // const transaction = ... from bytes
+    transaction.sign(StellarSdk.Keypair.fromSecret(senderPriv));
+    return server.submitTransaction(transaction);
+}
+
+
 // ----- Test Data ----- //
 
 // sample op-like data object

@@ -1,57 +1,78 @@
+const express = require('express')
+const app = express()
+// const bodyParser = require('body-parser');
+
+const watcherUtils = require('../helpers/watcher-utils');
 const StellarSdk = require('stellar-sdk');
 StellarSdk.Network.usePublicNetwork();
 const server = new StellarSdk.Server('https://horizon.stellar.org');
-const _keys = require('../data/_keys')
 
+const config =  require('../../config.json');
+const { Pool } =  require('pg');
 
-function postTransaction(transaction) {
-    // set tag on transaction as 'UNCONIFMRED'
-    // ... add transaction to database 
+const pool = new Pool({
+    user: 'postgres',
+    host: 'interstellar.market',
+    database: 'silent_shop',
+    password: config.pg.password,
+    port: 5432,
+});
+
+const getStellarBalances = (publicKey) => {
+    return server.loadAccount(publicKey)
+        .then(account => account.balances)
+        .catch(err => console.log(err))
 }
 
-// returns array of transaction objects
-function getTempTaggedTransactions(transaction) {
-    // ... query database table 
-    // select * from transaction where tag = 'UNCONFIRMED'
-}
-
-// returns whether the transaction exists and if it matches the pub key of the buyer
-    // returns true if it exists and above is true
-    // returns false if it does NOT exist or it exists and does NOT match
-function lookupTransaction(pubKey, transactionID) {
-    // ... add transaction to database
-
-    // TODO: need retry mechnanism
-    /*
-        return setInterval(() => {
-
-        }, 
-        2000);
-    */
-
-    return server.transactions()
-        .transaction(transactionID)
-        .call()
+// app.post('/createTransaction', function (req, res) {
+    // const { /* user_id, publicKey, */  selectedAsset, pathFinderBuffer } = req.body;
+    const selectedAsset =  new StellarSdk.Asset( 'REPO', 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B');
+    const pathFinderBuffer = 0.015;
+    const user_id = "40212e1c-aaf5-4c2c-a988-bfbe30360966";
+    const publicKey = "GADL2SDMD7XA3SQYBAMBZIWDFZAHHXI2AFESSQZLQVX66T573GGQP5W5";
+    const promises = [];
+    const query = {
+        text: 'SELECT * from CART where user_id = $1',
+        values: [user_id]
+    }
+    promises.push(pool.query(query))
+    promises.push(getStellarBalances(publicKey));
+    let myCartItems = [], myBalances = [];
+    Promise.all(promises)
         .then(res => {
-            console.log(res);
-            console.log(res.source_account);
-            console.log(pubKey);
-            console.log(res.source_account === pubKey);
-            return res.source_account === pubKey;
+            myCartItems = res[0].rows;
+            myBalances = res[1];
+            return myCartItems;
         })
-        .catch(err => {
-            console.log('this is an err');
-            console.error(err);
-            return false;
+        .then(cartItemIDs => {
+            const productIDs = cartItemIDs.map(row => String(row.item_id))
+            const query = {
+                text: "SELECT * from PRODUCTS where id = ANY($1::uuid[])",
+                values: [ productIDs ]
+            }
+            return pool.query(query);
+        })
+        .then(queryResult => queryResult.rows)
+        .then(cartItems => watcherUtils.createTransactionOps(cartItems, myBalances, selectedAsset, pathFinderBuffer))
+        .then(operations => watcherUtils.createTransaction(publicKey, operations))
+        .then(transaction => {
+            console.log(transaction);
+            res.send(transaction)
         });
+// })
+
+
+function updateTransactionConfirmation(transactionID) {
+    const query = `UPDATE TRANSACTION SET STATUS = 'Confirmed' WHERE ID = ${transactionID};`;
+    //  execute query
 }
 
-//
-// test //
-//
-// lookupTransaction(_keys.firstKey.pubKey, 'da5f01a6eaf5454748b20a5619c91cc5a14df9dcbfe120bb62270f9a6da593b1')
-//     .then(res => console.log(res))
+const txHandler = function (txResponse) {
+    const { hash } = txResponse;
+    updateTransactionConfirmation(transactionID);
+};
 
-module.exports = {
-    lookupTransaction
-}
+// server.transactions()
+//     .stream({
+//         onmessage: txHandler
+//     })
