@@ -59,7 +59,7 @@ const client = new ApolloClient({
     // TODO need to move this to separate file
     link: ApolloLink.from([
         authLink,
-        createUploadLink({uri: "http://localhost:3002/gql"}),
+        createUploadLink({uri: process.env.BUILD_TARGET === "production" ? "http://interstellar.market/gql" : "http://localhost:3002/gql"}),
         onError(
             ({ operation, response, graphQLErrors, networkError, forward }) => {
                 if (graphQLErrors) {
@@ -82,7 +82,7 @@ const client = new ApolloClient({
             },
         ),
         new HttpLink({
-            uri: "http://localhost:3002/gql",
+            uri: process.env.BUILD_TARGET === "production" ? "http://interstellar.market/gql" : "http://localhost:3002/gql",
             credentials: "include",
         }),
     ]),
