@@ -16,16 +16,6 @@ const repoAsset = new StellarSdk.Asset( 'REPO', 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23J
 const cnyAsset = new StellarSdk.Asset( 'CNY', 'GAREELUB43IRHWEASCFBLKHURCGMHE5IF6XSE7EXDLACYHGRHM43RFOX');
 // const futbolAsset = new StellarSdk.Asset( 'TFC', 'GDS3XDJAA4VY6MJYASIGSIMPHZ7AQNZ54RKLWT7MWCOU5YKYEVCNLVS3');
 
-const AssetDict = {
-    MOBI: new StellarSdk.Asset( 'MOBI', 'GA6HCMBLTZS5VYYBCATRBRZ3BZJMAFUDKYYF6AH6MVCMGWMRDNSWJPIH'),
-    EURT: new StellarSdk.Asset( 'EURT', 'GAP5LETOV6YIE62YAM56STDANPRDO7ZFDBGSNHJQIYGGKSMOZAHOOS2S'),
-    REPO: new StellarSdk.Asset( 'REPO', 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B'),
-    CNY: new StellarSdk.Asset( 'CNY', 'GAREELUB43IRHWEASCFBLKHURCGMHE5IF6XSE7EXDLACYHGRHM43RFOX'),
-    TFC: new StellarSdk.Asset( 'TFC', 'GDS3XDJAA4VY6MJYASIGSIMPHZ7AQNZ54RKLWT7MWCOU5YKYEVCNLVS3')
-    // if we want to make our asset lol
-    // const tycoin = new StellarSdk.Asset("Tycoin", "GDNZIMIWPMRQ3X3UNFF7A7XI26XILUP6QBFT6MX7B62GAKVO3ZWDWWUW");
-};
-
 // ----- functions ----- //
 
 // -------------------------------------------------------------------- //
@@ -153,38 +143,12 @@ function createPathPayment(sender, receiver, pathFoundResult, buffer = 0.015) {
     return StellarSdk.Operation.pathPayment(res);
 }
 
-// Cheapest = lowest source_amount
-// -------------------------------------------------------------------- //
-// desc: finds the first path given the necessary inputs
-// inputs: sender: string, receiver: string, sendAsset: Asset, destAsset: Asset, destAmount: string | num, 
-// returns: PathPaymentResult | transactionResult
-// -------------------------------------------------------------------- //
-function findCheapestPath(sender, receiver, sendAsset, currentBalance, destAsset, destAmount) {
-    return server.paths(sender, receiver, destAsset, destAmount)
-        .call()
-        .then(paths => JSON.parse(JSON.stringify(paths)).records)
-        .catch(err => console.log(err))
-        .then(paths => {
-            const { code, issuer } = sendAsset;
-            let pathList;
-            if (issuer) pathList = paths.filter(path => (path.source_asset_code === code && path.source_asset_issuer === issuer))
-            else pathList = paths.filter(path => (path.source_asset_type === 'native'))
-            const cheapestPath = pathList.reduce((prev, curr) => (prev.source_amount < curr.source_amount ? prev : curr), []);
-            // console.log('chepeast path: \n' + JSON.stringify(cheapestPath));
-            // && (Number(currentBalance) >= Number(cheapestPath.source_amount)
-            if (cheapestPath) return cheapestPath;
-            throw Error('err: No suitable path exists between the corresponding assets')
-        })
-        .catch(err => console.error(err))
-        // .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
-}
-
 
 // Cheapest = lowest source_amount
 // -------------------------------------------------------------------- //
 // desc: finds the cheapest path for each balance given the necessary inputs
 // inputs: sender: string, receiver: string, sendAsset: Asset, destAsset: Asset, destAmount: string | num, 
-// returns: Dict < PathPaymentResult > | transactionResult
+// returns: Dict < PathPaymentResult >
 // -------------------------------------------------------------------- //
 
 // helper method for  below
@@ -320,7 +284,7 @@ const repoAssetPath = StellarSdk.Operation.pathPayment({
 //  ---- sample runs ---- //
 //  ---- ---------------- //
 
-// getStellarBalances(pubKey).then(res => console.log(res))
+getStellarBalances(pubKey).then(res => console.log(res))
 // getStellarBalances(pubKey2).then(res => console.log(res))
 // getStellarBalances(pubKey).then(res => console.log(res))
 
@@ -369,9 +333,7 @@ const repoAssetPath = StellarSdk.Operation.pathPayment({
 //     });
 
 module.exports = {
-    AssetDict,
     getStellarBalances,
     createTransaction,
-    createPathPayment,
-    findCheapestPath
+    createPathPayment
 }

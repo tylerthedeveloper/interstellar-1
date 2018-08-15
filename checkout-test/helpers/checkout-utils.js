@@ -48,10 +48,36 @@ function combineLikeAssets(cartItems) {
     return assetDict;
 }
 
+function getTotalsByPath(paths) {
+    const totals = {};
+    paths.map(path => {
+        let { 
+            source_asset_type,
+            source_asset_code,
+            source_asset_issuer,
+            source_amount
+        } = path;
+        source_amount = +source_amount;
+        if (!source_asset_code && source_asset_type === 'native') {
+            source_asset_code = 'XLM';
+        } else { 
+            source_asset_code = source_asset_code + '-' + source_asset_issuer;
+        }
+        const curTotal = totals[source_asset_code];
+        if (curTotal) {
+            totals[source_asset_code] = curTotal + source_amount;
+        } else { 
+            totals[source_asset_code] = source_amount;
+        }
+    })
+    return totals;
+}
+
 
 module.exports = { 
     convertToUsd,
     convertToAsset,
     setPriceAmounts,
-    combineLikeAssets            
+    combineLikeAssets,
+    getTotalsByPath
 }

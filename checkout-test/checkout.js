@@ -4,10 +4,10 @@
 
 const StellarSdk = require('stellar-sdk');
 StellarSdk.Network.useTestNetwork();
-const server = new StellarSdk.Server('https://horizon.stellar.org');
 const stellarUtils = require('./helpers/stellar-checkout-utils.js');
+const stellarAssetDict = require('./data/stellar-asset-dict')
 const checkoutUtils = require('./helpers/checkout-utils');
-const usdMicroService = require('./microservices/ms-usd-cache');
+const usdMicroService = require('./microservices/ms-usd-cacher');
 const pathsMicroService = require('./microservices/ms-pathfinder');
 const watcherMicroService = require('./microservices/ms-horizon-watcher');
 
@@ -55,7 +55,7 @@ function onPageLoad(pubKey) {
         // .catch(err => console.error(err))
         .then(foundPaths => {
             myBestPaths = foundPaths;
-            myPathPageTotals = pathsMicroService.getTotalsByPath(foundPaths);
+            myPathPageTotals = checkoutUtils.getTotalsByPath(foundPaths);
         });
         // .catch(err => console.error(err))
         // .then(res => console.log(JSON.stringify(res)))
@@ -95,7 +95,6 @@ function createTransactionOps(myCartItems, pmtBuffer) {
             }
         } = cartItem;
         const adj_cartItemAsset_Price = cartItemAsset_Price.toFixed(7);
-        // console.log(selectedAsset);
         const { 
             code: selectedAssetCode, 
             issuer: selectedAssetIssuer
@@ -109,8 +108,6 @@ function createTransactionOps(myCartItems, pmtBuffer) {
         } else {
             balanceForAsset = myBalances.find(bal => (bal.asset_type === 'native')).balance;
         }
-        
-        // console.log(balanceForAsset);
         
         // TODO: If seller has multiple accepted assets, see if any of them match your selected asset        
         // const sellerAcceptedAsset = acceptedAssets.find(asset => 
@@ -155,12 +152,8 @@ function createTransactionOps(myCartItems, pmtBuffer) {
 
 function checkout(myCartItems, stellarAssetEnum, pathFinderBuffer) {
     createTransactionOps(myCartItems, stellarAssetEnum, pathFinderBuffer)
-        // .then(ops => {
-        //     return ops;
-        // })
         .then(operations => stellarUtils.createTransaction(pagePubKey, pagePrivKey, operations))
         // .catch(err => console.error(err))
-        
         .then(res => {
             console.log(res.hash)
             // console.log( JSON.stringify(StellarSdk.xdr.TransactionEnvelope.fromXDR(res.envelope_xdr, 'base64')) );
@@ -170,18 +163,14 @@ function checkout(myCartItems, stellarAssetEnum, pathFinderBuffer) {
             // console.log( JSON.stringify(StellarSdk.xdr.TransactionMeta.fromXDR(res.result_meta_xdr, 'base64')) );
             // console.log("\n \n")
             return res.hash;
-        }) 
+        })
         // .catch(err => console.error(err))
-
 // TODO: NEED TO WAIT FOR CONFIRMATION .... 4 seconds????
-
         .then(hash => watcherMicroService.lookupTransaction(pagePubKey, hash))
         .then(res => console.log(res))
         // TODO: go to order confirmation
         // .catch(err => console.error(err))
-
 }
-
 // ────────────────────────────────────────────────────────────────────────────────
 
 
@@ -212,18 +201,17 @@ onPageLoad(pagePubKey)
 
 // mock user selections
 function onSelectAsset(asset) {
-    // this.state.selectedAsset({asset: asset});
+    // this.setState({ selectedAsset: asset });
     selectedAsset = asset;
 }
-onSelectAsset(stellarUtils.AssetDict.REPO);
+onSelectAsset(stellarAssetDict.REPO);
 
 function onSelectBuffer(buffer) {
-    // this.state.selectedBuffer({buffer: buffer});
+    // this.setState({ selectedBuffer: buffer });
     selectedBuffer = buffer;
 }
 onSelectBuffer(0.015);
 // end mock user selections
-//
 
 // // 2. A full checkout on the network for path finding
 setTimeout(() => 

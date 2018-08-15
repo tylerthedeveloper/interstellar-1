@@ -20,6 +20,15 @@ function getTempTaggedTransactions(transaction) {
     // returns false if it does NOT exist or it exists and does NOT match
 function lookupTransaction(pubKey, transactionID) {
     // ... add transaction to database
+
+    // TODO: need retry mechnanism
+    /*
+        return setInterval(() => {
+
+        }, 
+        2000);
+    */
+
     return server.transactions()
         .transaction(transactionID)
         .call()
