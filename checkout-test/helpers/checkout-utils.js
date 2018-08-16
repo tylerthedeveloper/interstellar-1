@@ -5,20 +5,14 @@ function convertToUsd(asset_code, amount, usdPriceDict) {
     return (usdPrice * amount);
 }
 
-// THIS IS when they DO list usd price
-function convertToAsset(asset_code, fixedUsdPrice, usdPriceDict) {
-    const usdPrice = usdPriceDict[asset_code].price_USD;
-    return (fixedUsdPrice / usdPrice);
-}
-
 // updates cart items, given the price dict
 // sets the asset prices based on the fixed USD amount or asset amount
 function setPriceAmounts(usdPriceDict, cartItems) {
     cartItems.map(cartItem => {
-        const usdValue = cartItem.fixedUSDAmount;
-        const { asset_code, balance } = cartItem.acceptedAsset;
-        if (usdValue != 0) cartItem.acceptedAsset.balance = convertToAsset(asset_code, usdValue, usdPriceDict);
-        else cartItem.fixedUSDAmount = convertToUsd(asset_code, balance, usdPriceDict);
+        const usdValue = cartItem.usd_cost;
+        const { asset_code, balance } = cartItem.accepted_asset;
+        if (usdValue != 0) cartItem.accepted_asset.balance = convertToAsset(asset_code, usdValue, usdPriceDict);
+        else cartItem.usd_cost = convertToUsd(asset_code, balance, usdPriceDict);
     });
 }
 
@@ -30,15 +24,15 @@ function combineLikeAssets(cartItems) {
         // TODO: do we need USD?? if so where do we use it 
         // this should be used to just display to user separately, otherwise it will be picked up by algo
 
-        // const curUsdValue = cartItem.fixedUSDAmount;
+        // const curUsdValue = cartItem.usd_cost;
         // if (assetDict['USD']) {
         //     assetDict['USD'].total += curUsdValue;
         // } else {
         //     assetDict['USD'] = { total: curUsdValue };
         // }
 
-        const { asset_code: code, asset_issuer: issuer } = cartItem.acceptedAsset;
-        const curValue = +cartItem.acceptedAsset.balance.toFixed(7);
+        const { asset_code: code, asset_issuer: issuer } = cartItem.accepted_asset;
+        const curValue = +cartItem.accepted_asset.balance.toFixed(7);
         if (assetDict[code] && assetDict[code].issuer === issuer) {
             assetDict[code].total += curValue;
         } else {

@@ -1,6 +1,5 @@
 const express = require('express')
 const app = express()
-// const bodyParser = require('body-parser');
 
 const watcherUtils = require('../helpers/watcher-utils');
 const StellarSdk = require('stellar-sdk');
@@ -10,6 +9,8 @@ const server = new StellarSdk.Server('https://horizon.stellar.org');
 const config =  require('../../config.json');
 const { Pool } =  require('pg');
 
+const usdMicroService = require('./ms-usd-cacher');
+
 const pool = new Pool({
     user: 'postgres',
     host: 'interstellar.market',
@@ -18,13 +19,7 @@ const pool = new Pool({
     port: 5432,
 });
 
-const getStellarBalances = (publicKey) => {
-    return server.loadAccount(publicKey)
-        .then(account => account.balances)
-        .catch(err => console.log(err))
-}
-
-// app.post('/createTransaction', function (req, res) {
+app.post('/createTransaction', function (req, res) {
     // const { /* user_id, publicKey, */  selectedAsset, pathFinderBuffer } = req.body;
     const selectedAsset =  new StellarSdk.Asset( 'REPO', 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B');
     const pathFinderBuffer = 0.015;
@@ -32,47 +27,63 @@ const getStellarBalances = (publicKey) => {
     const publicKey = "GADL2SDMD7XA3SQYBAMBZIWDFZAHHXI2AFESSQZLQVX66T573GGQP5W5";
     const promises = [];
     const query = {
-        text: 'SELECT * from CART where user_id = $1',
-        values: [user_id]
-    }
+        text: 'SELECT name, quantity, usd_cost, asset_code, asset_issuer, asset_type, stellar_public_key ' +
+                'from CART C, PRODUCTS P, ASSETS A, USERS U ' + 
+                'where C.item_id = P.id AND C.user_id = $1 AND ' +
+                'U.id = P.seller_id AND ' +
+                'P.accepted_asset = A.id;',
+        values: [ user_id ]
+    };
+    promises.push(usdMicroService.getAverageUsdPrices());
+    promises.push(watcherUtils.getStellarBalances(publicKey));
     promises.push(pool.query(query))
-    promises.push(getStellarBalances(publicKey));
-    let myCartItems = [], myBalances = [];
+    let myBalances = []; usdPriceDict = {}, 
     Promise.all(promises)
         .then(res => {
-            myCartItems = res[0].rows;
+            usdPriceDict = res[0];
             myBalances = res[1];
-            return myCartItems;
+            return res[2].rows; // cart Items
         })
-        .then(cartItemIDs => {
-            const productIDs = cartItemIDs.map(row => String(row.item_id))
-            const query = {
-                text: "SELECT * from PRODUCTS where id = ANY($1::uuid[])",
-                values: [ productIDs ]
-            }
-            return pool.query(query);
+        .then(queryResult => {
+            const cartItems = queryResult.map(qr => {
+                const { name, quantity, usd_cost, asset_code, asset_issuer, asset_type, stellar_public_key } = qr;
+                const asset = watcherUtils.getAssetFromData(asset_code, asset_issuer, asset_type);
+                return {
+                    name: name,
+                    quantity: quantity,
+                    usd_cost: usd_cost,
+                    seller: stellar_public_key,
+                    accepted_asset: asset
+                };
+            });
+            watcherUtils.setPriceAmounts(usdPriceDict, cartItems);
+            return cartItems;
         })
-        .then(queryResult => queryResult.rows)
-        .then(cartItems => watcherUtils.createTransactionOps(cartItems, myBalances, selectedAsset, pathFinderBuffer))
+        .then(cartItems => watcherUtils.createTransactionOps(publicKey, cartItems, myBalances, selectedAsset, pathFinderBuffer))
         .then(operations => watcherUtils.createTransaction(publicKey, operations))
         .then(transaction => {
             console.log(transaction);
             res.send(transaction)
         });
-// })
+})
 
 
 function updateTransactionConfirmation(transactionID) {
-    const query = `UPDATE TRANSACTION SET STATUS = 'Confirmed' WHERE ID = ${transactionID};`;
-    //  execute query
+    const query = {
+        text: "UPDATE TRANSACTIONS SET STATUS = 'Confirmed' WHERE ID = $1",
+        values: [ transactionID ]
+    };
+    return pool.query(query);
 }
 
 const txHandler = function (txResponse) {
     const { hash } = txResponse;
-    updateTransactionConfirmation(transactionID);
+    updateTransactionConfirmation(hash)
+        // TODO: ???
+        .then(res => console.log(res))
 };
 
-// server.transactions()
-//     .stream({
-//         onmessage: txHandler
-//     })
+server.transactions()
+    .stream({
+        onmessage: txHandler
+    })

@@ -15,7 +15,6 @@ const sitePubKey = _keys.siteKey.pubKey;
 // mocking the redis cache
 const TEMP_pathsDict = require('./temp-paths-cache')
 
-// Cheapest = lowest source_amount
 // -------------------------------------------------------------------- //
 // desc: finds the first path given the necessary inputs
 // inputs: sender: string, receiver: string, sendAsset: Asset, destAsset: Asset, destAmount: string | num, 
@@ -24,7 +23,8 @@ const TEMP_pathsDict = require('./temp-paths-cache')
 const exchangeAndPathTupler = (pathFoundResult) => {
     const { destination_amount, source_amount, path } = pathFoundResult;
     const exchangeRate = calcExchangeRate(destination_amount, source_amount);
-    return { 
+    return {
+        "destination_amount": destination_amount,
         "exchangeRate": exchangeRate, 
         "path": path 
     };
@@ -41,18 +41,17 @@ const findCheapestPath = (sender, receiver, sendAsset, currentBalance, destAsset
             if (issuer) pathList = paths.filter(path => (path.source_asset_code === code && path.source_asset_issuer === issuer))
             else pathList = paths.filter(path => (path.source_asset_type === 'native'))
             const cheapestPath = pathList.reduce((prev, curr) => (prev.source_amount < curr.source_amount ? prev : curr), []);
-            const triple = exchangeAndPathTupler(cheapestPath);
+            // const triple = exchangeAndPathTupler(cheapestPath);
             // console.log(triple);
-            if (cheapestPath) return triple;
+            if (cheapestPath) return cheapestPath;
             throw Error('err: No suitable path exists between the corresponding assets')
         })
-        .catch(err => console.error(err))
-        // .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
+        // .catch(err => console.error(err))
+        .catch(err => console.error(JSON.stringify(err.response.data.extras.result_codes)))
 }
 
 
 
-// Cheapest = lowest source_amount
 // -------------------------------------------------------------------- //
 // desc: finds the cheapest path for each balance given the necessary inputs
 // inputs: sender: string, receiver: string, sendAsset: Asset, destAsset: Asset, destAmount: string | num, 
@@ -93,7 +92,6 @@ const findCheapestPaths = (sender, receiver, destAsset, destAmount) => {
                 } else {
                     const { source_amount } = pathResult;
                     const dict_source_amount = destInDict[key][0];
-                    // console.log(source_amount, dict_source_amount);
                     if (source_amount < dict_source_amount) {
                         destInDict[key] = exchangeAndPathTupler(pathResult);
                     }
@@ -176,8 +174,8 @@ const lookupAllPaths = (pubKey, balances, assetDict) => {
 // test //
 //      //
 // const stellarAssetDict = require('../data/stellar-asset-dict')
-findCheapestPath(_keys.firstKey.pubKey, _keys.thirdKey.pubKey, stellarAssetDict.REPO, .2, stellarAssetDict.MOBI, .05)
-    .then(res => console.log(res))
+// findCheapestPath(_keys.firstKey.pubKey, _keys.thirdKey.pubKey, stellarAssetDict.REPO, .2, stellarAssetDict.MOBI, .05)
+//     .then(res => console.log(res))
 
 // pathLookUp(_keys.firstKey.pubKey, stellarAssetDict.REPO, 10, stellarAssetDict.MOBI, .1)
 //     .then(res => console.log(res))

@@ -8,8 +8,8 @@ const CartItem = {
 const cartItems = [ // Array<CartItem>
     {
         name: "CartItem 1",
-        fixedUSDAmount: .005,
-        acceptedAsset: { 
+        usd_cost: .005,
+        accepted_asset: { 
             balance: 0, 
             asset_type: "alpha-numeric-4", 
             asset_code: "CNY",
@@ -21,8 +21,8 @@ const cartItems = [ // Array<CartItem>
     },
     {
         name: "CartItem 2",
-        fixedUSDAmount: .005,
-        acceptedAsset: { 
+        usd_cost: .005,
+        accepted_asset: { 
             balance: 0, 
             asset_type: "alpha-numeric-4",
             asset_code: "MOBI",

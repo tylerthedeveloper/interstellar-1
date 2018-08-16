@@ -38,8 +38,9 @@ app.get('/averages', function (req, res) {
         .then(averages => res.send(averages));
 })
 
-app.listen(usdCacherPort, () => console.log(`Example app listening on port ${usdCacherPort}`))
+// app.listen(usdCacherPort, () => console.log(`Example app listening on port ${usdCacherPort}`))
 
 module.exports = {
-    getCache
+    getCache,
+    getAverageUsdPrices
 }
