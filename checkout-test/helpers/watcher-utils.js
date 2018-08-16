@@ -27,10 +27,11 @@ const setPriceAmounts = (usdPriceDict, cartItems) => {
 }
 
 const getAssetFromData = (asset_code, asset_issuer, asset_type = '') => {
-    if (asset_type === 'native' || asset_issuer === undefined) return StellarSdk.Asset.native();
+    if (asset_type === 'native' || asset_issuer === undefined) {
+        return StellarSdk.Asset.native();
+    }
     else return new StellarSdk.Asset(asset_code, asset_issuer);
 }
-
 
 // create transaction operations
 // could be optimized if: 
@@ -52,12 +53,9 @@ const createPathPayment = (sender, receiver, pathFoundResult, buffer = 0.015) =>
         destination_amount,
         path
     } = pathFoundResult;
-    const sendAsset = (source_asset_type === 'native') ?
-        new StellarSdk.Asset.native() : 
-        new StellarSdk.Asset(source_asset_code, source_asset_issuer);
-    const destAsset = (destination_asset_type === 'native') ?
-        new StellarSdk.Asset.native() :
-        new StellarSdk.Asset(destination_asset_code, destination_asset_issuer);
+    const nativeAsset = StellarSdk.Asset.native();
+    const sendAsset = (source_asset_type === 'native') ? nativeAsset : new StellarSdk.Asset(source_asset_code, source_asset_issuer);
+    const destAsset = (destination_asset_type === 'native') ? nativeAsset : new StellarSdk.Asset(destination_asset_code, destination_asset_issuer);
     const _path = (path.length === 0) ? path : path.map(asset => {
         if (asset.asset_type === 'native') return nativeAsset;
         else return new StellarSdk.Asset(asset.asset_code, asset.asset_issuer);
@@ -74,15 +72,15 @@ const createPathPayment = (sender, receiver, pathFoundResult, buffer = 0.015) =>
     };
     return StellarSdk.Operation.pathPayment(res);
 }          
-        
+
 const createTransactionOps = (publicKey, myCartItems, myBalances, selectedAsset, pmtBuffer) => {
     const promises = myCartItems.map(cartItem => {
         const { 
             seller: curSellerPubKey,
             accepted_asset: {
-                    asset_code: cartItemAsset_Code,
+                    code: cartItemAsset_Code,
                     balance: cartItemAsset_Price,
-                    asset_issuer: cartItemAsset_Issuer,
+                    issuer: cartItemAsset_Issuer,
                     asset_type: cartItemAsset_Type,
             }
         } = cartItem;
@@ -119,6 +117,7 @@ const createTransactionOps = (publicKey, myCartItems, myBalances, selectedAsset,
         // TODO: need to use LRU PATH CACHE
         else { // user doesnt have the asset so we try to find a path
             const destAsset = getAssetFromData(cartItemAsset_Code, cartItemAsset_Issuer, cartItemAsset_Type);
+            console.log(destAsset);
             // TODO: test added check of not going over balance
             const cheapestPath = pathsMicroService.pathLookUp(
                 publicKey, curSellerPubKey, selectedAsset, balanceForAsset, destAsset, adj_cartItemAsset_Price
