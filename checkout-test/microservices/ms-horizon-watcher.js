@@ -19,7 +19,7 @@ const pool = new Pool({
     port: 5432,
 });
 
-app.post('/createTransaction', function (req, res) {
+// app.post('/createTransaction', function (req, res) {
     // const { /* user_id, publicKey, */  selectedAsset, pathFinderBuffer } = req.body;
     const selectedAsset =  new StellarSdk.Asset( 'REPO', 'GCZNF24HPMYTV6NOEHI7Q5RJFFUI23JKUKY3H3XTQAFBQIBOHD5OXG3B');
     const pathFinderBuffer = 0.015;
@@ -52,7 +52,7 @@ app.post('/createTransaction', function (req, res) {
                     name: name,
                     quantity: quantity,
                     usd_cost: usd_cost,
-                    seller: stellar_public_key,
+                    seller: stellar_public_key.trim(),
                     accepted_asset: asset
                 };
             });
@@ -61,11 +61,12 @@ app.post('/createTransaction', function (req, res) {
         })
         .then(cartItems => watcherUtils.createTransactionOps(publicKey, cartItems, myBalances, selectedAsset, pathFinderBuffer))
         .then(operations => watcherUtils.createTransaction(publicKey, operations))
-        .then(transaction => {
-            console.log(transaction);
-            res.send(transaction)
-        });
-})
+        .then(res => console.log(res))
+//         .then(transaction => {
+//             console.log(transaction);
+//             res.send(transaction)
+//         });
+// })
 
 
 function updateTransactionConfirmation(transactionID) {
@@ -83,7 +84,7 @@ const txHandler = function (txResponse) {
         .then(res => console.log(res))
 };
 
-server.transactions()
-    .stream({
-        onmessage: txHandler
-    })
+// server.transactions()
+//     .stream({
+//         onmessage: txHandler
+//     })
