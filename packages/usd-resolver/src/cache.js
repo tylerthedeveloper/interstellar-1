@@ -39,7 +39,7 @@ const getPrices = () => {
 };
 
 module.exports = {
-    initCache: updateCache,
+    init: updateCache,
     getPrices,
     beginUpdating,
     stopUpdating

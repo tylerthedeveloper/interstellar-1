@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 
-const Cache = require('./cacheUtils');
+const Cache = require('./cache');
 
 const wss = new WebSocket.Server({
     host: "0.0.0.0",
@@ -8,7 +8,7 @@ const wss = new WebSocket.Server({
 });
 
 //load in the inital data
-Cache.initCache().then(() => {
+Cache.init().then(() => {
 
     //set up the websocket paths
     wss.on('connection', (ws) => {
