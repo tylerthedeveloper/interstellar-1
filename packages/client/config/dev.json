@@ -1,0 +1,4 @@
+{
+  "gatewayURL": "http://localhost:3002",
+  "staticURL": "http://localhost:3001"
+}

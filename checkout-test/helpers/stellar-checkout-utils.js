@@ -327,7 +327,7 @@ getStellarBalances(pubKey).then(res => console.log(res))
 
     // console.log(StellarSdk.xdr.XDRStruct(mobiAssetPmtOp));
 
-// server.paths(pubKey, pubKey3, mobiAsset, 1)
+// gateway.paths(pubKey, pubKey3, mobiAsset, 1)
 //     .call()
 //     .then(res => console.log(res))
 

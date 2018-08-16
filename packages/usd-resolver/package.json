@@ -1,0 +1,15 @@
+{
+  "name": "interstellar-usd-resolver",
+  "version": "1.0.0",
+  "description": "Returns the usd prices of interstellar's usd assets.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jack Langston",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "ws": "^6.0.0"
+  }
+}

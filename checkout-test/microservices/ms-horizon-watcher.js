@@ -6,7 +6,7 @@ const StellarSdk = require('stellar-sdk');
 StellarSdk.Network.usePublicNetwork();
 const server = new StellarSdk.Server('https://horizon.stellar.org');
 
-const config =  require('../../config.json');
+const config =  require('../../packages/gateway/config.json');
 const { Pool } =  require('pg');
 
 const usdMicroService = require('./ms-usd-cacher');
@@ -84,7 +84,7 @@ const txHandler = function (txResponse) {
         .then(res => console.log(res))
 };
 
-// server.transactions()
+// gateway.transactions()
 //     .stream({
 //         onmessage: txHandler
 //     })

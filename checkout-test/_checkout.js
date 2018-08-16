@@ -133,7 +133,7 @@ console.log(combineLikeAssets(myCartItems));
 // //           }
 // //           // user doesnt have the asset so we try to find a path
 // //           // findPathPayment(cartItemAsset, assetToUse);
-// //           const paymentPath = server.paths(curUserPubKey, sellerPubKey, acceptedAsset, curAssetBalance);
+// //           const paymentPath = gateway.paths(curUserPubKey, sellerPubKey, acceptedAsset, curAssetBalance);
 // //           // cant find payment path, but may be more assets to use instead
 // //           if (!paymentPath) {
 // //               continue;
@@ -162,5 +162,5 @@ console.log(combineLikeAssets(myCartItems));
 // //   // transaction.add(ops)
 // //   // transaction.sign(KeyPair);
 // //   // transaction.build();
-// //   // return server.submitTransaction(transaction);
+// //   // return gateway.submitTransaction(transaction);
 // // }

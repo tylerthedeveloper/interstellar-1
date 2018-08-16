@@ -1,7 +1,7 @@
 const axios = require('axios');
 
-const CMC_TickerIDs = require('../data/cmc-ticker-data');
-const ST_TickerIDs = require('../data/st-ticker-data');
+const CMC_TickerIDs = require('./config/cmc-ticker-data');
+const ST_TickerIDs = require('./config/st-ticker-data');
 const cmcApiUrl = 'https://api.coinmarketcap.com/v2/ticker';
 const stApiUrl = 'https://api.stellarterm.com/v1/ticker.json';
 
@@ -59,7 +59,7 @@ function load_StellarTermPrices() {
 }
 
 // Averages both sets of prices
-function getAverageUsdPrices() {
+function getAverageUSDPrices() {
     const cmc = load_CoinMarketCapPrices();
     const st = load_StellarTermPrices();
     return axios.all([cmc, st])
@@ -89,5 +89,5 @@ function getAverageUsdPrices() {
 }
 
 module.exports = {
-    getAverageUsdPrices
+    getAverageUSDPrices
 };
