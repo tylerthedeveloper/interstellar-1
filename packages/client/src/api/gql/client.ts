@@ -1,4 +1,4 @@
-// graphql initialization
+// postgraphile initialization
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { ApolloClient } from "apollo-client";
 import { ApolloLink } from "apollo-link";
@@ -59,7 +59,7 @@ const client = new ApolloClient({
     // TODO need to move this to separate file
     link: ApolloLink.from([
         authLink,
-        createUploadLink({uri: process.env.NODE_ENV === "production" ? "http://interstellar.market/gql" : "http://localhost:3002/gql"}),
+        createUploadLink({uri: process.env.NODE_ENV === "production" ? "https://shakeonthis.com/gql" : "https://localhost:3002/gql"}),
         onError(
             ({ operation, response, graphQLErrors, networkError, forward }) => {
                 if (graphQLErrors) {
@@ -82,7 +82,7 @@ const client = new ApolloClient({
             },
         ),
         new HttpLink({
-            uri: process.env.NODE_ENV === "production" ? "http://interstellar.market/gql" : "http://localhost:3002/gql",
+            uri: process.env.NODE_ENV === "production" ? "https://shakeonthis.com/gql" : "https://localhost:3002/gql",
             credentials: "include",
         }),
     ]),

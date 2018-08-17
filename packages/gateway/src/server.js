@@ -1,18 +1,26 @@
-import express from "express";
+import fastify from "fastify";
+import fastifyStatic from "fastify-static";
+import fs from "fs";
 import path from "path";
-import fallback from "express-history-api-fallback";
-import session from 'express-session';
 import { postgraphile} from 'postgraphile';
 import cors from 'cors';
 import {Pool} from 'pg';
-import { apolloUploadExpress } from 'apollo-upload-server';
 import PostGraphileUploadFieldPlugin from 'postgraphile-plugin-upload-field';
 
-import config from '../config.json';
-import {currentUserPlugin, resolveFromSourceFirst} from '../lib/graphql/authPlugin';
-import {ProfilePicPluginConfig, ProductPicPluginConfig} from '../lib/graphql/uploadPlugin';
+const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../config/config.json')));
+import {currentUserPlugin, resolveFromSourceFirst} from './postgraphile/authPlugin';
+import {ProfilePicPluginConfig, ProductPicPluginConfig} from './postgraphile/uploadPlugin';
 
-const app = express();
+const app = fastify({
+    logger: true,
+    http2: true,
+    https: {
+        key: fs.readFileSync(config.https.key),
+        cert: fs.readFileSync(config.https.cert),
+        passphrase: config.https.passphrase
+    }
+});
+
 export const pool = new Pool({
     user: 'postgres',
     host: 'interstellar.market',
@@ -23,23 +31,14 @@ export const pool = new Pool({
 
 app.use("/gql",
     cors({origin: true, credentials: true, maxAge: 60 * 60, exposedHeaders: ['Authorization'],  allowHeaders: ['Authorization']}),
-    session({
-        secret: "Jack Langston is the undisputed best",
-        resave: true,
-        saveUninitialized: true,
-        cookie : {
-            maxAge: 1000 * 60
-        }
-    }),
-    apolloUploadExpress()
 );
+
 app.use(postgraphile(pool, 'public', {
     graphiql: true,
     graphqlRoute: "/gql",
     extendedErrors: ['hint', 'detail', 'errcode'],
     additionalGraphQLContextFromRequest: (req, res) => {
         return {
-            session: req.session,
             req,
             res
         }
@@ -53,9 +52,17 @@ app.use(postgraphile(pool, 'public', {
 }));
 
 //set the static asset directory
-const publicDir = path.resolve(__dirname, "../../client/bin");
-console.log("Serving from ", publicDir);
-app.use(express.static(publicDir));
-app.use(fallback(path.resolve(publicDir, "./index.html")));
+const publicDir = path.resolve(config.static.path);
+app.register(fastifyStatic, {
+    root: publicDir
+});
+
+//tries to serve index.html if requesting html asset from unknown route
+app.setNotFoundHandler((req, reply) => {
+    if(req.headers.accept.indexOf('text/html') > -1){
+        reply.type("text/html");
+        reply.send(fs.createReadStream(publicDir + "/index.html"))
+    }
+});
 
 export default app;
