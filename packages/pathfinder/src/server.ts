@@ -1,6 +1,6 @@
 import * as WebSocket from "ws";
 
-import {Pathfinder} from './pathfinder'
+import {Pathfinder} from "./pathfinder";
 
 const wss = new WebSocket.Server({
     host: "0.0.0.0",
@@ -15,11 +15,26 @@ pf.init().then(() => {
     wss.on("connection", (ws) => {
 
         // public api
-        ws.on("message", (message) => {
+        ws.on("message", async (message) => {
             const req = JSON.parse(message.toString());
 
             switch (req.method) {
                 case "getPath":
+
+                    if (!req.params.destinationAsset) {
+                        ws.send(JSON.stringify({err: "[getPath]: params.destinationAsset not specified"}));
+                    } else if (!req.params.sourceAsset) {
+                        ws.send(JSON.stringify({err: "[getPath]: params.sourceAsset not specified"}));
+                    } else if (!req.params.destinationAmount) {
+                        ws.send(JSON.stringify({err: "[getPath]: params.destinationAmount not specified"}));
+                    }
+
+                    try {
+                        ws.send(JSON.stringify(await pf.getPath(req.params)));
+                    } catch (e) {
+                        ws.send(JSON.stringify({err: e.message}));
+                    }
+
                     break;
             }
         });
@@ -27,9 +42,8 @@ pf.init().then(() => {
     });
     console.log("Microservice ready!");
 
-}).catch(err => {
+}).catch((err) => {
     console.log("Microservice failed!");
     console.log(err);
     process.exit(1);
 });
-
