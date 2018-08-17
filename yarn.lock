@@ -1410,6 +1410,13 @@
   version "1.0.2"
   resolved "https://registry.npmjs.org/@types/valid-url/-/valid-url-1.0.2.tgz#60fa435ce24bfd5ba107b8d2a80796aeaf3a8f45"
 
+"@types/ws@^6.0.0":
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/@types/ws/-/ws-6.0.0.tgz#4787c4194c29cc6361208dcf4e580e208794e012"
+  dependencies:
+    "@types/events" "*"
+    "@types/node" "*"
+
 "@types/zen-observable@^0.8.0":
   version "0.8.0"
   resolved "https://registry.npmjs.org/@types/zen-observable/-/zen-observable-0.8.0.tgz#8b63ab7f1aa5321248aad5ac890a485656dcea4d"
@@ -6889,6 +6896,14 @@ js-xdr@^1.0.0:
     lodash "^4.17.5"
     long "^2.2.3"
 
+js-xdr@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/js-xdr/-/js-xdr-1.0.4.tgz#a76e292ec3053f190dcd1dae9215274aae6a138d"
+  dependencies:
+    cursor "^0.1.5"
+    lodash "^4.17.5"
+    long "^2.2.3"
+
 js-yaml@^3.7.0, js-yaml@^3.9.0:
   version "3.12.0"
   resolved "https://registry.npmjs.org/js-yaml/-/js-yaml-3.12.0.tgz#eaed656ec8344f10f527c6bfa1b6e2244de167d1"
@@ -8781,7 +8796,7 @@ pg-types@~1.12.1:
 
 "pg@>=6.1.0 <8", pg@^7.4.3:
   version "7.4.3"
-  resolved "https://registry.npmjs.org/pg/-/pg-7.4.3.tgz#f7b6f93f5340ecc2596afbb94a13e3d6b609834b"
+  resolved "https://registry.yarnpkg.com/pg/-/pg-7.4.3.tgz#f7b6f93f5340ecc2596afbb94a13e3d6b609834b"
   dependencies:
     buffer-writer "1.0.1"
     packet-reader "0.3.1"
@@ -10293,6 +10308,33 @@ stellar-base@^0.7.6:
   optionalDependencies:
     ed25519 "0.0.4"
 
+stellar-base@^0.8.3:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/stellar-base/-/stellar-base-0.8.3.tgz#0403a538fdb5e7e247bb23e64eeabfa754323f72"
+  dependencies:
+    base32.js "~0.1.0"
+    bignumber.js "^4.0.0"
+    crc "3.5.0"
+    js-xdr "^1.0.4"
+    lodash "^4.17.10"
+    sha.js "^2.3.6"
+    tweetnacl "^1.0.0"
+  optionalDependencies:
+    ed25519 "0.0.4"
+
+stellar-sdk@^0.10.3:
+  version "0.10.3"
+  resolved "https://registry.yarnpkg.com/stellar-sdk/-/stellar-sdk-0.10.3.tgz#91ce5eba56bcde69f398dd95df63a137e2aea74c"
+  dependencies:
+    axios "^0.18.0"
+    es6-promise "^4.2.4"
+    event-source-polyfill "0.0.12"
+    eventsource "^1.0.5"
+    lodash "^4.17.10"
+    stellar-base "^0.8.3"
+    toml "^2.3.0"
+    urijs "1.19.1"
+
 stellar-sdk@^0.8.2:
   version "0.8.2"
   resolved "https://registry.npmjs.org/stellar-sdk/-/stellar-sdk-0.8.2.tgz#e7de7e2d6d3091b77d5b323f66931bdb727a2cc3"
@@ -11449,7 +11491,7 @@ webpack-sources@^1.0.1, webpack-sources@^1.1.0:
 
 webpack@^4.16.5:
   version "4.16.5"
-  resolved "https://registry.npmjs.org/webpack/-/webpack-4.16.5.tgz#29fb39462823d7eb8aefcab8b45f7f241db0d092"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.16.5.tgz#29fb39462823d7eb8aefcab8b45f7f241db0d092"
   dependencies:
     "@webassemblyjs/ast" "1.5.13"
     "@webassemblyjs/helper-module-context" "1.5.13"
