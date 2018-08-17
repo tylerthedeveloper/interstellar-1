@@ -8,7 +8,7 @@ interface IPathInfo {
     to: stellarAsset;
     from: stellarAsset;
     path: stellarAsset[] | null;
-    theshold: number;
+    bucket: number;
     exchangeRate: number | null; // to / from
 }
 
