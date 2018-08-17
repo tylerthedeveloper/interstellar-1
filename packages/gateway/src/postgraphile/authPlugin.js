@@ -60,11 +60,11 @@ export function currentUserPlugin (builder) {
 
             const resolve = (parent, args, context, info) => {
 
-                const { session, req } = context;
+                const { req } = context;
 
                 return new Promise((resolve, reject) => {
 
-                    const authHeader = req.get('Authorization');
+                    const authHeader = req.headers.authorization;
                     if(!authHeader) {
                         resolve(null);
                         return;
@@ -190,9 +190,7 @@ export function currentUserPlugin (builder) {
                                 if (err)
                                     rej(err);
 
-                                context.res.set({
-                                   'Authorization': `Bearer ${token}`
-                                });
+                                context.res.setHeader('Authorization', `Bearer ${token}`);
                                 res(result.data.createAndLoadUserByStellarPublicKey.users[0]);
 
                             })
@@ -206,7 +204,6 @@ export function currentUserPlugin (builder) {
                 type: graphql.GraphQLBoolean,
                 description: "Logout mechanism for the gateway",
                 resolve(source, args, { session }) {
-                    delete session.currentUserId;
                     return true;
                 }
             };

@@ -1,4 +1,6 @@
 import aws from 'aws-sdk';
+import fs from 'fs';
+import path from 'path';
 import uuid from 'uuid/v4';
 import Promise from 'bluebird';
 import sharp from 'sharp';
@@ -6,8 +8,8 @@ sharp.simd(true);
 sharp.cache( { memory: 200 } );
 import zlib from 'zlib';
 
-import config from '../../../config.json';
-import {pool} from '../../../src/server';
+const config = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../../../config/config.json')));
+import {pool} from '../../server';
 
 const BUCKET_NAME = 'silentshop';
 aws.config.setPromisesDependency(Promise);
