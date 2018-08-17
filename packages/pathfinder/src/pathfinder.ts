@@ -7,9 +7,9 @@ interface stellarAsset {
 interface IPathInfo {
     to: stellarAsset;
     from: stellarAsset;
-    path: stellarAsset[];
+    path: stellarAsset[] | null;
     theshold: number;
-    exchangeRate: number; // to / from
+    exchangeRate: number | null; // to / from
 }
 
 export class PathfinderInitializationError extends Error {}
@@ -82,7 +82,7 @@ export class Pathfinder {
             throw new Error(`[getPath] Given an unsupported sourceAsset: ${sourceAsset}`);
         } else if (!this.supportsAsset(destinationAsset)) {
             throw new Error(`[getPath] Given an unsupported destinationAsset: ${destinationAsset}`);
-             }
+        }
 
         // calculate the quanitized threshold amount
         const bucket = await this.getBucket(destinationAsset, destinationAmount);
@@ -95,10 +95,19 @@ export class Pathfinder {
         const bestPaths = await this.getBestPaths(destinationAsset, destinationAmount);
 
         // cache the results - no need to await this
+        this.savePathsToCache(destinationAsset, bucket, bestPaths);
 
-        // get the best path corresponding to the sourceAsset and return in
-        const path = bestPaths[0];
-        return path;
+        // get the best path corresponding to the sourceAsset and return
+        const bestPath = bestPaths.find((pathInfo) => {
+            return pathInfo.from.issuerPublicKey === sourceAsset.issuerPublicKey &&
+                pathInfo.from.code == sourceAsset.code;
+        });
+
+        if (!bestPath) {
+            throw new Error("[getPath]: stellar account not configured correctly");
+        }
+
+        return bestPath;
     }
 
     /***************************************************************************
@@ -135,10 +144,10 @@ export class Pathfinder {
             const key = `${keyPrefix}${pathInfo.from.code}-${pathInfo.from.issuerPublicKey}`;
             const value = {
                 exchangeRate: pathInfo.exchangeRate,
-                path: pathInfo.path
-            }
+                path: pathInfo.path,
+            };
 
-            //todo provide the saving mechanism
+            // todo provide the saving mechanism
         });
     }
 
@@ -189,7 +198,6 @@ export class Pathfinder {
     /***************************************************************************
      * Utilities
      ***************************************************************************/
-
 
     /**
      * Checks that we support the indicated asset
