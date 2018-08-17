@@ -6,7 +6,7 @@ const StellarSdk = require('stellar-sdk');
 StellarSdk.Network.usePublicNetwork();
 const server = new StellarSdk.Server('https://horizon.stellar.org');
 
-const config =  require('../../packages/gateway/config.json');
+const config =  require('../../packages/gateway/config/config.json');
 const { Pool } =  require('pg');
 
 const usdMicroService = require('./ms-usd-cacher');

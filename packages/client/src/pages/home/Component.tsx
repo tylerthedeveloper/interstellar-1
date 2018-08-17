@@ -12,8 +12,8 @@ class Home extends React.PureComponent<IComponentProps> {
             <div className={classes.container}>
                 <Typography variant={"display3"}>Home Page</Typography>
                 <ul>
-                    <li>Secret Key (Public Network): SB6ZKPBDEWFQ7CGV7IPV3QUBU6MSR232LWHOIURIHPHICOSWCAPEQDSC</li>
-                    <li>Secret Key (Test Network): SAKRB7EE6H23EF733WFU76RPIYOPEWVOMBBUXDQYQ3OF4NF6ZY6B6VLW</li>
+                    <li>Secret Key (Public Network): SCNJABWZFKPPY3FDLWQ763KQ37SWOHWZRH7N76Z35DTLQXDVCR4G5PU2</li>
+                    <li>Secret Key (Test Network): SABZRD7PVLGVWI4MCNCEYZG6UJ6ROHMATCEMDA4OL4XYZFBHCYWQC4UW</li>
                 </ul>
             </div>
         );
