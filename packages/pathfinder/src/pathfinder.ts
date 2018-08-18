@@ -76,6 +76,8 @@ export class Pathfinder {
     }
 
     /**
+     *  TODO: Use or remove
+    // TODO: should this be moved to stellar section
      * Uses Stellar SDK to retrieve and verify the balances for REFERENCE_ACCOUNT_PUBLIC_KEY 
      */
     private getStellarBalances() {
@@ -83,11 +85,41 @@ export class Pathfinder {
             .then((account: any) => account.balances)
     }
 
-    private makeKey = (asset: any) => {
+    // todo: is this okay to be static
+    // TODO: should this be moved to stellar section
+    private static makeCompositeKey = (asset: any): string => {
         const { asset_code, asset_issuer, asset_type} = asset;
-        const key = (asset_type !== 'native') ?
-            `${asset_code}-${asset_issuer}`
+        const key = (asset_type !== 'native') 
+            ? `${asset_code}-${asset_issuer}`
             : 'XLM';
+        return key;
+    }
+
+    private static makeCompositeKeyFromPath = (pathResult: any): string => {
+        const { source_asset_code, source_asset_issuer, source_asset_type } = pathResult;
+        const key = (source_asset_type !== 'native') 
+            ? `${source_asset_code}-${source_asset_issuer}`
+            : 'XLM';
+        return key;
+    }
+
+    // todo: is this okay to be static
+    // TODO: should this be moved to stellar section
+    private static constructStellarAsset = (asset: any): any => {
+        const { asset_code, asset_issuer, asset_type} = asset;
+        const key = (asset_type !== 'native') 
+            ? new StellarSdk.Asset(asset_code, asset_issuer)
+            : StellarSdk.Asset.native();
+        return key;
+    }
+
+    // todo: is this okay to be static
+    // TODO: should this be moved to stellar section
+    private static constructStellarAssetFromPath = (pathResult: any): any => {
+        const { source_asset_code, source_asset_issuer, source_asset_type } = pathResult;
+        const key = (source_asset_type !== 'native') 
+            ? new StellarSdk.Asset(source_asset_code, source_asset_issuer)
+            : StellarSdk.Asset.native();
         return key;
     }
 
@@ -98,6 +130,7 @@ export class Pathfinder {
      * throws PathfinderInitializationError if incorrectly formatted
      */
     private async validateSupportedAssets(assets: [stellarAsset]) {
+        // todo fill in the appropriate validation calls
         return server.loadAccount(Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY)
             .then((account: any) => account.balances)
             .then((balances: stellarAsset[]) => {
@@ -106,22 +139,17 @@ export class Pathfinder {
                     let asset_dict = {} as any;
                     assets.map((asset: any) => {
                         const { asset_code, asset_issuer, asset_type } = asset;
-                        const key = (asset_type !== 'native') ?
-                            `${asset_code}-${asset_issuer}`
-                            : "XLM";
+                        const key = Pathfinder.makeCompositeKey(asset);
                         asset_dict[key] = true;
                     });
                     balances.map((asset: any) => {
                         const { asset_code, asset_issuer, asset_type } = asset;
-                        const key = (asset_type !== 'native') ?
-                            `${asset_code}-${asset_issuer}`
-                            : "XLM";
+                        const key = Pathfinder.makeCompositeKey(asset);
                         if (!asset_dict[key] && asset_type !== 'native') throw PathfinderInitializationError
                     });
                 }
                 return true;
             });
-        // todo fill in the appropriate validation calls
     }
 
     /****************************************
@@ -180,8 +208,14 @@ export class Pathfinder {
         destinationAsset: stellarAsset,
         threshold: number,
     ): Promise<IPathInfo | null> {
-
         // todo provide the retrieval logic
+        const key = `${destinationAsset.code}_${destinationAsset.issuerPublicKey}`;
+        const TEMP_DICT = {};
+        // return new Promise((res: any, rej: any ) => {
+        //     if (TEMP_DICT[key] != null)
+        //         Promise.resolve(null); // TEMP_DICT[key]
+        //     Promise.resolve(null);
+        // });
         return Promise.resolve(null);
     }
 
@@ -198,6 +232,7 @@ export class Pathfinder {
         const keyPrefix = `${destinationAsset.code}_${destinationAsset.issuerPublicKey}-${bucket}-`;
 
         bestPaths.forEach((pathInfo) => {
+            // todo: need to be able to XLM which doesnt have all asset props
             const key = `${keyPrefix}${pathInfo.from.code}-${pathInfo.from.issuerPublicKey}`;
             const value = {
                 exchangeRate: pathInfo.exchangeRate,
@@ -237,6 +272,52 @@ export class Pathfinder {
      * Stellar Interface
      ***************************************************************************/
 
+    private calculateExchangeRate = (destination_amount: number, source_amount: number) => {
+        return (destination_amount / source_amount);
+    }
+
+    private constructPathInfo = (pathFoundResult: any) => {
+        const { 
+            source_amount,
+            source_asset_code, 
+            source_asset_issuer, 
+            source_asset_type,
+            destination_amount,
+            destination_asset_type,
+            destination_asset_issuer,
+            destination_asset_code,
+            path,
+        } = pathFoundResult;
+        const source_asset = (source_asset_type !== 'native') 
+            ? {
+                code: source_asset_code,
+                issuerPublicKey: source_asset_issuer
+            } as stellarAsset
+            : {
+                code: 'XLM',
+                issuerPublicKey: ''
+            } as stellarAsset;
+        const destination_asset = (destination_asset_type !== 'native') 
+            ? {
+                code: destination_asset_code,
+                issuerPublicKey: destination_asset_issuer
+            } as stellarAsset
+            : {
+                code: 'XLM',
+                issuerPublicKey: ''
+            } as stellarAsset;
+        // make asset of each then return
+        const bucket = this.getBucket(destination_asset, destination_amount);
+        const exchangeRate = this.calculateExchangeRate(destination_amount, source_amount);
+        return {
+            to: destination_asset,
+            from: source_asset,
+            path: path,
+            bucket: bucket,
+            exchangeRate: exchangeRate
+        }
+    }    
+     
     /**
      * Returns a list of the best paths from each of the supported assets to the given
      * destination asset and amount
@@ -248,8 +329,29 @@ export class Pathfinder {
 
         // todo implement the pathfinding logic
         // be sure to use REFERENCE_ACCOUNT_PUBLIC_KEY as the destination and source accounts
-
-        return Promise.resolve([]);
+        return server.paths(Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY, 
+                            Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY, 
+                            destinationAsset, destinationAmount)
+                    .call()
+                    .then((paths: any) => JSON.parse(JSON.stringify(paths)).records)
+                    .then((paths: any) => {
+                        const pathDict: any = {};
+                        paths.map((pathResult: any) => {
+                            const key = Pathfinder.makeCompositeKeyFromPath(pathResult);
+                            if (!pathDict[key]) {
+                                pathDict[key] = this.constructPathInfo(pathResult);
+                            } else {
+                                const { source_amount } = pathResult;
+                                const dict_source_amount = pathDict[key].exchangeRate;
+                                if (dict_source_amount > this.calculateExchangeRate(destinationAmount, source_amount)) {
+                                    pathDict[key] = this.constructPathInfo(pathResult);
+                                }
+                            }
+                        });
+                        const pathArray = Object.keys(pathDict).map(key => pathDict[key])
+                        if (pathArray !== null && pathArray.length > 0) return Promise.resolve(pathArray);
+                        else throw Error('err: No path exists between the corresponding assets')
+                    })
     }
 
     /***************************************************************************
