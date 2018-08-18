@@ -1,3 +1,17 @@
+import { log } from "handlebars";
+
+const config =  require('../../../config.json');
+const { Pool } =  require('pg');
+const pool = new Pool({
+    user: 'postgres',
+    host: 'interstellar.market',
+    database: 'silent_shop',
+    password: config.pg.password,
+    port: 5432,
+});
+
+const StellarSdk = require('stellar-sdk'); 
+const server = new StellarSdk.Server('https://horizon.stellar.org');
 
 interface stellarAsset {
     code: string;
@@ -21,7 +35,7 @@ export class Pathfinder {
      * the assets that we support. It will be used as both the destination and source
      * account for all of the pathfinding algorithms. TODO fill it in
      */
-    public static REFERENCE_ACCOUNT_PUBLIC_KEY = "";
+    public static REFERENCE_ACCOUNT_PUBLIC_KEY = "GBG47DCYZCY4UU4UN7XSECYT45IRTCUGZN73SVZE5TSCIB3DQDREYUTS";
     public supportedAssets: stellarAsset[];
     constructor() {
 
@@ -50,10 +64,33 @@ export class Pathfinder {
     private async getSupportedAssets() {
 
         // TODO make the appropriate database calls
-        const assets = [] as stellarAsset[];
+        let assets = [] as stellarAsset[];
+        const query = {
+            text: 'SELECT id, asset_code, asset_issuer, asset_type from ASSETS'
+        };
+        return pool.query(query)
+            .then((queryResult: any) => queryResult.rows)
+            .then((dbAssets: any) => {
+                assets = dbAssets;
+                this.supportedAssets = dbAssets;
+                return dbAssets;
+            });
+    }
 
-        this.supportedAssets = assets;
-        return assets;
+    /**
+     * Uses Stellar SDK to retrieve and verify the balances for REFERENCE_ACCOUNT_PUBLIC_KEY 
+     */
+    private getStellarBalances() {
+        return server.loadAccount(Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY)
+            .then((account: any) => account.balances)
+    }
+
+    private makeKey = (asset: any) => {
+        const { asset_code, asset_issuer, asset_type} = asset;
+        const key = (asset_type !== 'native') ?
+            `${asset_code}-${asset_issuer}`
+            : 'XLM';
+        return key;
     }
 
     /**
@@ -63,7 +100,29 @@ export class Pathfinder {
      * throws PathfinderInitializationError if incorrectly formatted
      */
     private async validateSupportedAssets(assets: [stellarAsset]) {
-
+        return server.loadAccount(Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY)
+            .then((account: any) => account.balances)
+            .then((balances: stellarAsset[]) => {
+                if (assets.length !== balances.length) throw PathfinderInitializationError;
+                else {
+                    let asset_dict = {} as any;
+                    assets.map((asset: any) => {
+                        const { asset_code, asset_issuer, asset_type } = asset;
+                        const key = (asset_type !== 'native') ?
+                            `${asset_code}-${asset_issuer}`
+                            : "XLM";
+                        asset_dict[key] = true;
+                    });
+                    balances.map((asset: any) => {
+                        const { asset_code, asset_issuer, asset_type } = asset;
+                        const key = (asset_type !== 'native') ?
+                            `${asset_code}-${asset_issuer}`
+                            : "XLM";
+                        if (!asset_dict[key] && asset_type !== 'native') throw PathfinderInitializationError
+                    });
+                }
+                return true;
+            });
         // todo fill in the appropriate validation calls
     }
 
