@@ -4,6 +4,7 @@
   "description": "Utility for finding paths on the Stellar network",
   "main": "index.js",
   "dependencies": {
+    "@types/stellar-sdk": "^0.8.6",
     "js-xdr": "^1.0.4",
     "pg": "^7.4.3",
     "stellar-base": "^0.8.3",

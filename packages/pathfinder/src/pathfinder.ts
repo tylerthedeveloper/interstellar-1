@@ -8,8 +8,6 @@ const pool = new Pool({
     port: 5432,
 });
 
-const StellarSdk = require('stellar-sdk'); 
-const server = new StellarSdk.Server('https://horizon.stellar.org');
 
 interface stellarAsset {
     code: string;
@@ -24,7 +22,25 @@ interface IPathInfo {
     exchangeRate: number | null; // to / from
 }
 
+interface stellarBalance { 
+    balances: Array<
+    {
+        balance: string
+        asset_type: 'native'
+    } |
+    {
+        balance: string
+        limit: string
+        asset_type: 'credit_alphanum4' | 'credit_alphanum12'
+        asset_code: string
+        asset_issuer: string
+    }
+    >;
+}
+
 export class PathfinderInitializationError extends Error {}
+
+import * as StellarSdk from 'stellar-sdk'; 
 
 export class Pathfinder {
 
@@ -35,8 +51,10 @@ export class Pathfinder {
      */
     public static REFERENCE_ACCOUNT_PUBLIC_KEY = "GBG47DCYZCY4UU4UN7XSECYT45IRTCUGZN73SVZE5TSCIB3DQDREYUTS";
     public supportedAssets: stellarAsset[];
-    constructor() {
+    private server: StellarSdk.Server;
 
+    constructor() {
+        this.server = new StellarSdk.Server('https://horizon.stellar.org');
     }
 
     /****************************************
@@ -51,7 +69,7 @@ export class Pathfinder {
     public async init() {
 
         return Promise.all([
-            this.getSupportedAssets().then(this.validateSupportedAssets),
+            this.getSupportedAssets().then(() => this.validateSupportedAssets(this.supportedAssets))
         ]);
 
     }
@@ -76,52 +94,35 @@ export class Pathfinder {
     }
 
     /**
-     *  TODO: Use or remove
-    // TODO: should this be moved to stellar section
-     * Uses Stellar SDK to retrieve and verify the balances for REFERENCE_ACCOUNT_PUBLIC_KEY 
+     * helper for below
+     * returns a key to be used for lookup in the form of `code-issuer`
      */
-    private getStellarBalances() {
-        return server.loadAccount(Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY)
-            .then((account: any) => account.balances)
-    }
-
-    // todo: is this okay to be static
-    // TODO: should this be moved to stellar section
-    private static makeCompositeKey = (asset: any): string => {
-        const { asset_code, asset_issuer, asset_type} = asset;
-        const key = (asset_type !== 'native') 
+    private makeKeyPairHelper = (asset_code: string, asset_issuer: string, asset_type: string): string => {
+        const key = (asset_type !== 'native')
             ? `${asset_code}-${asset_issuer}`
             : 'XLM';
         return key;
     }
 
-    private static makeCompositeKeyFromPath = (pathResult: any): string => {
-        const { source_asset_code, source_asset_issuer, source_asset_type } = pathResult;
-        const key = (source_asset_type !== 'native') 
-            ? `${source_asset_code}-${source_asset_issuer}`
-            : 'XLM';
-        return key;
+
+    /**
+     * Takes in stellarAsset | StellarSdk.Asset 
+     * returns a key to be used for lookup in the form of `code-issuer`
+     */
+    private makeKeyPair = (asset: any): string => {
+        const { asset_code, asset_issuer, asset_type } = asset;
+        return this.makeKeyPairHelper(asset_code, asset_issuer, asset_type);
     }
 
-    // todo: is this okay to be static
-    // TODO: should this be moved to stellar section
-    private static constructStellarAsset = (asset: any): any => {
-        const { asset_code, asset_issuer, asset_type} = asset;
-        const key = (asset_type !== 'native') 
-            ? new StellarSdk.Asset(asset_code, asset_issuer)
-            : StellarSdk.Asset.native();
-        return key;
+    /**
+    * Takes in a StellarSdk.PaymentPathRecord and 
+    * returns a key to be used for lookup in the form of `code-issuer`
+    */
+    private makeKeyPairFromPath = (pathResult: StellarSdk.PaymentPathRecord ): string => {
+        const { source_asset_code, source_asset_issuer, source_asset_type } = pathResult;
+        return this.makeKeyPairHelper(source_asset_code, source_asset_issuer, source_asset_type);
     }
 
-    // todo: is this okay to be static
-    // TODO: should this be moved to stellar section
-    private static constructStellarAssetFromPath = (pathResult: any): any => {
-        const { source_asset_code, source_asset_issuer, source_asset_type } = pathResult;
-        const key = (source_asset_type !== 'native') 
-            ? new StellarSdk.Asset(source_asset_code, source_asset_issuer)
-            : StellarSdk.Asset.native();
-        return key;
-    }
 
     /**
      * Ensures that the account belonging to REFERENCE_ACCOUNT_PUBLIC_KEY contains balances
@@ -130,22 +131,20 @@ export class Pathfinder {
      * throws PathfinderInitializationError if incorrectly formatted
      */
     private async validateSupportedAssets(assets: [stellarAsset]) {
-        // todo fill in the appropriate validation calls
-        return server.loadAccount(Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY)
-            .then((account: any) => account.balances)
-            .then((balances: stellarAsset[]) => {
+        return this.server.loadAccount(Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY)
+            .then((account: StellarSdk.AccountRecord) => account.balances)
+            // todo Resolve this type to stellarBalance
+            .then((balances: any) => {
                 if (assets.length !== balances.length) throw PathfinderInitializationError;
                 else {
-                    let asset_dict = {} as any;
-                    assets.map((asset: any) => {
-                        const { asset_code, asset_issuer, asset_type } = asset;
-                        const key = Pathfinder.makeCompositeKey(asset);
+                    const asset_dict: { [index: string]: boolean } = {};
+                    assets.map((asset: stellarAsset) => {
+                        const key = this.makeKeyPair(asset);
                         asset_dict[key] = true;
                     });
-                    balances.map((asset: any) => {
-                        const { asset_code, asset_issuer, asset_type } = asset;
-                        const key = Pathfinder.makeCompositeKey(asset);
-                        if (!asset_dict[key] && asset_type !== 'native') throw PathfinderInitializationError
+                    balances.map((asset: StellarSdk.Asset) => {
+                        const key = this.makeKeyPair(asset);
+                        if (!asset_dict[key] && !asset.isNative()) throw PathfinderInitializationError
                     });
                 }
                 return true;
@@ -272,11 +271,17 @@ export class Pathfinder {
      * Stellar Interface
      ***************************************************************************/
 
-    private calculateExchangeRate = (destination_amount: number, source_amount: number) => {
-        return (destination_amount / source_amount);
+    /**
+     * returns the exchange rate of 2 assets
+     */
+    private calculateExchangeRate = (destination_amount: number, source_amount: number): number => {
+        return (source_amount / destination_amount);
     }
 
-    private constructPathInfo = (pathFoundResult: any) => {
+    /**
+     * Properly constructs IPathInfo from StellarSdk.PaymentPathRecord
+     */
+    private constructPathInfo = (pathFoundResult: StellarSdk.PaymentPathRecord): IPathInfo => {
         const { 
             source_amount,
             source_asset_code, 
@@ -306,18 +311,33 @@ export class Pathfinder {
                 code: 'XLM',
                 issuerPublicKey: ''
             } as stellarAsset;
-        // make asset of each then return
-        const bucket = this.getBucket(destination_asset, destination_amount);
-        const exchangeRate = this.calculateExchangeRate(destination_amount, source_amount);
+        const dest_amount_str = parseFloat(destination_amount);
+        const bucket = this.getBucket(destination_asset, dest_amount_str);
+        const exchangeRate = this.calculateExchangeRate(dest_amount_str, parseFloat(source_amount));
+        const _path = path.map((asset: { asset_code: string, asset_issuer: string, asset_type: string}) => {
+            return { code: asset.asset_code, issuerPublicKey: asset.asset_issuer } as stellarAsset;
+        });
         return {
             to: destination_asset,
             from: source_asset,
-            path: path,
+            path: _path,
             bucket: bucket,
             exchangeRate: exchangeRate
-        }
+        } as IPathInfo;
     }    
      
+    /**
+     * Helper For below
+     * Creates a StellarSdk.Asset to be used in server calls
+     */
+    private constructStellarAsset = (asset: stellarAsset): StellarSdk.Asset => {
+        const { code, issuerPublicKey } = asset;
+        const returnAsset = (code !== 'X:M') 
+            ? new StellarSdk.Asset(code, issuerPublicKey)
+            : StellarSdk.Asset.native();
+        return returnAsset;
+    }
+    
     /**
      * Returns a list of the best paths from each of the supported assets to the given
      * destination asset and amount
@@ -329,28 +349,33 @@ export class Pathfinder {
 
         // todo implement the pathfinding logic
         // be sure to use REFERENCE_ACCOUNT_PUBLIC_KEY as the destination and source accounts
-        return server.paths(Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY, 
+        const _destinationAsset = this.constructStellarAsset(destinationAsset);
+        return this.server.paths(Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY, 
                             Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY, 
-                            destinationAsset, destinationAmount)
+                            _destinationAsset, String(destinationAmount))
                     .call()
                     .then((paths: any) => JSON.parse(JSON.stringify(paths)).records)
-                    .then((paths: any) => {
-                        const pathDict: any = {};
-                        paths.map((pathResult: any) => {
-                            const key = Pathfinder.makeCompositeKeyFromPath(pathResult);
-                            if (!pathDict[key]) {
-                                pathDict[key] = this.constructPathInfo(pathResult);
+                    .then((paths: StellarSdk.PaymentPathRecord[]) => {
+                        const pathRecordDict: { [index: string]: StellarSdk.PaymentPathRecord } = {};
+                        paths.map((pathResult: StellarSdk.PaymentPathRecord) => {
+                            const key = this.makeKeyPairFromPath(pathResult);
+                            if (!pathRecordDict[key]) {
+                                pathRecordDict[key] = pathResult;
                             } else {
                                 const { source_amount } = pathResult;
-                                const dict_source_amount = pathDict[key].exchangeRate;
-                                if (dict_source_amount > this.calculateExchangeRate(destinationAmount, source_amount)) {
-                                    pathDict[key] = this.constructPathInfo(pathResult);
+                                const saved_source_amount = this.calculateExchangeRate(destinationAmount, 
+                                    parseInt(pathRecordDict[key].source_amount)) || null;
+                                if (saved_source_amount !== null &&
+                                    saved_source_amount > this.calculateExchangeRate(destinationAmount, parseInt(source_amount))) {
+                                    pathRecordDict[key] = pathResult;
                                 }
                             }
                         });
-                        const pathArray = Object.keys(pathDict).map(key => pathDict[key])
+                        const pathArray = Object.keys(pathRecordDict).map(key => this.constructPathInfo(pathRecordDict[key]));
                         if (pathArray !== null && pathArray.length > 0) return Promise.resolve(pathArray);
                         else throw Error('err: No path exists between the corresponding assets')
+                        throw new Error(`[getBestPaths]: No path found to ${_destinationAsset.code}\
+                                        in the amount of ${destinationAmount}`);
                     })
     }
 
