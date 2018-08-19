@@ -9,12 +9,12 @@ const pool = new Pool({
 });
 
 
-interface stellarAsset {
+export interface stellarAsset {
     code: string;
     issuerPublicKey: string;
 }
 
-interface IPathInfo {
+export interface IPathInfo {
     to: stellarAsset;
     from: stellarAsset;
     path: stellarAsset[] | null;
@@ -36,6 +36,13 @@ interface stellarBalance {
         asset_issuer: string
     }
     >;
+}
+
+interface Cache {
+    cache: any;
+    savePathsToCache(destinationAsset: stellarAsset, bucket: number, bestPaths: IPathInfo[]): any;
+    removeFromCache(destinationAsset: stellarAsset): any;
+    lookupInCache(destinationAsset: stellarAsset): any;
 }
 
 export class PathfinderInitializationError extends Error {}
