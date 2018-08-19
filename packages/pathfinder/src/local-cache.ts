@@ -1,24 +1,35 @@
 import { stellarAsset, IPathInfo } from "./pathfinder";
 
+// local cache class implementation
 export class LocalCache {
 
-    private cache: any;
+    // in-memory data
+    private cache: { [index: string]: { exchangeRate: number, path: stellarAsset[] } };
 
     constructor(cache: any) {
         this.cache = cache;
     }
 
-    public savePathsToCache(destinationAsset: stellarAsset, bucket: number, bestPaths: IPathInfo[]): any {
-        // this.cache.add()
+    /**
+     * adds / updates cache with new best paths list going to the destination asset
+     */
+    public savePathsToCache(key: string, value: any, bucket: number, bestPaths: IPathInfo[]): any {
+        // this.cache[key] = value
+        // setTimeout(() => this.removeFromCache(key))
     }
 
-    public lookupInCache(destinationAsset: stellarAsset): any {
-        // return this.cache.get(destinationAsset)
+    /**
+     * returns if an item is in the cache
+     */
+    public lookupInCache(key: string): any | null {
+        // return this.cache[key] 
     }
     
-    private removeFromCache(destinationAsset: stellarAsset): void {
-        // this.cache.remove(destinationAsset)
+    /**
+     * removes an asset from the cache
+     */
+    private removeFromCache(asset: stellarAsset): void {
+        // this.cache[asset] = null;
     }
-    
 
 }

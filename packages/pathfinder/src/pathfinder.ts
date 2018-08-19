@@ -40,9 +40,9 @@ interface stellarBalance {
 
 interface Cache {
     cache: any;
-    savePathsToCache(destinationAsset: stellarAsset, bucket: number, bestPaths: IPathInfo[]): any;
-    removeFromCache(destinationAsset: stellarAsset): any;
-    lookupInCache(destinationAsset: stellarAsset): any;
+    savePathsToCache(key: string, bucket: number, bestPaths: IPathInfo[]): any;
+    removeFromCache(key: string): any;
+    lookupInCache(key: string): any;
 }
 
 export class PathfinderInitializationError extends Error {}
@@ -86,7 +86,6 @@ export class Pathfinder {
      */
     private async getSupportedAssets() {
 
-        // TODO make the appropriate database calls
         let assets = [] as stellarAsset[];
         const query = {
             text: 'SELECT id, asset_code, asset_issuer, asset_type from ASSETS'
@@ -98,6 +97,7 @@ export class Pathfinder {
                 this.supportedAssets = dbAssets;
                 return dbAssets;
             });
+            
     }
 
     /**
@@ -218,8 +218,7 @@ export class Pathfinder {
         const key = `${destinationAsset.code}_${destinationAsset.issuerPublicKey}`;
         const TEMP_DICT = {};
         // return new Promise((res: any, rej: any ) => {
-        //     if (TEMP_DICT[key] != null)
-        //         Promise.resolve(null); // TEMP_DICT[key]
+        //      return this.cache.lookup(key)
         //     Promise.resolve(null);
         // });
         return Promise.resolve(null);
@@ -244,8 +243,8 @@ export class Pathfinder {
                 exchangeRate: pathInfo.exchangeRate,
                 path: pathInfo.path,
             };
-
             // todo provide the saving mechanism
+            // this.cache.savePaths(key, value)
         });
     }
 
@@ -347,15 +346,15 @@ export class Pathfinder {
     
     /**
      * Returns a list of the best paths from each of the supported assets to the given
-     * destination asset and amount
+     * destination asset and amount 
+     * 
+     * Note: uses REFERENCE_ACCOUNT_PUBLIC_KEY as the destination and source accounts
      */
     private async getBestPaths(
         destinationAsset: stellarAsset,
         destinationAmount: number,
     ): Promise<IPathInfo[]> {
 
-        // todo implement the pathfinding logic
-        // be sure to use REFERENCE_ACCOUNT_PUBLIC_KEY as the destination and source accounts
         const _destinationAsset = this.constructStellarAsset(destinationAsset);
         return this.server.paths(Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY, 
                             Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY, 
@@ -380,9 +379,8 @@ export class Pathfinder {
                         });
                         const pathArray = Object.keys(pathRecordDict).map(key => this.constructPathInfo(pathRecordDict[key]));
                         if (pathArray !== null && pathArray.length > 0) return Promise.resolve(pathArray);
-                        else throw Error('err: No path exists between the corresponding assets')
-                        throw new Error(`[getBestPaths]: No path found to ${_destinationAsset.code}\
-                                        in the amount of ${destinationAmount}`);
+                        else throw new Error(`[getBestPaths]: No path found to ${_destinationAsset.code} \
+                            in the amount of ${destinationAmount}`);
                     })
     }
 
