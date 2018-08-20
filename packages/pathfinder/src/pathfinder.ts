@@ -1,23 +1,15 @@
 const config =  require('../../../config.json');
-const { Pool } =  require('pg');
-const pool = new Pool({
-    user: 'postgres',
-    host: 'interstellar.market',
-    database: 'silent_shop',
-    password: config.pg.password,
-    port: 5432,
-});
+import { Pool, QueryResult } from 'pg';
 
-
-export interface stellarAsset {
+export interface IStellarAssetMetadata {
     code: string;
     issuerPublicKey: string;
 }
 
 export interface IPathInfo {
-    to: stellarAsset;
-    from: stellarAsset;
-    path: stellarAsset[] | null;
+    to: IStellarAssetMetadata;
+    from: IStellarAssetMetadata;
+    path: IStellarAssetMetadata[] | null;
     bucket: number;
     exchangeRate: number | null; // to / from
 }
@@ -38,7 +30,7 @@ interface stellarBalance {
     >;
 }
 
-interface Cache {
+interface ICache {
     cache: any;
     savePathsToCache(key: string, bucket: number, bestPaths: IPathInfo[]): any;
     removeFromCache(key: string): any;
@@ -57,11 +49,24 @@ export class Pathfinder {
      * account for all of the pathfinding algorithms. TODO fill it in
      */
     public static REFERENCE_ACCOUNT_PUBLIC_KEY = "GBG47DCYZCY4UU4UN7XSECYT45IRTCUGZN73SVZE5TSCIB3DQDREYUTS";
-    public supportedAssets: stellarAsset[];
+    public supportedAssets: IStellarAssetMetadata[];
+    
+    /**
+     * Private Dependency Injection
+     * 
+     */
     private server: StellarSdk.Server;
+    private postgresPool: Pool;
+    private cache: ICache;
 
-    constructor() {
+    constructor(server: StellarSdk.Server, 
+                postgresPool: Pool,        
+                cache: ICache) {
+
         this.server = new StellarSdk.Server('https://horizon.stellar.org');
+        this.postgresPool = postgresPool;
+        this.cache = cache;
+
     }
 
     /****************************************
@@ -86,12 +91,12 @@ export class Pathfinder {
      */
     private async getSupportedAssets() {
 
-        let assets = [] as stellarAsset[];
+        let assets = [] as IStellarAssetMetadata[];
         const query = {
             text: 'SELECT id, asset_code, asset_issuer, asset_type from ASSETS'
         };
-        return pool.query(query)
-            .then((queryResult: any) => queryResult.rows)
+        return this.postgresPool.query(query)
+            .then((queryResult: QueryResult) => queryResult.rows)
             .then((dbAssets: any) => {
                 assets = dbAssets;
                 this.supportedAssets = dbAssets;
@@ -101,59 +106,32 @@ export class Pathfinder {
     }
 
     /**
-     * helper for below
-     * returns a key to be used for lookup in the form of `code-issuer`
-     */
-    private makeKeyPairHelper = (asset_code: string, asset_issuer: string, asset_type: string): string => {
-        const key = (asset_type !== 'native')
-            ? `${asset_code}-${asset_issuer}`
-            : 'XLM';
-        return key;
-    }
-
-
-    /**
-     * Takes in stellarAsset | StellarSdk.Asset 
-     * returns a key to be used for lookup in the form of `code-issuer`
-     */
-    private makeKeyPair = (asset: any): string => {
-        const { asset_code, asset_issuer, asset_type } = asset;
-        return this.makeKeyPairHelper(asset_code, asset_issuer, asset_type);
-    }
-
-    /**
-    * Takes in a StellarSdk.PaymentPathRecord and 
-    * returns a key to be used for lookup in the form of `code-issuer`
-    */
-    private makeKeyPairFromPath = (pathResult: StellarSdk.PaymentPathRecord ): string => {
-        const { source_asset_code, source_asset_issuer, source_asset_type } = pathResult;
-        return this.makeKeyPairHelper(source_asset_code, source_asset_issuer, source_asset_type);
-    }
-
-
-    /**
      * Ensures that the account belonging to REFERENCE_ACCOUNT_PUBLIC_KEY contains balances
      * of all of (but also ONLY) the indicated assets
      *
+     * Notes: This takes in the list of assets saved in the database, 
+     *          adds them to a dictionary for quick look up, 
+     *          pulls in the balances from the REFERENCE_ACCOUNT_PUBLIC_KEY
+     *          which contains all the assets we support on the stellar network
+     *          and makes sure that the lists are the same
+     * 
      * throws PathfinderInitializationError if incorrectly formatted
      */
-    private async validateSupportedAssets(assets: [stellarAsset]) {
+    private async validateSupportedAssets(assets: IStellarAssetMetadata[]) {
         return this.server.loadAccount(Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY)
             .then((account: StellarSdk.AccountRecord) => account.balances)
             // todo Resolve this type to stellarBalance
             .then((balances: any) => {
-                if (assets.length !== balances.length) throw PathfinderInitializationError;
-                else {
-                    const asset_dict: { [index: string]: boolean } = {};
-                    assets.map((asset: stellarAsset) => {
-                        const key = this.makeKeyPair(asset);
-                        asset_dict[key] = true;
-                    });
-                    balances.map((asset: StellarSdk.Asset) => {
-                        const key = this.makeKeyPair(asset);
-                        if (!asset_dict[key] && !asset.isNative()) throw PathfinderInitializationError
-                    });
-                }
+                if (assets.length !== balances.length) throw new PathfinderInitializationError;
+                const asset_dict: { [index: string]: boolean } = {};
+                assets.map((asset: IStellarAssetMetadata) => {
+                    const key = this.makeAssetIdentifier(asset);
+                    asset_dict[key] = true;
+                });
+                balances.map((asset: StellarSdk.Asset) => {
+                    const key = this.makeAssetIdentifier(asset);
+                    if (!asset_dict.hasOwnProperty(key) && !asset.isNative()) throw new PathfinderInitializationError
+                });
                 return true;
             });
     }
@@ -162,8 +140,8 @@ export class Pathfinder {
      * Pathfinding Utilities
      ****************************************/
     public async getPath(params: {
-        sourceAsset: stellarAsset,
-        destinationAsset: stellarAsset,
+        sourceAsset: IStellarAssetMetadata,
+        destinationAsset: IStellarAssetMetadata,
         destinationAmount: number,
     }): Promise<IPathInfo> {
         const { sourceAsset, destinationAsset, destinationAmount } = params;
@@ -210,17 +188,12 @@ export class Pathfinder {
      * exists, the promise resolves to null.
      */
     private async loadPathFromCache(
-        sourceAsset: stellarAsset,
-        destinationAsset: stellarAsset,
+        sourceAsset: IStellarAssetMetadata,
+        destinationAsset: IStellarAssetMetadata,
         threshold: number,
     ): Promise<IPathInfo | null> {
         // todo provide the retrieval logic
-        const key = `${destinationAsset.code}_${destinationAsset.issuerPublicKey}`;
-        const TEMP_DICT = {};
-        // return new Promise((res: any, rej: any ) => {
-        //      return this.cache.lookup(key)
-        //     Promise.resolve(null);
-        // });
+        //return this.cache.lookup(sourceAsset: destinationAsset, threshold)
         return Promise.resolve(null);
     }
 
@@ -230,7 +203,7 @@ export class Pathfinder {
      * Note: no need to make this a promise because we will never check up on it
      */
     private savePathsToCache(
-        destinationAsset: stellarAsset,
+        destinationAsset: IStellarAssetMetadata,
         bucket: number,
         bestPaths: IPathInfo[],
     ) {
@@ -267,7 +240,7 @@ export class Pathfinder {
      */
 
     private getBucket(
-        destinationAsset: stellarAsset,
+        destinationAsset: IStellarAssetMetadata,
         destinationAmount: number,
     ): number {
         return 10000;
@@ -276,6 +249,85 @@ export class Pathfinder {
     /***************************************************************************
      * Stellar Interface
      ***************************************************************************/
+
+    /**
+     * Returns a list of the best paths from each of the supported assets to the given
+     * destination asset and amount 
+     * 
+     * Note: uses REFERENCE_ACCOUNT_PUBLIC_KEY as the destination and source accounts
+     */
+    private async getBestPaths(
+        destinationAsset: IStellarAssetMetadata,
+        destinationAmount: number,
+    ): Promise<IPathInfo[]> {
+
+        const _destinationAsset = this.constructStellarAsset(destinationAsset);
+
+        // This pulls in the possible paths that we support to
+        // the destination asset in the destinationAmount
+        return this.server.paths(Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY, 
+                            Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY, 
+                            _destinationAsset, String(destinationAmount))
+                    .call()
+                    .then((paths: StellarSdk.CollectionPage<StellarSdk.PaymentPathRecord>) => JSON.parse(JSON.stringify(paths)).records)
+                    .then((paths: StellarSdk.PaymentPathRecord[]) => {
+                        // Creates a dictionary of the assets identified by the cheapest exchange rate
+                        const pathRecordDict: { [index: string]: StellarSdk.PaymentPathRecord } = {};
+                        paths.map((pathResult: StellarSdk.PaymentPathRecord) => {
+                            const key = this.makeKeyPairFromPath(pathResult);
+                            if (!pathRecordDict.hasOwnProperty(key)) { // the dictionary doesn't currently contain this asset
+                                pathRecordDict[key] = pathResult;
+                            } else { 
+                                // the dictionary already contains this asset and 
+                                // we are checking if it has a lower exchange rate
+                                const { source_amount } = pathResult;
+                                const saved_source_amount = this.calculateExchangeRate(destinationAmount, 
+                                    parseInt(pathRecordDict[key].source_amount)) || null;
+                                if (saved_source_amount !== null &&
+                                    saved_source_amount > this.calculateExchangeRate(destinationAmount, parseInt(source_amount))) {
+                                    pathRecordDict[key] = pathResult;
+                                }
+                            }
+                        });
+                        // convert the dictionary to IPathInfo
+                        const pathArray = Object.keys(pathRecordDict).map(key => this.constructPathInfo(pathRecordDict[key]));
+                        if (pathArray !== null && pathArray.length > 0) return Promise.resolve(pathArray);
+                        else throw new Error(`[getBestPaths]: No path found to ${_destinationAsset.code} \
+                            in the amount of ${destinationAmount}`);
+                    })
+    }
+
+    // Stellar Helpers
+    
+    /**
+     * helper for below
+     * returns a key to be used for lookup in the form of `code-issuer`
+     */
+    private makeKeyPairHelper = (asset_code: string, asset_issuer: string, asset_type: string): string => {
+        const key = (asset_type !== 'native')
+            ? `${asset_code}-${asset_issuer}`
+            : 'XLM';
+        return key;
+    }
+
+
+    /**
+     * Takes in stellarAsset | StellarSdk.Asset 
+     * returns a key to be used for lookup in the form of `code-issuer`
+     */
+    private makeAssetIdentifier = (asset: any): string => {
+        const { asset_code, asset_issuer, asset_type } = asset;
+        return this.makeKeyPairHelper(asset_code, asset_issuer, asset_type);
+    }
+
+    /**
+    * Takes in a StellarSdk.PaymentPathRecord and 
+    * returns a key to be used for lookup in the form of `code-issuer`
+    */
+    private makeKeyPairFromPath = (pathResult: StellarSdk.PaymentPathRecord ): string => {
+        const { source_asset_code, source_asset_issuer, source_asset_type } = pathResult;
+        return this.makeKeyPairHelper(source_asset_code, source_asset_issuer, source_asset_type);
+    }
 
     /**
      * returns the exchange rate of 2 assets
@@ -303,25 +355,25 @@ export class Pathfinder {
             ? {
                 code: source_asset_code,
                 issuerPublicKey: source_asset_issuer
-            } as stellarAsset
+            } as IStellarAssetMetadata
             : {
                 code: 'XLM',
                 issuerPublicKey: ''
-            } as stellarAsset;
+            } as IStellarAssetMetadata;
         const destination_asset = (destination_asset_type !== 'native') 
             ? {
                 code: destination_asset_code,
                 issuerPublicKey: destination_asset_issuer
-            } as stellarAsset
+            } as IStellarAssetMetadata
             : {
                 code: 'XLM',
                 issuerPublicKey: ''
-            } as stellarAsset;
+            } as IStellarAssetMetadata;
         const dest_amount_str = parseFloat(destination_amount);
         const bucket = this.getBucket(destination_asset, dest_amount_str);
         const exchangeRate = this.calculateExchangeRate(dest_amount_str, parseFloat(source_amount));
         const _path = path.map((asset: { asset_code: string, asset_issuer: string, asset_type: string}) => {
-            return { code: asset.asset_code, issuerPublicKey: asset.asset_issuer } as stellarAsset;
+            return { code: asset.asset_code, issuerPublicKey: asset.asset_issuer } as IStellarAssetMetadata;
         });
         return {
             to: destination_asset,
@@ -329,60 +381,21 @@ export class Pathfinder {
             path: _path,
             bucket: bucket,
             exchangeRate: exchangeRate
-        } as IPathInfo;
+        };
     }    
      
     /**
      * Helper For below
      * Creates a StellarSdk.Asset to be used in server calls
      */
-    private constructStellarAsset = (asset: stellarAsset): StellarSdk.Asset => {
+    private constructStellarAsset = (asset: IStellarAssetMetadata): StellarSdk.Asset => {
         const { code, issuerPublicKey } = asset;
-        const returnAsset = (code !== 'X:M') 
+        const returnAsset = (code !== 'XLM') 
             ? new StellarSdk.Asset(code, issuerPublicKey)
             : StellarSdk.Asset.native();
         return returnAsset;
     }
     
-    /**
-     * Returns a list of the best paths from each of the supported assets to the given
-     * destination asset and amount 
-     * 
-     * Note: uses REFERENCE_ACCOUNT_PUBLIC_KEY as the destination and source accounts
-     */
-    private async getBestPaths(
-        destinationAsset: stellarAsset,
-        destinationAmount: number,
-    ): Promise<IPathInfo[]> {
-
-        const _destinationAsset = this.constructStellarAsset(destinationAsset);
-        return this.server.paths(Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY, 
-                            Pathfinder.REFERENCE_ACCOUNT_PUBLIC_KEY, 
-                            _destinationAsset, String(destinationAmount))
-                    .call()
-                    .then((paths: any) => JSON.parse(JSON.stringify(paths)).records)
-                    .then((paths: StellarSdk.PaymentPathRecord[]) => {
-                        const pathRecordDict: { [index: string]: StellarSdk.PaymentPathRecord } = {};
-                        paths.map((pathResult: StellarSdk.PaymentPathRecord) => {
-                            const key = this.makeKeyPairFromPath(pathResult);
-                            if (!pathRecordDict[key]) {
-                                pathRecordDict[key] = pathResult;
-                            } else {
-                                const { source_amount } = pathResult;
-                                const saved_source_amount = this.calculateExchangeRate(destinationAmount, 
-                                    parseInt(pathRecordDict[key].source_amount)) || null;
-                                if (saved_source_amount !== null &&
-                                    saved_source_amount > this.calculateExchangeRate(destinationAmount, parseInt(source_amount))) {
-                                    pathRecordDict[key] = pathResult;
-                                }
-                            }
-                        });
-                        const pathArray = Object.keys(pathRecordDict).map(key => this.constructPathInfo(pathRecordDict[key]));
-                        if (pathArray !== null && pathArray.length > 0) return Promise.resolve(pathArray);
-                        else throw new Error(`[getBestPaths]: No path found to ${_destinationAsset.code} \
-                            in the amount of ${destinationAmount}`);
-                    })
-    }
 
     /***************************************************************************
      * Utilities
@@ -391,7 +404,7 @@ export class Pathfinder {
     /**
      * Checks that we support the indicated asset
      */
-    private supportsAsset(asset: stellarAsset) {
+    private supportsAsset(asset: IStellarAssetMetadata) {
         return this.supportedAssets!.findIndex((supportedAsset) => {
             return asset.code === supportedAsset.code && asset.issuerPublicKey === supportedAsset.issuerPublicKey;
         }) !== -1;

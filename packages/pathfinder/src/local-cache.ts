@@ -1,10 +1,10 @@
-import { stellarAsset, IPathInfo } from "./pathfinder";
+import { IStellarAssetMetadata, IPathInfo } from "./pathfinder";
 
 // local cache class implementation
 export class LocalCache {
 
     // in-memory data
-    private cache: { [index: string]: { exchangeRate: number, path: stellarAsset[] } };
+    private cache: { [index: string]: { exchangeRate: number, path: IStellarAssetMetadata[] } };
 
     constructor(cache: any) {
         this.cache = cache;
@@ -22,14 +22,20 @@ export class LocalCache {
      * returns if an item is in the cache
      */
     public lookupInCache(key: string): any | null {
-        // return this.cache[key] 
+        // return this.cache[key]
     }
     
     /**
      * removes an asset from the cache
      */
-    private removeFromCache(asset: stellarAsset): void {
+    private removeFromCache(asset: IStellarAssetMetadata): void {
         // this.cache[asset] = null;
     }
+
+    private makeCacheKey (destinationAsset: IStellarAssetMetadata, bucket: number) {
+        // const { code, issuerPublicKey} = destinationAsset;
+        // const key = `${code}_${issuerPublicKey}-bucket`;
+    }
+
 
 }
