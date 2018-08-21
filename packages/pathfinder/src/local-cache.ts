@@ -1,10 +1,14 @@
 import { IStellarAssetMetadata, IPathInfo } from "./pathfinder";
 
+export class KeyNotFoundError extends Error {}
+
 // local cache class implementation
 export class LocalCache {
+    
+    private static EVICTION_TIME: number = 300000;
 
     // in-memory data
-    private cache: { [index: string]: { exchangeRate: number, path: IStellarAssetMetadata[] } };
+    private cache: { [index: string]: IPathInfo | null };
 
     constructor(cache: any) {
         this.cache = cache;
@@ -13,29 +17,28 @@ export class LocalCache {
     /**
      * adds / updates cache with new best paths list going to the destination asset
      */
-    public savePathsToCache(key: string, value: any, bucket: number, bestPaths: IPathInfo[]): any {
-        // this.cache[key] = value
-        // setTimeout(() => this.removeFromCache(key))
+    public savePathsToCache(key: string, value: IPathInfo, bestPaths: IPathInfo[]): void {
+        this.cache[key] = value;
+        setTimeout(() => this.removeFromCache(key), LocalCache.EVICTION_TIME);
     }
 
     /**
      * returns if an item is in the cache
      */
-    public lookupInCache(key: string): any | null {
-        // return this.cache[key]
+    public lookupPathInCache(key: string): Promise < IPathInfo | null > {
+        if (this.cache.hasOwnProperty(key))
+            return Promise.resolve(this.cache[key])
+        throw new KeyNotFoundError;
+
     }
     
     /**
      * removes an asset from the cache
      */
-    private removeFromCache(asset: IStellarAssetMetadata): void {
-        // this.cache[asset] = null;
+    private removeFromCache(key: string): void {
+        if (this.cache.hasOwnProperty(key))
+            this.cache[key] = null;
+        throw new KeyNotFoundError;
     }
-
-    private makeCacheKey (destinationAsset: IStellarAssetMetadata, bucket: number) {
-        // const { code, issuerPublicKey} = destinationAsset;
-        // const key = `${code}_${issuerPublicKey}-bucket`;
-    }
-
 
 }

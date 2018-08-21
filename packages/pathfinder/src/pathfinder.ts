@@ -31,15 +31,16 @@ interface stellarBalance {
 }
 
 interface ICache {
-    cache: any;
+    cache: LocalCache | any; // this will be replaced by the other implementing class
     savePathsToCache(key: string, bucket: number, bestPaths: IPathInfo[]): any;
-    removeFromCache(key: string): any;
-    lookupInCache(key: string): any;
+    lookupPathInCache(key: string): any;
+    // removeFromCache(key: string): any; // this will have auto eviction
 }
 
 export class PathfinderInitializationError extends Error {}
 
 import * as StellarSdk from 'stellar-sdk'; 
+import { LocalCache } from './local-cache';
 
 export class Pathfinder {
 
@@ -63,7 +64,7 @@ export class Pathfinder {
                 postgresPool: Pool,        
                 cache: ICache) {
 
-        this.server = new StellarSdk.Server('https://horizon.stellar.org');
+        this.server = server;
         this.postgresPool = postgresPool;
         this.cache = cache;
 
@@ -183,6 +184,14 @@ export class Pathfinder {
      * Cache Logic
      ***************************************************************************/
 
+     /**
+      * 
+      */
+    private makeCacheKey(destinationAsset: IStellarAssetMetadata, bucket: number) {
+        const keyPrefix = `${destinationAsset.code}_${destinationAsset.issuerPublicKey}-${bucket}-`;
+        return keyPrefix;
+    }
+
     /**
      * Queries the cache and returns a promise for the path information; if no path information
      * exists, the promise resolves to null.
@@ -193,7 +202,9 @@ export class Pathfinder {
         threshold: number,
     ): Promise<IPathInfo | null> {
         // todo provide the retrieval logic
-        //return this.cache.lookup(sourceAsset: destinationAsset, threshold)
+        // TODO - here: key creation / value creation
+        const key = this.makeCacheKey(destinationAsset, threshold);
+        return this.cache.lookupPathInCache(key);
         return Promise.resolve(null);
     }
 
@@ -238,7 +249,8 @@ export class Pathfinder {
      *
      * //Todo need to decide and implement the quantization method
      */
-
+    
+    // TODO: K-means clustering
     private getBucket(
         destinationAsset: IStellarAssetMetadata,
         destinationAmount: number,
